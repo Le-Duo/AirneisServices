@@ -3,7 +3,8 @@ import { Types } from 'mongoose'
 export enum OrderStatus {
     Pending = 'pending',
     Delivered = 'delivered',
-    Cancelled = 'cancelled'
+    Cancelled = 'cancelled',
+    Shipped = 'shipped'
 }
 
 export type Product = {
