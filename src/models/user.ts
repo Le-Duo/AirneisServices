@@ -6,7 +6,7 @@
 
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 
-@modelOptions({ schemaOptions: { timestamps: true } })
+@modelOptions({ schemaOptions: { collection: 'users' } })
 export class User {
   public _id?: string
   @prop({ required: true })
@@ -17,6 +17,7 @@ export class User {
 
   @prop({ required: true })
   public password!: string
+
   @prop({ default: false })
   public isAdmin!: boolean
 }

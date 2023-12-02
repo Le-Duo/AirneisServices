@@ -4,6 +4,7 @@
  * Les produits et les utilisateurs sont définis avec leurs attributs respectifs, tels que le nom, l'image, la catégorie, la marque, le prix, le stock pour les produits et le nom, l'email, le mot de passe pour les utilisateurs.
  */
 
+import { Category } from './models/category'
 import { Product } from './models/product'
 import { User } from './models/user'
 import bcrypt from 'bcryptjs'
@@ -11,84 +12,68 @@ import bcrypt from 'bcryptjs'
 export const sampleProducts: Product[] = [
   {
     name: 'MACLEOD',
-    slug: 'macleod',
-    image: '../public/images/blue-3-seater-sofa.png',
-    category: 'Sofas',
+    URLimage: '../public/images/blue-3-seater-sofa.png',
+    category: new Category("Sofa", "./images/categories/sofa"),
     brand: 'Airneis',
     price: 200,
-    countInStock: 10,
     description: 'Blue 3 seater sofa',
   },
   {
     name: 'NESSIE',
-    slug: 'nessie',
-    image: '../public/images/red-2-seater-sofa-in-living-room.png',
-    category: 'Sofas',
+    URLimage: '../public/images/red-2-seater-sofa-in-living-room.png',
+    category: new Category("Sofa", "./images/categories/sofa"),
     brand: 'Airneis',
     price: 150,
-    countInStock: 20,
     description: 'Red 2 seater sofa',
   },
   {
     name: 'THISTLE',
-    slug: 'thisle',
-    image: '../public/images/single-seat-green-sofa-in-living-room.png',
-    category: 'Sofas',
+    URLimage: '../public/images/single-seat-green-sofa-in-living-room.png',
+    category: new Category("Sofa", "./images/categories/sofa"),
     brand: 'Airneis',
     price: 100,
-    countInStock: 0,
     description: 'Green 1 seater sofa',
   },
   {
     name: 'GLEN',
-    slug: 'glen',
-    image: '../public/images/modern-brown-coffee-table (1).png',
-    category: 'Tables',
+    URLimage: '../public/images/modern-brown-coffee-table (1).png',
+    category: new Category("Table", "./images/categories/table"),
     brand: 'Airneis',
     price: 80,
-    countInStock: 15,
     description: 'Brown coffee table',
   },
   {
     name: 'WALLACE',
-    slug: 'wallace',
-    image:
+    URLimage:
       '../public/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png',
-    category: 'Bookcases',
+    category: new Category("Bookcase", "./images/categories/sofa"),
     brand: 'Airneis',
     price: 80,
-    countInStock: 15,
     description: 'bookcase with a wooden finish and a metal frame.',
   },
   {
     name: 'HEATHER',
-    slug: 'heather',
-    image: '../public/images/modern-purple-rug-with-floral-pattern.png',
-    category: 'Rugs',
+    URLimage: '../public/images/modern-purple-rug-with-floral-pattern.png',
+    category: new Category("Rugs", "./images/categories/rugs"),
     brand: 'Airneis',
     price: 35,
-    countInStock: 0,
     description: 'rug with a woolen texture and a purple colour',
   },
   {
     name: 'STIRLING',
-    slug: 'stirling',
-    image:
+    URLimage:
       '../public/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png',
-    category: 'Lamps',
+    category: new Category("Lamps", "./images/categories/lamp"),
     brand: 'Airneis',
     price: 20,
-    countInStock: 15,
     description: 'lamp with glass shade and thin silver base',
   },
   {
     name: 'SKYE',
-    slug: 'skye',
-    image: '../public/images/wardrobe-with-a-white-colour-and-3-doors.png',
-    category: 'Wardrobes',
+    URLimage: '../public/images/wardrobe-with-a-white-colour-and-3-doors.png',
+    category: new Category("Wardrobe", "./images/categories/wardrobe"),
     brand: 'Airneis',
     price: 200,
-    countInStock: 15,
     description: 'wardrobe with a white colour and a mirrored door',
   },
 ]

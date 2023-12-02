@@ -5,22 +5,20 @@
  */
 
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { Category } from './category'
 
-@modelOptions({ schemaOptions: { timestamps: true } })
+@modelOptions({ schemaOptions: { collection: 'product' } })
 export class Product {
   public _id?: string
 
   @prop({ required: true })
   public name!: string
 
-  @prop({ required: true, unique: true })
-  public slug!: string
+  @prop({ required: true })
+  public URLimage!: string
 
   @prop({ required: true })
-  public image!: string
-
-  @prop({ required: true })
-  public category!: string
+  public category!: Category
 
   @prop({ required: true })
   public description!: string
@@ -30,9 +28,6 @@ export class Product {
 
   @prop({ required: true, default: 0 })
   public price!: number
-
-  @prop({ required: true, default: 0 })
-  public countInStock!: number
 }
 
 export const ProductModel = getModelForClass(Product)
