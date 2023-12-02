@@ -5,7 +5,7 @@
  * La fonction 'isAuth' est un middleware qui vérifie si un token est fourni dans les en-têtes de la requête. Si un token est présent, il est vérifié et les informations de l'utilisateur sont extraites et attachées à la requête.
  */
 
-import { NextFunction, Request } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { User } from './models/user'
 import jwt from 'jsonwebtoken'
 
