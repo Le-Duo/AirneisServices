@@ -57,6 +57,6 @@ Welcome to Àirneis, a furniture retail project designed to provide a seamless a
   * Use connection string to connect with database
 
 ### 4. Start the Application:
-  ```npm start```
-   * The application should now be running locally.
-   * Access it by navigating to http://localhost:3000 in your web browser.
+  * ```npm start```
+  * The application should now be running locally.
+  * Access it by navigating to http://localhost:3000 in your web browser.
