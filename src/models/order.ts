@@ -7,6 +7,13 @@ import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
 import { Product } from './product'
 import { User } from './user'
 
+enum OrderStatus {
+  Initiated = 'initiated',
+  Pending = 'pending',
+  Delivered = 'delivered',
+  Cancelled = 'cancelled'
+}
+
 class ShippingAddress {
   @prop()
   public fullName?: string
@@ -24,6 +31,7 @@ class ShippingAddress {
   public lng?: number
 }
 
+// TODO : why not use Product ?
 class Item {
   @prop({ required: true })
   public name!: string
@@ -48,7 +56,7 @@ class PaymentResult {
   public email_address!: string
 }
 
-modelOptions({ schemaOptions: { timestamps: true } })
+@modelOptions({ schemaOptions: { collection: 'orders' } })
 export class Order {
   public _id!: string
   @prop()
@@ -67,20 +75,30 @@ export class Order {
 
   @prop({ required: true, default: 0 })
   public itemsPrice!: number
+
   @prop({ required: true, default: 0 })
   public shippingPrice!: number
+
   @prop({ required: true, default: 0 })
   public taxPrice!: number
+
   @prop({ required: true, default: 0 })
   public totalPrice!: number
+
   @prop({ required: true, default: false })
   public isPaid!: boolean
+
   @prop()
   public paidAt!: Date
+
   @prop({ required: true, default: false })
   public isDelivered!: boolean
+
   @prop()
   public deliveredAt!: Date
+
+  @prop({ required: true, default: OrderStatus.Initiated })
+  public status!: OrderStatus
 }
 
 export const OrderModel = getModelForClass(Order)
