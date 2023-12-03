@@ -18,4 +18,4 @@ export class Category {
     public urlImage!: string
 }
 
-export const ProductModel = getModelForClass(Category)
+export const CategoryModel = getModelForClass(Category)

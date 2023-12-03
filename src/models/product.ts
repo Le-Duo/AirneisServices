@@ -9,10 +9,14 @@ import { Category } from './category'
 
 @modelOptions({ schemaOptions: { collection: 'product' } })
 export class Product {
+
   public _id?: string
 
   @prop({ required: true })
   public name!: string
+
+  @prop({ required: true, unique: true })
+  public slug!: string
 
   @prop({ required: true })
   public URLimage!: string

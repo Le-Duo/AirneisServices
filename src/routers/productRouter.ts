@@ -7,6 +7,7 @@
 import express from 'express'
 import asyncHandler from 'express-async-handler'
 import { ProductModel } from '../models/product'
+import { CategoryModel } from '../models/category'
 
 export const productRouter = express.Router()
 productRouter.get(
@@ -26,5 +27,39 @@ productRouter.get(
     } else {
       res.status(404).json({ message: 'Product not found' })
     }
+  })
+)
+
+productRouter.post(
+  "/",
+  asyncHandler(async (req, res) => {
+
+    try {
+
+      const { name, slug, URLimage, category, description, brand, price } = req.body;
+
+      var catTest = new CategoryModel(category)
+
+      const newProduct = new ProductModel({
+        name,
+        slug,
+        URLimage,
+        category: catTest,
+        description,
+        brand,
+        price,
+      });
+
+      // Enregistrez le produit dans la base de données
+      const savedProduct = await newProduct.save();
+
+      // Répondez avec le produit créé
+      res.status(201).json(savedProduct);
+    } catch (error) {
+      // Gérez les erreurs
+      console.error(error);
+      res.status(500).json({ error: 'Erreur lors de la création du produit' });
+    }
+
   })
 )
