@@ -38,13 +38,13 @@ productRouter.post(
 
       const { name, slug, URLimage, category, description, brand, price } = req.body;
 
-      var catTest = new CategoryModel(category)
+      var cat = new CategoryModel(category)
 
       const newProduct = new ProductModel({
         name,
         slug,
         URLimage,
-        category: catTest,
+        category: cat,
         description,
         brand,
         price,

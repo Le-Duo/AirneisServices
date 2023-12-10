@@ -13,14 +13,23 @@ import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
 import { userRouter } from './routers/userRouter'
 import { orderRouter } from './routers/orderRouter'
+import { stockRouter } from './routers/stockRouter'
 
 dotenv.config()
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/airneis'
+
+const MONGODB_URI = process.env.MONGODB_URI || ''
+
+if (MONGODB_URI == ""){
+  console.error("var MONGODB_URI not found")
+  process.exit(1)
+} 
+
+
 mongoose.set('strictQuery', true)
 mongoose
   .connect(MONGODB_URI)
-  .then(() => console.log('connected to MongoDB ...'))
-  .catch((error) => console.log(error))
+  .then(() => console.log('connected to MongoDB !'))
+  .catch((error) => console.error(error))
 
 const app = express()
 
@@ -38,6 +47,7 @@ app.use('/api/products', productRouter)
 app.use('/api/users', userRouter)
 app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
+app.use('/api/stock', stockRouter)
 
 const PORT = 4000
 

@@ -7,7 +7,7 @@
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 import { Category } from './category'
 
-@modelOptions({ schemaOptions: { collection: 'product' } })
+@modelOptions({ schemaOptions: { collection: 'products' } })
 export class Product {
 
   public _id?: string
