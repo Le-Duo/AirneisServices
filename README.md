@@ -7,8 +7,9 @@ Welcome to Àirneis, a furniture retail project designed to provide a seamless a
 ## To run Àirneis successfully, ensure you have the following dependencies installed:
 
 * install Node >= v16.14.2 (https://nodejs.org/en/download)
-* install Mangoose v7.6.3
+* install Mangoose v7.6.3 + v8.0.1
   	* ```npm i mongoose@7.6.3```
+  	* ```npm i mongoose@8.0.1```
 * install @typegoose/typegoose
     * ```npm i @typegoose/typegoose```
 * install vite v5.0.4
