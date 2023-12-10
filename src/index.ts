@@ -15,11 +15,17 @@ import { userRouter } from './routers/userRouter'
 import { orderRouter } from './routers/orderRouter'
 
 dotenv.config()
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/airneis'
+const MONGODB_URI = process.env.MONGODB_URI || ''
+
+if (MONGODB_URI == ""){
+  console.error("var MONGODB_URI not found")
+  process.exit(1)
+} 
+
 mongoose.set('strictQuery', true)
 mongoose
   .connect(MONGODB_URI)
-  .then(() => console.log('connected to MongoDB ...'))
+  .then(() => console.log('connected to MongoDB !'))
   .catch((error) => console.log(error))
 
 const app = express()
