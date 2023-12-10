@@ -13,6 +13,28 @@ stockRouter.get(
   })
 )
 
+
+stockRouter.get(
+    '/products/:productId',
+    asyncHandler(async (req, res) => {
+
+        const productId = req.params.productId;
+
+        console.log(productId)
+    
+        // Récupérez le stock du produit en utilisant la propriété product
+        const stock = await StockModel.findOne({ 'product._id': productId });
+  
+        if (!stock) {
+           res.status(404).json({ error: 'Stock not found for the product' });
+        }
+  
+        // Répondez avec le stock et les détails du produit
+        res.status(200).json(stock);
+    
+    })
+  );
+
 stockRouter.post(
   "/",
   asyncHandler(async (req, res) => {

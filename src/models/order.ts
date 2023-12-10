@@ -59,8 +59,9 @@ class PaymentResult {
 @modelOptions({ schemaOptions: { collection: 'orders' } })
 export class Order {
   public _id!: string
-  @prop()
-  public orderItems!: Item[]
+  
+  @prop({ type: () => [Item], required: true })  // Utilisez un tableau de Product plutôt que "Mixed"
+  public orderItems!: Item[];
   @prop()
   public shippingAddress?: ShippingAddress
 
