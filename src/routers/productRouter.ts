@@ -36,15 +36,24 @@ productRouter.post(
 
     try {
 
-      const { name, slug, URLimage, category, description, brand, price } = req.body;
+      const { name, slug, URLimage, categoryId, description, brand, price } = req.body;
 
-      var cat = new CategoryModel(category)
+      // Récupère le produit dans la db
+      const category = await CategoryModel.findById(categoryId);
+
+      if (category) {
+        console.log('Category found:', category);
+      } else {
+        // si la catégorie n'existe pas, il ne faut pas aller plus loin
+        console.error('Category not found');
+        res.status(500).json('Category does not exists');
+      }
 
       const newProduct = new ProductModel({
         name,
         slug,
         URLimage,
-        category: cat,
+        category: category, // cast la variable category en type "Category"
         description,
         brand,
         price,

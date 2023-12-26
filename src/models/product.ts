@@ -4,7 +4,7 @@
  * Chaque produit contient des informations sur le nom, le slug, l'image, la catégorie, la description, la marque, le prix et le nombre en stock.
  */
 
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass, DocumentType } from '@typegoose/typegoose'
 import { Category } from './category'
 
 @modelOptions({ schemaOptions: { collection: 'products' } })
@@ -21,8 +21,10 @@ export class Product {
   @prop({ required: true })
   public URLimage!: string
 
-  @prop({ required: true })
-  public category!: Category
+
+  @prop({ type: () => Category, required: true })
+  public category!: DocumentType<Category>; //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons la Category entiere
+
 
   @prop({ required: true })
   public description!: string
