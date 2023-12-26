@@ -26,8 +26,6 @@ Welcome to Àirneis, a furniture retail project designed to provide a seamless a
     * ```npm i axios```
 * install Cors v2.8.5
     * ```npm i cors```
-* install Body-parser v1.20.2
-    * ```npm i body-parser```
 * install Nodemon v3.0.2
     * ```npm i nodemon```
 * install Bcrypt v5.1.1
@@ -58,6 +56,6 @@ Welcome to Àirneis, a furniture retail project designed to provide a seamless a
   * Use connection string to connect with database
 
 ### 4. Start the Application:
-  * ```npm start```
+  * ```npm start``` or ```npm run dev```
   * The application should now be running locally.
-  * Access it by navigating to http://localhost:3000 in your web browser.
+  * Access it by navigating to http://localhost:4000 in your web browser.
