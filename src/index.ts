@@ -19,15 +19,19 @@ dotenv.config()
 
 const MONGODB_URI = process.env.MONGODB_URI || ''
 
-if (MONGODB_URI == ""){
+if (MONGODB_URI == "") {
   console.error("var MONGODB_URI not found")
   process.exit(1)
-} 
+}
 
+// Force connection on "Airneis" database; by default, mongoose create "Test" database
+const connectionpOptions = {
+  dbName: `Airneis`
+}
 
 mongoose.set('strictQuery', true)
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, connectionpOptions)
   .then(() => console.log('connected to MongoDB !'))
   .catch((error) => console.error(error))
 
