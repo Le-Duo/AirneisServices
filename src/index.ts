@@ -36,6 +36,7 @@ mongoose
   .then(() => console.log('connected to MongoDB !'))
   .catch((error) => console.error(error))
 
+
 const app = express()
 
 app.use(
