@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2015",
+    "moduleResolution": "node",
     "outDir": "./build",
     "strict": true,
-    "module": "commonjs",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+  ],
 }

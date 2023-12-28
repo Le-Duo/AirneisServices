@@ -4,10 +4,12 @@
  * Chaque produit contient des informations sur le nom, le slug, l'image, la catégorie, la description, la marque, le prix et le nombre en stock.
  */
 
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass, DocumentType } from '@typegoose/typegoose'
+import { Category } from './category'
 
-@modelOptions({ schemaOptions: { timestamps: true } })
+@modelOptions({ schemaOptions: { collection: 'products' } })
 export class Product {
+
   public _id?: string
 
   @prop({ required: true })
@@ -17,10 +19,12 @@ export class Product {
   public slug!: string
 
   @prop({ required: true })
-  public image!: string
+  public URLimage!: string
 
-  @prop({ required: true })
-  public category!: string
+
+  @prop({ type: () => Category, required: true })
+  public category!: DocumentType<Category>; //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons la Category entiere
+
 
   @prop({ required: true })
   public description!: string
@@ -30,9 +34,6 @@ export class Product {
 
   @prop({ required: true, default: 0 })
   public price!: number
-
-  @prop({ required: true, default: 0 })
-  public countInStock!: number
 }
 
 export const ProductModel = getModelForClass(Product)

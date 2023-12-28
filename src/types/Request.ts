@@ -6,14 +6,14 @@
  * L'objet 'user' dans la requête contient des informations sur l'utilisateur qui a fait la requête, y compris son ID, son nom, son email, son statut d'administrateur et son token.
  */
 
+import { User } from "../models/user"
+
 declare namespace Express {
   export interface Request {
-    user: {
-      _id: string
-      name: string
-      email: string
-      isAdmin: boolean
-      token: string
-    }
+    user: User
+  }
+
+  export interface Response {
+    user: User
   }
 }
