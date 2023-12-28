@@ -9,6 +9,7 @@ import asyncHandler from 'express-async-handler'
 import { ProductModel } from '../models/product'
 import { CategoryModel } from '../models/category'
 import { isAuth } from '../utils'
+import { Types } from 'mongoose';
 
 
 export const productRouter = express.Router()
@@ -73,5 +74,28 @@ productRouter.post(
       res.status(500).json({ error: 'Erreur lors de la création du produit' });
     }
 
+  })
+)
+
+productRouter.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+
+      const id = req.params.id; // récupère l'id dans les paramètres de l'url
+
+      const filtreSuppression = {_id: new Types.ObjectId(id) }; // filtre sur l'id pour la suppression
+
+     try {
+          const resultat = await ProductModel.deleteOne(filtreSuppression);
+
+          if (resultat.deletedCount && resultat.deletedCount > 0) {
+               res.json({ message: 'Produit supprimé avec succès.' });
+          } else {
+               res.status(500).json({ error: 'Aucun produit trouvé avec cet ID.' });
+          }
+      } catch (erreur) {
+          console.error('Erreur lors de la suppression :', erreur);
+          res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
+      }  
   })
 )

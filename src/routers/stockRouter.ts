@@ -4,6 +4,7 @@ import asyncHandler from 'express-async-handler'
 import { StockModel } from '../models/stock'
 import { ProductModel } from '../models/product'
 import { isAuth } from '../utils'
+import { Types } from 'mongoose';
 
 export const stockRouter = express.Router()
 stockRouter.get(
@@ -74,5 +75,28 @@ stockRouter.post(
       res.status(500).json({ error: 'Erreur lors de la création du stock pour le produit' });
     }
 
+  })
+)
+
+stockRouter.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+
+      const id = req.params.id; // récupère l'id dans les paramètres de l'url
+
+      const filtreSuppression = {_id: new Types.ObjectId(id) }; // filtre sur l'id pour la suppression
+
+     try {
+          const resultat = await StockModel.deleteOne(filtreSuppression);
+
+          if (resultat.deletedCount && resultat.deletedCount > 0) {
+               res.json({ message: 'Stock supprimé avec succès.' });
+          } else {
+               res.status(500).json({ error: 'Aucun produit trouvé avec cet ID.' });
+          }
+      } catch (erreur) {
+          console.error('Erreur lors de la suppression :', erreur);
+          res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
+      }  
   })
 )

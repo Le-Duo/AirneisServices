@@ -60,9 +60,6 @@ categoryRouter.delete(
         } catch (erreur) {
             console.error('Erreur lors de la suppression :', erreur);
             res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
-        }
-        
-      
-        
+        }  
     })
 )
