@@ -1,6 +1,8 @@
 import express from 'express'
 import asyncHandler from 'express-async-handler'
+import { Types } from 'mongoose';
 import { CategoryModel } from '../models/category'
+import { isAuth } from '../utils'
 
 export const categoryRouter = express.Router()
 
@@ -14,6 +16,7 @@ categoryRouter.get(
 
 categoryRouter.post(
     "/",
+    // isAuth,
     asyncHandler(async (req, res) => {
         try {
 
@@ -35,5 +38,31 @@ categoryRouter.post(
             res.status(500).json({ error: 'Erreur lors de la création de la categorie' });
         }
 
+    })
+)
+
+categoryRouter.delete(
+    '/:id',
+    asyncHandler(async (req, res) => {
+
+        const id = req.params.id; // récupère l'id dans les paramètres de l'url
+
+        const filtreSuppression = {_id: new Types.ObjectId(id) }; // filtre sur l'id pour la suppression
+
+       try {
+            const resultat = await CategoryModel.deleteOne(filtreSuppression);
+
+            if (resultat.deletedCount && resultat.deletedCount > 0) {
+                 res.json({ message: 'Catégorie supprimée avec succès.' });
+            } else {
+                 res.status(500).json({ error: 'Aucune catégorie trouvée avec cet ID.' });
+            }
+        } catch (erreur) {
+            console.error('Erreur lors de la suppression :', erreur);
+            res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
+        }
+        
+      
+        
     })
 )

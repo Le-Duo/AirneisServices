@@ -6,7 +6,7 @@
  */
 
 import express, { Request, Response } from 'express'
-import asynchandler from 'express-async-handler'
+import asyncHandler from 'express-async-handler'
 import { isAuth } from '../utils'
 import { OrderModel } from '../models/order'
 import { Product } from '../models/product'
@@ -15,7 +15,7 @@ export const orderRouter = express.Router()
 orderRouter.get(
   '/:id',
   isAuth,
-  asynchandler(async (req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const order = await OrderModel.findById(req.params.id)
     if (order) {
       res.json(order)
@@ -28,7 +28,7 @@ orderRouter.get(
 orderRouter.post(
   '/',
   isAuth,
-  asynchandler(async (req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     if (req.body.orderItems.length === 0) {
       res.status(400).send({ message: 'Cart is empty' })
     } else {

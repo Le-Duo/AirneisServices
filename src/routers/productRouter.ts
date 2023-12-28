@@ -8,6 +8,8 @@ import express from 'express'
 import asyncHandler from 'express-async-handler'
 import { ProductModel } from '../models/product'
 import { CategoryModel } from '../models/category'
+import { isAuth } from '../utils'
+
 
 export const productRouter = express.Router()
 productRouter.get(
@@ -32,6 +34,7 @@ productRouter.get(
 
 productRouter.post(
   "/",
+  // isAuth,
   asyncHandler(async (req, res) => {
 
     try {

@@ -3,6 +3,7 @@ import express from 'express'
 import asyncHandler from 'express-async-handler'
 import { StockModel } from '../models/stock'
 import { ProductModel } from '../models/product'
+import { isAuth } from '../utils'
 
 export const stockRouter = express.Router()
 stockRouter.get(
@@ -37,10 +38,11 @@ stockRouter.get(
 
 stockRouter.post(
   "/",
+  // isAuth,
   asyncHandler(async (req, res) => {
     try {
 
-        console.log("POST stockRouter / called.")
+      console.log("POST stockRouter / called.")
 
       const { productId, quantity } = req.body;
 
