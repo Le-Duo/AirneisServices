@@ -41,6 +41,29 @@ categoryRouter.post(
     })
 )
 
+categoryRouter.put(
+    "/:id",
+     // isAuth,
+    asyncHandler(async (req, res) => {
+
+        const id = req.params.id;
+        const nouvellesDonnees = req.body; // récupère les informations du body
+
+        try {
+        const resultat = await CategoryModel.updateOne({ _id: id }, { $set: nouvellesDonnees });
+
+        if (resultat.modifiedCount > 0) {
+              res.json({ message: 'Élément mis à jour avec succès' });
+        } else {
+              res.status(500).json({ error: 'Aucun élément trouvé avec cet ID' });
+        }
+        } catch (erreur) {
+        console.error('Erreur lors de la mise à jour :', erreur);
+          res.status(500).json({ error: 'Erreur serveur lors de la mise à jour' });
+        }
+  })
+)
+
 categoryRouter.delete(
     '/:id',
     asyncHandler(async (req, res) => {
