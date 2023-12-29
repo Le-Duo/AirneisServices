@@ -35,7 +35,7 @@ categoryRouter.post(
             res.status(201).json(savedCategory);
         } catch (error) {
             console.error(error);
-            res.status(500).json({ error: 'Erreur lors de la création de la categorie' });
+            res.status(500).json({ error: 'Error on create new category' });
         }
 
     })
@@ -53,13 +53,13 @@ categoryRouter.put(
         const resultat = await CategoryModel.updateOne({ _id: id }, { $set: nouvellesDonnees });
 
         if (resultat.modifiedCount > 0) {
-              res.json({ message: 'Élément mis à jour avec succès' });
+              res.json({ message: 'Update succeeded' });
         } else {
-              res.status(500).json({ error: 'Aucun élément trouvé avec cet ID' });
+              res.status(500).json({ error: 'Category not found' });
         }
         } catch (erreur) {
-        console.error('Erreur lors de la mise à jour :', erreur);
-          res.status(500).json({ error: 'Erreur serveur lors de la mise à jour' });
+        console.error('Update error :', erreur);
+          res.status(500).json({ error: 'Update error' });
         }
   })
 )
@@ -76,13 +76,13 @@ categoryRouter.delete(
             const resultat = await CategoryModel.deleteOne(filtreSuppression);
 
             if (resultat.deletedCount && resultat.deletedCount > 0) {
-                 res.json({ message: 'Catégorie supprimée avec succès.' });
+                 res.json({ message: 'category deleted successfully' });
             } else {
-                 res.status(500).json({ error: 'Aucune catégorie trouvée avec cet ID.' });
+                 res.status(500).json({ error: 'Category not found.' });
             }
         } catch (erreur) {
             console.error('Erreur lors de la suppression :', erreur);
-            res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
+            res.status(500).json({ error: 'Delete error.' });
         }  
     })
 )

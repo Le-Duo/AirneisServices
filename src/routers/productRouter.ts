@@ -71,7 +71,7 @@ productRouter.post(
     } catch (error) {
       // Gérez les erreurs
       console.error(error);
-      res.status(500).json({ error: 'Erreur lors de la création du produit' });
+      res.status(500).json({ error: 'Error on product creation' });
     }
 
   })
@@ -89,13 +89,13 @@ productRouter.delete(
           const resultat = await ProductModel.deleteOne(filtreSuppression);
 
           if (resultat.deletedCount && resultat.deletedCount > 0) {
-               res.json({ message: 'Produit supprimé avec succès.' });
+               res.json({ message: 'product deleted successfully.' });
           } else {
-               res.status(500).json({ error: 'Aucun produit trouvé avec cet ID.' });
+               res.status(500).json({ error: 'Product not found.' });
           }
       } catch (erreur) {
-          console.error('Erreur lors de la suppression :', erreur);
-          res.status(500).json({ error: 'Erreur serveur lors de la suppression.' });
+          console.error('Error :', erreur);
+          res.status(500).json({ error: 'Delete error.' });
       }  
   })
 )
