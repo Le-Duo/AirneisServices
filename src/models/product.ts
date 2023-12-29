@@ -32,7 +32,7 @@ export class Product {
   public description!: string;
 
   @prop({ required: true })
-  public brand!: string;
+  public materials!: string[];
 
   @prop({ required: true, default: 0 })
   public price!: number;
