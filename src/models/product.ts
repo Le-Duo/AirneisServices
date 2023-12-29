@@ -31,7 +31,7 @@ export class Product {
   @prop({ required: true })
   public description!: string;
 
-  @prop({ required: true })
+  @prop({ required: true, type: () => [String] })
   public materials!: string[];
 
   @prop({ required: true, default: 0 })
