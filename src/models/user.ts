@@ -4,21 +4,21 @@
  * Chaque utilisateur contient des informations sur le nom, l'email, le mot de passe et le statut d'administrateur.
  */
 
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass } from "@typegoose/typegoose";
 
-@modelOptions({ schemaOptions: { collection: 'users' } })
+@modelOptions({ schemaOptions: { collection: "users" } })
 export class User {
-  public _id?: string
+  public _id?: string;
   @prop({ required: true })
-  public name!: string
+  public name!: string;
 
   @prop({ required: true })
-  public email!: string
+  public email!: string;
 
   @prop({ required: true })
-  public password!: string
+  public password!: string;
 
   @prop({ default: false })
-  public isAdmin!: boolean
+  public isAdmin!: boolean;
 }
-export const UserModel = getModelForClass(User)
+export const UserModel = getModelForClass(User);

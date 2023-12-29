@@ -3,103 +3,108 @@
  * Ce fichier définit le modèle de commande pour notre API REST. Il représente la structure des données que nous stockerons dans notre base de données MongoDB.
  * Chaque commande contient des informations sur l'adresse de livraison, les articles commandés et le résultat du paiement.
  */
-import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
-import { Product } from './product'
-import { User } from './user'
+import {
+  modelOptions,
+  prop,
+  getModelForClass,
+  Ref,
+} from "@typegoose/typegoose";
+import { Product } from "./product";
+import { User } from "./user";
 
 enum OrderStatus {
-  Initiated = 'initiated',
-  Pending = 'pending',
-  Delivered = 'delivered',
-  Cancelled = 'cancelled'
+  Initiated = "initiated",
+  Pending = "pending",
+  Delivered = "delivered",
+  Cancelled = "cancelled",
 }
 
 class ShippingAddress {
   @prop()
-  public fullName?: string
+  public fullName?: string;
   @prop()
-  public address?: string
+  public address?: string;
   @prop()
-  public city?: string
+  public city?: string;
   @prop()
-  public postalCode?: string
+  public postalCode?: string;
   @prop()
-  public country?: string
+  public country?: string;
   @prop()
-  public lat?: number
+  public lat?: number;
   @prop()
-  public lng?: number
+  public lng?: number;
 }
 
 // TODO : why not use Product ?
 class Item {
   @prop({ required: true })
-  public name!: string
+  public name!: string;
   @prop({ required: true })
-  public quantity!: string
+  public quantity!: string;
   @prop({ required: true })
-  public image!: number
+  public image!: number;
   @prop({ required: true })
-  public price!: number
+  public price!: number;
   @prop({ ref: Product })
-  public product?: Ref<Product>
+  public product?: Ref<Product>;
 }
 
 class PaymentResult {
   @prop()
-  public paymentId!: string
+  public paymentId!: string;
   @prop()
-  public status!: string
+  public status!: string;
   @prop()
-  public update_time!: string
+  public update_time!: string;
   @prop()
-  public email_address!: string
+  public email_address!: string;
 }
 
-@modelOptions({ schemaOptions: { collection: 'orders' } })
+@modelOptions({ schemaOptions: { collection: "orders" } })
 export class Order {
-  public _id!: string
-  
-  @prop({ type: () => [Item], required: true })  // Utilisez un tableau de Product plutôt que "Mixed"
+  public _id!: string;
+
+  @prop({ type: () => [Item], required: true }) // Utilisez un tableau de Product plutôt que "Mixed"
   public orderItems!: Item[];
   @prop()
-  public shippingAddress?: ShippingAddress
+  public shippingAddress?: ShippingAddress;
 
   @prop({ ref: User })
-  public user?: Ref<User>
+  public user?: Ref<User>;
 
   @prop({ required: true })
-  public paymentMethod!: string
+  public paymentMethod!: string;
 
   @prop()
-  public paymentResult?: PaymentResult
+  public paymentResult?: PaymentResult;
 
   @prop({ required: true, default: 0 })
-  public itemsPrice!: number
+  public itemsPrice!: number;
 
   @prop({ required: true, default: 0 })
-  public shippingPrice!: number
+  public shippingPrice!: number;
 
   @prop({ required: true, default: 0 })
-  public taxPrice!: number
+  public taxPrice!: number;
 
   @prop({ required: true, default: 0 })
-  public totalPrice!: number
+  public totalPrice!: number;
 
   @prop({ required: true, default: false })
-  public isPaid!: boolean
+  public isPaid!: boolean;
 
   @prop()
-  public paidAt!: Date
+  public paidAt!: Date;
 
   @prop({ required: true, default: false })
-  public isDelivered!: boolean
+  public isDelivered!: boolean;
 
   @prop()
-  public deliveredAt!: Date
+  public deliveredAt!: Date;
 
   @prop({ required: true, default: OrderStatus.Initiated })
-  public status!: OrderStatus
+  public status!: OrderStatus;
 }
 
-export const OrderModel = getModelForClass(Order)
+export const OrderModel = getModelForClass(Order);
