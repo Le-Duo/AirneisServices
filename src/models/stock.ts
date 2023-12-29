@@ -1,8 +1,12 @@
+import {
+  modelOptions,
+  prop,
+  getModelForClass,
+  DocumentType,
+} from "@typegoose/typegoose";
+import { Product, ProductModel } from "./product";
 
-import { modelOptions, prop, getModelForClass, DocumentType } from '@typegoose/typegoose'
-import { Product, ProductModel } from './product';
-
-@modelOptions({ schemaOptions: { collection: 'stock' } })
+@modelOptions({ schemaOptions: { collection: "stock" } })
 export class Stock {
   public _id?: string;
 
@@ -11,7 +15,6 @@ export class Stock {
 
   @prop({ required: true, default: 0 })
   public quantity!: number;
-
 }
 
 export const StockModel = getModelForClass(Stock);
