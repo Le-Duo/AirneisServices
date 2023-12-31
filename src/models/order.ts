@@ -36,8 +36,8 @@ export class Order {
   @prop({ type: () => ShippingAddress, required: true })
   public shippingAddress!: DocumentType<ShippingAddress>;
 
-  @prop({ required: true })
-  public payment!: Payment;
+  @prop({ required: false })
+  public payment?: Payment;
 
   @prop({ type: () => Product, required: true })
   public products!: DocumentType<Product>[];

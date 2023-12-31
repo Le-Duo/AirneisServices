@@ -43,11 +43,11 @@ orderRouter.get(
 
 
 orderRouter.post(
-  "/",
+  "/initialize",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
   try{
-    const { price, createdAt, products, user, shippingAddress, payment} = req.body;
+    const { price, createdAt, products, user, shippingAddress} = req.body;
 
     const orderNumber = generateOrderNumber()
     
@@ -58,7 +58,6 @@ orderRouter.post(
       createdAt,
       products,
       shippingAddress, 
-      payment,
       user,
     });
     const savedOrder = await newOrder.save();
@@ -69,6 +68,42 @@ orderRouter.post(
     console.error(error);
     res.status(500).json({ error: "Error on order creation" });
   }
+  })
+);
+
+/*
+  Pour le update, une fois l'ordre créer en initiated, on s'attend
+  à un paiement valide.
+  Quand le paiement est fait, l'ordre sera mis à jour avec la référence de paiement
+  et son status changera en "pending".
+  Si le paiement est refusé, l'ordre sera mis à jour avec le status
+  "cancelled" et la référence du paiement échouée
+*/
+orderRouter.put(
+  "/:ordernumber",
+  asyncHandler(async (req, res) => {
+    const ordernumber = req.params.ordernumber;
+    const newData = req.body;
+    newData.updatedAt = Date.now()
+
+    try {
+      const result = await OrderModel.updateOne(
+        { orderNumber: ordernumber },
+        { $set: newData }
+      );
+
+      if (result.matchedCount == 0) {
+        res.status(500).json({ error: "No order found" });
+      }
+      if (result.modifiedCount > 0) {
+        res.status(200).json({ message: "update succeeded" });
+      }
+
+      res.status(500).json({ error: "Update error" });
+    } catch (erreur) {
+      console.error("error :", erreur);
+      res.status(500).json({ error: "Update  error" });
+    }
   })
 );
 
