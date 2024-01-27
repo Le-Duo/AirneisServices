@@ -6,14 +6,14 @@
  * L'objet 'user' dans la requête contient des informations sur l'utilisateur qui a fait la requête, y compris son ID, son nom, son email, son statut d'administrateur et son token.
  */
 
-import { User } from "../models/user"
+import { User } from '../models/user'
+import { Request as ExpressRequest } from 'express'
 
-declare namespace Express {
-  export interface Request {
-    user: User
-  }
-
-  export interface Response {
-    user: User
+declare module 'express-serve-static-core' {
+  interface Request extends ExpressRequest {
+    user?: User
   }
 }
+
+// Re-export the Request interface
+export { Request } from 'express-serve-static-core'

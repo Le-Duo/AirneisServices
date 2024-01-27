@@ -12,8 +12,8 @@ export class Category {
   @prop({ required: true })
   public name!: string;
 
-  @prop({ required: true })
-  public urlImage!: string;
+  @prop()
+  public urlImage?: string;
 }
 
 export const CategoryModel = getModelForClass(Category);

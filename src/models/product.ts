@@ -22,8 +22,8 @@ export class Product {
   @prop({ required: true, unique: true })
   public slug!: string;
 
-  @prop({ required: true })
-  public URLimage!: string;
+  @prop()
+  public URLimage?: string;
 
   @prop({ type: () => Category, required: true })
   public category!: DocumentType<Category>; //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons la Category entiere

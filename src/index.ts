@@ -7,8 +7,9 @@
 
 import cors from 'cors'
 import dotenv from 'dotenv'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
+import path from 'path'
 import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
 import { userRouter } from './routers/userRouter'
@@ -20,14 +21,14 @@ dotenv.config()
 
 const MONGODB_URI = process.env.MONGODB_URI || ''
 
-if (MONGODB_URI == "") {
-  console.error("var MONGODB_URI not found")
+if (MONGODB_URI == '') {
+  console.error('var MONGODB_URI not found')
   process.exit(1)
 }
 
 // Force connection on "Airneis" database; by default, mongoose create "Test" database
 const connectionpOptions = {
-  dbName: `Airneis`
+  dbName: `Airneis`,
 }
 
 mongoose.set('strictQuery', true)
@@ -35,7 +36,6 @@ mongoose
   .connect(MONGODB_URI, connectionpOptions)
   .then(() => console.log('connected to MongoDB !'))
   .catch((error) => console.error(error))
-
 
 const app = express()
 
@@ -49,14 +49,18 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use('/api/categories', categoryRouter)
 app.use('/api/products', productRouter)
 app.use('/api/users', userRouter)
 app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
-app.use('/api/stock', stockRouter)
+app.use('/api/categories', categoryRouter)
 
-const PORT = 4000
+app.use(express.static(path.join(__dirname, '../../AirneisWebApp/dist')))
+app.get('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../../AirneisWebApp/dist/index.html'))
+})
+
+const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 
 app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`)
