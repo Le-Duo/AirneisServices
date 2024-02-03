@@ -3,11 +3,16 @@
  * Ce fichier, 'utils.ts', contient des fonctions utilitaires pour générer et vérifier les tokens JWT.
  * La fonction 'generateToken' prend un utilisateur comme argument et génère un token JWT qui est ensuite renvoyé.
  * La fonction 'isAuth' est un middleware qui vérifie si un token est fourni dans les en-têtes de la requête. Si un token est présent, il est vérifié et les informations de l'utilisateur sont extraites et attachées à la requête.
+ * La fonction 'generatePasswordResetToken' génère un token unique pour la réinitialisation du mot de passe.
+ * La fonction 'sendPasswordResetEmail' envoie un e-mail à l'utilisateur avec un lien pour réinitialiser le mot de passe.
  */
 
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { User } from './models/user'
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer' // Import nodemailer for sending emails
+import dotenv from 'dotenv' // Import dotenv for environment variables
+dotenv.config() // Load environment variables
 
 export const generateToken = (user: User) => {
   return jwt.sign(
@@ -25,22 +30,63 @@ export const generateToken = (user: User) => {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers;
+  const { authorization } = req.headers
   if (authorization) {
     const token = authorization.slice(7, authorization.length) // Bearer XXXXX
     try {
       const decode = jwt.verify(
         token,
         process.env.JWT_SECRET || 'somethingsecret'
-      );
-      req.user = decode as User;
-      next();
+      )
+      req.user = decode as User
+      next()
     } catch (error) {
       // Gérer les erreurs de vérification du token
-      console.error(error);
-      res.status(401).send({ message: 'Invalid Token' });
+      console.error(error)
+      res.status(401).send({ message: 'Invalid Token' })
     }
   } else {
-    res.status(401).send({ message: 'No Token' });
+    res.status(401).send({ message: 'No Token' })
+  }
+}
+
+export const generatePasswordResetToken = (user: User) => {
+  const jti = new Date().getTime().toString() // Generate jti as a string
+  const token = jwt.sign(
+    {
+      _id: user._id,
+      email: user.email,
+      jti: jti, // Use the generated jti
+    },
+    process.env.JWT_SECRET || 'somethingsecret',
+    {
+      expiresIn: '1h',
+    }
+  )
+  return { token, jti } // Return both the token and jti
+}
+
+export const sendPasswordResetEmail = async (user: User, token: string) => {
+  const transporter = nodemailer.createTransport({
+    host: 'sandbox.smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+      user: process.env.MAILTRAP_USER,
+      pass: process.env.MAILTRAP_PASS,
+    },
+    secure: false,
+  })
+
+  const mailOptions = {
+    from: '"Airneis Support" <support@airneis.com>',
+    to: user.email,
+    subject: 'Password Reset Request',
+    text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:5173/password-reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
+  }
+
+  try {
+    await transporter.sendMail(mailOptions)
+  } catch (error) {
+    console.error(error)
   }
 }

@@ -7,13 +7,11 @@
  */
 
 import { User } from '../models/user'
-import { Request as ExpressRequest } from 'express'
 
-declare module 'express-serve-static-core' {
-  interface Request extends ExpressRequest {
-    user?: User
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User
+    }
   }
 }
-
-// Re-export the Request interface
-export { Request } from 'express-serve-static-core'

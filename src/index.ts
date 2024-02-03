@@ -54,6 +54,7 @@ app.use('/api/users', userRouter)
 app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
 app.use('/api/categories', categoryRouter)
+app.use('/api/stocks', stockRouter)
 
 app.use(express.static(path.join(__dirname, '../../AirneisWebApp/dist')))
 app.get('*', (req: Request, res: Response) => {
