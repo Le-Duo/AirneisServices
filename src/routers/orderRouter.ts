@@ -13,6 +13,15 @@ import { Product } from '../models/product'
 export const orderRouter = express.Router()
 
 orderRouter.get(
+  '/',
+  isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const orders = await OrderModel.find({})
+    res.json(orders)
+  })
+)
+
+orderRouter.get(
   '/:id',
   isAuth,
   asyncHandler(async (req: Request, res: Response) => {
