@@ -6,7 +6,7 @@
 
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 
-@modelOptions({ schemaOptions: { collection: 'users' } })
+@modelOptions({ schemaOptions: { collection: 'users', timestamps: true } })
 export class User {
   public _id?: string
   @prop({ required: true })

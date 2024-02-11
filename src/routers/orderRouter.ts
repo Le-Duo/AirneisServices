@@ -1,10 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express et Typegoose pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'orderRouter.ts', gère les routes pour les commandes. Il contient deux routes principales : une pour obtenir une commande spécifique par son ID et une autre pour créer une nouvelle commande.
- * La route 'GET /:id' renvoie les détails d'une commande spécifique. Elle nécessite une authentification.
- * La route 'POST /' crée une nouvelle commande avec les détails fournis dans le corps de la requête. Elle nécessite également une authentification.
- */
-
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { isAuth } from '../utils'
@@ -16,7 +9,7 @@ orderRouter.get(
   '/',
   isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    const orders = await OrderModel.find({})
+    const orders = await OrderModel.find({}).populate('user', 'name')
     res.json(orders)
   })
 )
@@ -38,25 +31,63 @@ orderRouter.post(
   '/',
   isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log(req.body) // Add this line to log the entire request body
-    const orderItems = req.body.orderItems
+    const {
+      orderItems,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      shippingPrice,
+      taxPrice,
+      totalPrice,
+    } = req.body
+    const user = req.user // Correctly define the user from the request object
     if (!orderItems || orderItems.length === 0) {
       res.status(400).send({ message: 'Cart is empty' })
     } else {
       const createOrder = await OrderModel.create({
-        orderItems: req.body.orderItems.map((x: Product) => ({
+        orderItems: orderItems.map((x: Product) => ({
           ...x,
           product: x._id,
         })),
-        shippingAddress: req.body.shippingAddress,
-        paymentMethod: req.body.paymentMethod,
-        itemsPrice: req.body.itemsPrice,
-        shippingPrice: req.body.shippingPrice,
-        taxPrice: req.body.taxPrice,
-        totalPrice: req.body.totalPrice,
-        user: req.body._id,
+        shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+        user: user?._id, // Use the user ID from the defined user object
       })
       res.status(201).send({ message: 'Order Created', order: createOrder })
+    }
+  })
+)
+
+orderRouter.put(
+  '/:id',
+  isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const order = await OrderModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    })
+    if (order) {
+      res.json(order)
+    } else {
+      res.status(404).send({ message: 'Order Not Found' })
+    }
+  })
+)
+
+orderRouter.delete(
+  '/:id',
+  isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const order = await OrderModel.findByIdAndDelete(id)
+    if (order) {
+      res.status(204).send()
+    } else {
+      res.status(404).send({ message: 'Order Not Found' })
     }
   })
 )

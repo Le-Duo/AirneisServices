@@ -56,7 +56,7 @@ class PaymentResult {
   public email_address!: string
 }
 
-@modelOptions({ schemaOptions: { collection: 'orders' } })
+@modelOptions({ schemaOptions: { collection: 'orders', timestamps: true } })
 export class Order {
   public _id!: string
 

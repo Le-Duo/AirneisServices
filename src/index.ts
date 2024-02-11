@@ -16,6 +16,7 @@ import { userRouter } from './routers/userRouter'
 import { orderRouter } from './routers/orderRouter'
 import { stockRouter } from './routers/stockRouter'
 import { categoryRouter } from './routers/categoryRouter'
+import { carouselRouter } from './routers/carouselRouter'
 
 dotenv.config()
 
@@ -55,6 +56,7 @@ app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
 app.use('/api/categories', categoryRouter)
 app.use('/api/stocks', stockRouter)
+app.use('/api/carousel', carouselRouter)
 
 app.use(express.static(path.join(__dirname, '../../AirneisWebApp/dist')))
 app.get('*', (req: Request, res: Response) => {
