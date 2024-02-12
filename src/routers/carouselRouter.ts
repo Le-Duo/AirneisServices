@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { CarouselItemModel } from '../models/carouselItem'
 
@@ -23,15 +23,19 @@ carouselRouter.post(
 
 carouselRouter.put(
   '/:id',
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
     const updatedItem = await CarouselItemModel.findByIdAndUpdate(
-      req.params.id,
+      id,
       req.body,
-      { new: true }
+      {
+        new: true,
+      }
     )
-    if (!updatedItem) {
-      return res.status(404).json({ message: 'Item not found' })
+    if (updatedItem) {
+      res.json(updatedItem)
+    } else {
+      res.status(404).send({ message: 'Carousel Item Not Found' })
     }
-    res.json(updatedItem)
   })
 )
