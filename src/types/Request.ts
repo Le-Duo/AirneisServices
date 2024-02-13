@@ -6,14 +6,12 @@
  * L'objet 'user' dans la requête contient des informations sur l'utilisateur qui a fait la requête, y compris son ID, son nom, son email, son statut d'administrateur et son token.
  */
 
-import { User } from "../models/user"
+import { User } from '../models/user'
 
-declare namespace Express {
-  export interface Request {
-    user: User
-  }
-
-  export interface Response {
-    user: User
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User
+    }
   }
 }

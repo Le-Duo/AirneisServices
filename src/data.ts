@@ -4,49 +4,81 @@
  * Les produits et les utilisateurs sont définis avec leurs attributs respectifs, tels que le nom, l'image, la catégorie, la marque, le prix, le stock pour les produits et le nom, l'email, le mot de passe pour les utilisateurs.
  */
 
-// ONLY FOR TEST //
 import { DocumentType } from '@typegoose/typegoose'
 import { Category, CategoryModel } from './models/category'
 import { Product } from './models/product'
 import { User } from './models/user'
 import bcrypt from 'bcryptjs'
 
+export const sampleCategories: Category[] = [
+  {
+    _id: '60d0fe4f5311236168a109ca',
+    name: 'Sofas',
+    urlImage: '../public/images/sofa.png',
+  },
+  {
+    _id: '60d0fe4f5311236168a109cb',
+    name: 'Tables',
+    urlImage: '../public/images/table.png',
+  },
+  {
+    _id: '60d0fe4f5311236168a109cc',
+    name: 'Bookcases',
+    urlImage: '../public/images/bookcase.png',
+  },
+  {
+    _id: '60d0fe4f5311236168a109cd',
+    name: 'Rugs',
+    urlImage: '../public/images/rug.png',
+  },
+  {
+    _id: '60d0fe4f5311236168a109ce',
+    name: 'Lamps',
+    urlImage: '../public/images/lamp.png',
+  },
+  {
+    _id: '60d0fe4f5311236168a109cf',
+    name: 'Wardrobes',
+    urlImage: '../public/images/wardrobe.png',
+  },
+]
 
+const categoryMap = new Map(sampleCategories.map(cat => [cat._id, cat]));
 
 export const sampleProducts: Product[] = [
   {
     name: 'MACLEOD',
     slug: 'macleod',
     URLimage: '../public/images/blue-3-seater-sofa.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>, //récupère une categorie dont l'id est 658ad8a0c5f1cecc0b52d46d + le cast en type "unknow" (selon mongoose) et ensuite le cast en type voulu qui est DocumentType<Category>
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109ca") as DocumentType<Category>,
+    materials: ['cotton', 'wood'],
     price: 200,
-    description: 'Blue 3 seater sofa',
+    description: 'Blue 3-seater sofa',
   },
   {
     name: 'NESSIE',
     slug: 'nessie',
     URLimage: '../public/images/red-2-seater-sofa-in-living-room.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109ca") as DocumentType<Category>,
+    materials: ['cotton', 'wood'],
     price: 150,
-    description: 'Red 2 seater sofa',
+    description: 'Red 2-seater sofa',
   },
   {
     name: 'THISTLE',
     slug: 'thistle',
     URLimage: '../public/images/single-seat-green-sofa-in-living-room.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109ca") as DocumentType<Category>,
+    materials: ['cotton', 'wood'],
     price: 100,
-    description: 'Green 1 seater sofa',
+    description: 'Green 1-seater sofa',
   },
   {
     name: 'GLEN',
     slug: 'glen',
     URLimage: '../public/images/modern-brown-coffee-table (1).png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109cb") as DocumentType<Category>,
+    materials: ['wood'],
     price: 80,
     description: 'Brown coffee table',
   },
@@ -55,38 +87,38 @@ export const sampleProducts: Product[] = [
     slug: 'wallace',
     URLimage:
       '../public/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109cc") as DocumentType<Category>,
+    materials: ['wood', 'metal'],
     price: 80,
-    description: 'bookcase with a wooden finish and a metal frame.',
+    description: 'Bookcase with wooden finish and metal frame.',
   },
   {
     name: 'HEATHER',
     slug: 'heather',
     URLimage: '../public/images/modern-purple-rug-with-floral-pattern.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109cd") as DocumentType<Category>,
+    materials: ['wool'],
     price: 35,
-    description: 'rug with a woolen texture and a purple colour',
+    description: 'Rug with a wool texture and a purple color',
   },
   {
     name: 'STIRLING',
     slug: 'stirling',
     URLimage:
       '../public/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109ce") as DocumentType<Category>,
+    materials: ['glass', 'metal'],
     price: 20,
-    description: 'lamp with glass shade and thin silver base',
+    description: 'Lamp with glass shade and thin silver base',
   },
   {
     name: 'SKYE',
     slug: 'skye',
     URLimage: '../public/images/wardrobe-with-a-white-colour-and-3-doors.png',
-    category: (CategoryModel.findById("658ad8a0c5f1cecc0b52d46d")) as unknown as DocumentType<Category>,
-    brand: 'Airneis',
+    category: categoryMap.get("60d0fe4f5311236168a109cf") as DocumentType<Category>,
+    materials: ['wood', 'glass'],
     price: 200,
-    description: 'wardrobe with a white colour and a mirrored door',
+    description: 'White wardrobe with a mirror door',
   },
 ]
 
@@ -110,3 +142,4 @@ export const sampleUsers: User[] = [
     isAdmin: false,
   },
 ]
+
