@@ -15,6 +15,7 @@ import { userRouter } from './routers/userRouter'
 import { orderRouter } from './routers/orderRouter'
 import { stockRouter } from './routers/stockRouter'
 import { categoryRouter } from './routers/categoryRouter'
+import { contactRouter } from './routers/contactRouter'
 
 dotenv.config()
 
@@ -55,6 +56,7 @@ app.use('/api/users', userRouter)
 app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
 app.use('/api/stock', stockRouter)
+app.use('/api/contact', contactRouter)
 
 const PORT = 4000
 

@@ -36,6 +36,9 @@ export class Product {
 
   @prop({ required: true, default: 0 })
   public price!: number;
+
+  @prop({required: true, default: 0})
+  public priority!: boolean;
 }
 
 export const ProductModel = getModelForClass(Product);

@@ -37,7 +37,7 @@ productRouter.post(
   // isAuth,
   asyncHandler(async (req, res) => {
     try {
-      const { name, slug, URLimage, categoryId, description, materials, price } =
+      const { name, slug, URLimage, categoryId, description, materials, price, priority } =
         req.body;
 
       // Récupère le produit dans la db
@@ -59,6 +59,7 @@ productRouter.post(
         description,
         materials,
         price,
+        priority,
       });
 
       // Enregistrez le produit dans la base de données
