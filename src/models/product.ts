@@ -9,33 +9,33 @@ import {
   prop,
   getModelForClass,
   DocumentType,
-} from "@typegoose/typegoose";
-import { Category } from "./category";
+} from '@typegoose/typegoose'
+import { Category } from './category'
 
-@modelOptions({ schemaOptions: { collection: "products" } })
+@modelOptions({ schemaOptions: { collection: 'products', timestamps: true } })
 export class Product {
-  public _id?: string;
+  public _id?: string
 
   @prop({ required: true })
-  public name!: string;
+  public name!: string
 
   @prop({ required: true, unique: true })
-  public slug!: string;
+  public slug!: string
 
-  @prop({ required: true })
-  public URLimage!: string;
+  @prop()
+  public URLimage?: string
 
   @prop({ type: () => Category, required: true })
-  public category!: DocumentType<Category>; //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons la Category entiere
+  public category!: DocumentType<Category> //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons la Category entiere
 
   @prop({ required: true })
-  public description!: string;
+  public description!: string
 
   @prop({ required: true })
-  public materials!: string[];
+  public materials!: string[]
 
   @prop({ required: true, default: 0 })
-  public price!: number;
+  public price!: number
 }
 
-export const ProductModel = getModelForClass(Product);
+export const ProductModel = getModelForClass(Product)

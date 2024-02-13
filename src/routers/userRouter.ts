@@ -8,9 +8,77 @@ import express, { Request, Response } from 'express'
 import { User, UserModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
-import { generateToken } from '../utils'
+import jwt, { VerifyErrors } from 'jsonwebtoken'
+import {
+  generateToken,
+  generatePasswordResetToken,
+  sendPasswordResetEmail,
+} from '../utils'
+import rateLimit from 'express-rate-limit'
+import { ParamsDictionary } from 'express-serve-static-core'
 
 export const userRouter = express.Router()
+
+const passwordResetRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message:
+    'Too many password reset requests from this IP, please try again after 15 minutes.',
+})
+
+interface UserRequestBody {
+  name?: string
+  email?: string
+  password?: string
+}
+
+userRouter.get(
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
+    const users = await UserModel.find({})
+    res.json(users)
+  })
+)
+
+userRouter.put(
+  '/:id',
+  asyncHandler(
+    async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
+      const user = await UserModel.findById(req.params.id)
+      if (user) {
+        user.name = req.body.name || user.name
+        user.email = req.body.email || user.email
+        if (req.body.password) {
+          user.password = bcrypt.hashSync(req.body.password, 8)
+        }
+        const updatedUser = await user.save()
+        res.send({
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          isAdmin: updatedUser.isAdmin,
+          token: generateToken(updatedUser),
+        })
+      } else {
+        res.status(404).send({ message: 'Utilisateur non trouvé' })
+      }
+    }
+  )
+)
+
+userRouter.delete(
+  '/:id',
+  asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+      await UserModel.deleteOne({ _id: req.params.id })
+      res.send({ message: 'Utilisateur supprimé' })
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
 userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
@@ -46,5 +114,76 @@ userRouter.post(
       isAdmin: user.isAdmin,
       token: generateToken(user),
     })
+  })
+)
+
+userRouter.post(
+  '/password-reset-request',
+  passwordResetRequestLimiter,
+  asyncHandler(async (req: Request, res: Response) => {
+    const user = await UserModel.findOne({ email: req.body.email })
+    if (user) {
+      const { token, jti } = generatePasswordResetToken(user)
+
+      user.passwordResetTokenJti = jti
+      await user.save()
+
+      try {
+        await sendPasswordResetEmail(user, token)
+        res.status(200).send({ message: 'Password reset email sent.' })
+      } catch (error) {
+        res.status(500).send({ message: 'Error sending password reset email.' })
+      }
+    } else {
+      res
+        .status(404)
+        .send({ message: 'No account with this email address exists.' })
+    }
+  })
+)
+
+interface DecodedToken {
+  _id: string
+  email: string
+  jti: string
+}
+
+userRouter.post(
+  '/password-reset',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body
+    if (!token || !newPassword) {
+      res
+        .status(400)
+        .send({ message: 'Token and new password must be provided' })
+      return
+    }
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'your_default_secret',
+      async (err: VerifyErrors | null, decoded: any) => {
+        if (err) {
+          res.status(401).send({ message: 'Invalid or expired token' })
+          return
+        }
+        const decodedToken = decoded as DecodedToken
+        const user = await UserModel.findOne({
+          _id: decodedToken._id,
+          email: decodedToken.email,
+        })
+        if (user) {
+          if (user.passwordResetTokenJti !== decodedToken.jti) {
+            res.status(401).send({ message: 'Invalid or expired token' })
+            return
+          }
+          user.password = bcrypt.hashSync(newPassword)
+          user.passwordResetTokenJti = undefined
+          await user.save()
+          res.send({ message: 'Password reset successful' })
+        } else {
+          res.status(404).send({ message: 'User not found' })
+        }
+      }
+    )
   })
 )
