@@ -16,6 +16,7 @@ import { userRouter } from './routers/userRouter'
 import { orderRouter } from './routers/orderRouter'
 import { stockRouter } from './routers/stockRouter'
 import { categoryRouter } from './routers/categoryRouter'
+import { contactRouter } from './routers/contactRouter'
 import { carouselRouter } from './routers/carouselRouter'
 
 dotenv.config()
@@ -54,6 +55,7 @@ app.use('/api/products', productRouter)
 app.use('/api/users', userRouter)
 app.use('/api/seed', seedRouter)
 app.use('/api/orders', orderRouter)
+app.use('/api/contact', contactRouter)
 app.use('/api/categories', categoryRouter)
 app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)

@@ -15,6 +15,8 @@ export class User {
   @prop({ required: true })
   public email!: string
 
+  // Must be required: false
+  // Quand on veut utilisr un user pour passer un order, il ne faudrait pas obligatoirement fournir son MDP
   @prop({ required: true })
   public password!: string
 

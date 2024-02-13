@@ -36,6 +36,8 @@ Welcome to Àirneis, a furniture retail project designed to provide a seamless a
     * ```npm i dotenv```
 * install Fuse v0.5.0
     * ```npm i fuse```
+* install uuid
+    * ```npm i @types/uuid```
  
 ## Usefull extensions
 
