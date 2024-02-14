@@ -57,7 +57,7 @@ orderRouter.post(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
   try{
-    const { price, createdAt, products, user, shippingAddress, paymentMethod} = req.body; // Include paymentMethod in the destructuring
+    const { price, createdAt, products, user, shippingAddress, paymentMethod, orderItems} = req.body; // Included orderItems in the destructuring
 
     const orderNumber = generateOrderNumber()
     
@@ -70,6 +70,7 @@ orderRouter.post(
       shippingAddress, 
       user,
       paymentMethod,
+      orderItems, // Added orderItems to the new order object
     });
     const savedOrder = await newOrder.save();
 
