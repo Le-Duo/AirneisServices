@@ -30,25 +30,32 @@ export const generateToken = (user: User) => {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers
+  const { authorization } = req.headers;
   if (authorization) {
-    const token = authorization.slice(7, authorization.length) // Bearer XXXXX
+    console.log(`Authorization Header: ${authorization}`); // Log the full authorization header for debugging
+    if (!authorization.startsWith('Bearer ')) {
+      return res.status(401).send({ message: 'Token must be prefixed with "Bearer "' });
+    }
+    const token = authorization.slice(7, authorization.length); // Bearer XXXXX
+    if (!token) {
+      console.log('Token not found after Bearer prefix');
+      return res.status(401).send({ message: 'Token not found' });
+    }
     try {
       const decode = jwt.verify(
         token,
         process.env.JWT_SECRET || 'somethingsecret'
-      )
-      req.user = decode as User
-      next()
+      );
+      req.user = decode as User;
+      next();
     } catch (error) {
-      // Gérer les erreurs de vérification du token
-      console.error(error)
-      res.status(401).send({ message: 'Invalid Token' })
+      console.error(error);
+      res.status(401).send({ message: 'Invalid Token' });
     }
   } else {
-    res.status(401).send({ message: 'No Token' })
+    res.status(401).send({ message: 'No Token' });
   }
-}
+};
 
 export const generatePasswordResetToken = (user: User) => {
   const jti = new Date().getTime().toString() // Generate jti as a string

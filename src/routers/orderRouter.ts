@@ -14,6 +14,16 @@ import {v4 as uuidv4} from 'uuid';
 export const orderRouter = express.Router();
 
 orderRouter.get(
+  "/",
+  // isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    console.log("Get all orders called")
+    const orders = await OrderModel.find({}).populate('user', 'name')
+    res.json(orders)
+  })
+);
+
+orderRouter.get(
   "/:id",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
@@ -43,31 +53,34 @@ orderRouter.get(
 
 
 orderRouter.post(
-  "/initialize",
+  "/",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-  try{
-    const { price, createdAt, products, user, shippingAddress} = req.body;
+    try {
+      const { user, shippingAddress, paymentMethod, orderItems } = req.body;
+      const itemsPrice = orderItems.reduce((acc: number, item: any) => acc + item.quantity * item.price, 0);
+      const shippingPrice = itemsPrice > 100 ? 0 : 10; // Example logic for shipping price
+      const taxPrice = itemsPrice * 0.2; // Example logic for tax price
+      const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-    const orderNumber = generateOrderNumber()
-    
-    const newOrder = new OrderModel({
-      orderNumber,
-      price,
-      status: "initated",
-      createdAt,
-      products,
-      shippingAddress, 
-      user,
-    });
-    const savedOrder = await newOrder.save();
+      const newOrder = new OrderModel({
+        user,
+        shippingAddress,
+        paymentMethod,
+        orderItems,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+        status: "initiated", // Assuming default status
+      });
 
-    res.status(201).json(savedOrder);
-
-  }catch(error){
-    console.error(error);
-    res.status(500).json({ error: "Error on order creation" });
-  }
+      const savedOrder = await newOrder.save();
+      res.status(201).json(savedOrder);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error on order creation" });
+    }
   })
 );
 
@@ -107,10 +120,24 @@ orderRouter.put(
   })
 );
 
+orderRouter.delete(
+  "/:id",
+  // isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const orderId = req.params.id;
+    const deletedOrder = await OrderModel.findByIdAndDelete(orderId);
+    if (deletedOrder) {
+      res.json(deletedOrder);
+    } else {
+      res.status(404).json({ message: "Order Not Found" });
+    }
+  })
+);
+
 function generateOrderNumber() : string{
   const prefix = "CMD";
 
-  const uniqueId = uuidv4().replace(/-/g, ''); // Supprime les tirets du GUID
+  const uniqueId = uuidv4().replace(/-/g, ''); 
 
   const orderNumber = `${prefix}-${uniqueId}`;
 
