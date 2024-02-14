@@ -18,8 +18,8 @@ orderRouter.get(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     console.log("Get all orders called")
-    const orders = await OrderModel.find({});
-    res.json(orders);
+    const orders = await OrderModel.find({}).populate('user', 'name')
+    res.json(orders)
   })
 );
 
