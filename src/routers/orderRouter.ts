@@ -119,6 +119,20 @@ orderRouter.put(
   })
 );
 
+orderRouter.delete(
+  "/:id",
+  // isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const orderId = req.params.id;
+    const deletedOrder = await OrderModel.findByIdAndDelete(orderId);
+    if (deletedOrder) {
+      res.json(deletedOrder);
+    } else {
+      res.status(404).json({ message: "Order Not Found" });
+    }
+  })
+);
+
 function generateOrderNumber() : string{
   const prefix = "CMD";
 
