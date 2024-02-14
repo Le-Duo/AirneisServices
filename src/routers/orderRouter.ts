@@ -14,6 +14,16 @@ import {v4 as uuidv4} from 'uuid';
 export const orderRouter = express.Router();
 
 orderRouter.get(
+  "/",
+  // isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    console.log("Get all orders called")
+    const orders = await OrderModel.find({});
+    res.json(orders);
+  })
+);
+
+orderRouter.get(
   "/:id",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
@@ -110,7 +120,7 @@ orderRouter.put(
 function generateOrderNumber() : string{
   const prefix = "CMD";
 
-  const uniqueId = uuidv4().replace(/-/g, ''); // Supprime les tirets du GUID
+  const uniqueId = uuidv4().replace(/-/g, ''); 
 
   const orderNumber = `${prefix}-${uniqueId}`;
 
