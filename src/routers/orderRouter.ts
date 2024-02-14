@@ -53,7 +53,7 @@ orderRouter.get(
 
 
 orderRouter.post(
-  "/initialize",
+  "/",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
   try{
