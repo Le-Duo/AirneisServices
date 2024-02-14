@@ -57,18 +57,19 @@ orderRouter.post(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
   try{
-    const { price, createdAt, products, user, shippingAddress} = req.body;
+    const { price, createdAt, products, user, shippingAddress, paymentMethod} = req.body; // Include paymentMethod in the destructuring
 
     const orderNumber = generateOrderNumber()
     
     const newOrder = new OrderModel({
       orderNumber,
       price,
-      status: "initated",
+      status: "initiated",
       createdAt,
       products,
       shippingAddress, 
       user,
+      paymentMethod,
     });
     const savedOrder = await newOrder.save();
 
