@@ -5,73 +5,78 @@
  * La route 'POST /' crée une nouvelle commande avec les détails fournis dans le corps de la requête. Elle nécessite également une authentification.
  */
 
-import express, { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
-import { isAuth } from "../utils";
-import { OrderModel } from "../models/order";
-import { Product } from "../models/product";
-import {v4 as uuidv4} from 'uuid';
-export const orderRouter = express.Router();
+import express, { Request, Response } from 'express'
+import asyncHandler from 'express-async-handler'
+import { isAuth } from '../utils'
+import { OrderModel } from '../models/order'
+import { Product } from '../models/product'
+import { v4 as uuidv4 } from 'uuid'
+export const orderRouter = express.Router()
 
 orderRouter.get(
-  "/",
+  '/',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log("Get all orders called")
+    console.log('Get all orders called')
     const orders = await OrderModel.find({}).populate('user', 'name')
     res.json(orders)
   })
-);
+)
 
 orderRouter.get(
-  "/:id",
+  '/:id',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log("Get order by id called")
-    const order = await OrderModel.findById(req.params.id);
+    console.log('Get order by id called')
+    const order = await OrderModel.findById(req.params.id)
     if (order) {
-      res.json(order);
+      res.json(order)
     } else {
-      res.status(404).json({ message: "Order Not Found" });
+      res.status(404).json({ message: 'Order Not Found' })
     }
   })
-);
+)
 
 orderRouter.get(
-  "/order/:orderNumber",
+  '/order/:orderNumber',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log("Get order by orderNumer called")
-    const order = await OrderModel.findOne({orderNumber : req.params.orderNumber});
+    console.log('Get order by orderNumer called')
+    const order = await OrderModel.findOne({
+      orderNumber: req.params.orderNumber,
+    })
     if (order) {
-      res.json(order);
+      res.json(order)
     } else {
-      res.status(404).json({ message: "Order Not Found" });
+      res.status(404).json({ message: 'Order Not Found' })
     }
   })
-);
+)
 
 function calculateShippingPrice(itemsPrice: number): number {
   if (itemsPrice < 400) {
-    return 39;
+    return 39
   } else if (itemsPrice >= 400 && itemsPrice <= 1000) {
-    return 59;
+    return 59
   } else if (itemsPrice > 1000) {
-    return 109;
+    return 109
   }
-  return 0;
+  return 0
 }
 
 orderRouter.post(
-  "/",
+  '/',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { user, shippingAddress, paymentMethod, orderItems } = req.body;
-      const itemsPrice = orderItems.reduce((acc: number, item: any) => acc + item.quantity * item.price, 0);
-      const shippingPrice = calculateShippingPrice(itemsPrice);
-      const taxPrice = itemsPrice * 0.2; // Example logic for tax price
-      const totalPrice = itemsPrice + shippingPrice + taxPrice;
+      const { user, shippingAddress, paymentMethod, orderItems } = req.body
+      const itemsPrice = orderItems.reduce(
+        (acc: number, item: any) => acc + item.quantity * item.price,
+        0
+      )
+      const shippingPrice = calculateShippingPrice(itemsPrice)
+      const taxPrice = itemsPrice * 0.2 // Example logic for tax price
+      const totalPrice = itemsPrice + shippingPrice + taxPrice
 
       const newOrder = new OrderModel({
         user,
@@ -82,17 +87,17 @@ orderRouter.post(
         shippingPrice,
         taxPrice,
         totalPrice,
-        status: "initiated", // Assuming default status
-      });
+        status: 'initiated', // Assuming default status
+      })
 
-      const savedOrder = await newOrder.save();
-      res.status(201).json(savedOrder);
+      const savedOrder = await newOrder.save()
+      res.status(201).json(savedOrder)
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error on order creation" });
+      console.error(error)
+      res.status(500).json({ error: 'Error on order creation' })
     }
   })
-);
+)
 
 /*
   Pour le update, une fois l'ordre créer en initiated, on s'attend
@@ -103,54 +108,53 @@ orderRouter.post(
   "cancelled" et la référence du paiement échouée
 */
 orderRouter.put(
-  "/:ordernumber",
+  '/:ordernumber',
   asyncHandler(async (req, res) => {
-    const ordernumber = req.params.ordernumber;
-    const newData = req.body;
+    const ordernumber = req.params.ordernumber
+    const newData = req.body
     newData.updatedAt = Date.now()
 
     try {
       const result = await OrderModel.updateOne(
         { orderNumber: ordernumber },
         { $set: newData }
-      );
+      )
 
       if (result.matchedCount == 0) {
-        res.status(500).json({ error: "No order found" });
+        res.status(500).json({ error: 'No order found' })
       }
       if (result.modifiedCount > 0) {
-        res.status(200).json({ message: "update succeeded" });
+        res.status(200).json({ message: 'update succeeded' })
       }
 
-      res.status(500).json({ error: "Update error" });
+      res.status(500).json({ error: 'Update error' })
     } catch (erreur) {
-      console.error("error :", erreur);
-      res.status(500).json({ error: "Update  error" });
+      console.error('error :', erreur)
+      res.status(500).json({ error: 'Update  error' })
     }
   })
-);
+)
 
 orderRouter.delete(
-  "/:id",
+  '/:id',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    const orderId = req.params.id;
-    const deletedOrder = await OrderModel.findByIdAndDelete(orderId);
+    const orderId = req.params.id
+    const deletedOrder = await OrderModel.findByIdAndDelete(orderId)
     if (deletedOrder) {
-      res.json(deletedOrder);
+      res.json(deletedOrder)
     } else {
-      res.status(404).json({ message: "Order Not Found" });
+      res.status(404).json({ message: 'Order Not Found' })
     }
   })
-);
+)
 
-function generateOrderNumber() : string{
-  const prefix = "CMD";
+function generateOrderNumber(): string {
+  const prefix = 'CMD'
 
-  const uniqueId = uuidv4().replace(/-/g, ''); 
+  const uniqueId = uuidv4().replace(/-/g, '')
 
-  const orderNumber = `${prefix}-${uniqueId}`;
+  const orderNumber = `${prefix}-${uniqueId}`
 
-  return orderNumber;
-
+  return orderNumber
 }
