@@ -56,30 +56,31 @@ orderRouter.post(
   "/",
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-  try{
-    const { price, createdAt, products, user, shippingAddress, paymentMethod, orderItems} = req.body; // Included orderItems in the destructuring
+    try {
+      const { user, shippingAddress, paymentMethod, orderItems } = req.body;
+      const itemsPrice = orderItems.reduce((acc: number, item: any) => acc + item.quantity * item.price, 0);
+      const shippingPrice = itemsPrice > 100 ? 0 : 10; // Example logic for shipping price
+      const taxPrice = itemsPrice * 0.2; // Example logic for tax price
+      const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-    const orderNumber = generateOrderNumber()
-    
-    const newOrder = new OrderModel({
-      orderNumber,
-      price,
-      status: "initiated",
-      createdAt,
-      products,
-      shippingAddress, 
-      user,
-      paymentMethod,
-      orderItems, // Added orderItems to the new order object
-    });
-    const savedOrder = await newOrder.save();
+      const newOrder = new OrderModel({
+        user,
+        shippingAddress,
+        paymentMethod,
+        orderItems,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+        status: "initiated", // Assuming default status
+      });
 
-    res.status(201).json(savedOrder);
-
-  }catch(error){
-    console.error(error);
-    res.status(500).json({ error: "Error on order creation" });
-  }
+      const savedOrder = await newOrder.save();
+      res.status(201).json(savedOrder);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error on order creation" });
+    }
   })
 );
 
