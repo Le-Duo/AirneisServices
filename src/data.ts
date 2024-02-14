@@ -5,7 +5,7 @@
  */
 
 import { DocumentType } from '@typegoose/typegoose'
-import { Category, CategoryModel } from './models/category'
+import { Category } from './models/category'
 import { Product } from './models/product'
 import { User } from './models/user'
 import bcrypt from 'bcryptjs'
@@ -54,6 +54,7 @@ export const sampleProducts: Product[] = [
     materials: ['cotton', 'wood'],
     price: 200,
     description: 'Blue 3-seater sofa',
+    priority: true,
   },
   {
     name: 'NESSIE',
@@ -63,6 +64,7 @@ export const sampleProducts: Product[] = [
     materials: ['cotton', 'wood'],
     price: 150,
     description: 'Red 2-seater sofa',
+    priority: false,
   },
   {
     name: 'THISTLE',
@@ -72,6 +74,7 @@ export const sampleProducts: Product[] = [
     materials: ['cotton', 'wood'],
     price: 100,
     description: 'Green 1-seater sofa',
+    priority: false,
   },
   {
     name: 'GLEN',
@@ -81,6 +84,7 @@ export const sampleProducts: Product[] = [
     materials: ['wood'],
     price: 80,
     description: 'Brown coffee table',
+    priority: false,
   },
   {
     name: 'WALLACE',
@@ -91,6 +95,7 @@ export const sampleProducts: Product[] = [
     materials: ['wood', 'metal'],
     price: 80,
     description: 'Bookcase with wooden finish and metal frame.',
+    priority: false,
   },
   {
     name: 'HEATHER',
@@ -100,6 +105,7 @@ export const sampleProducts: Product[] = [
     materials: ['wool'],
     price: 35,
     description: 'Rug with a wool texture and a purple color',
+    priority: false,
   },
   {
     name: 'STIRLING',
@@ -110,6 +116,7 @@ export const sampleProducts: Product[] = [
     materials: ['glass', 'metal'],
     price: 20,
     description: 'Lamp with glass shade and thin silver base',
+    priority: false,
   },
   {
     name: 'SKYE',
@@ -119,6 +126,7 @@ export const sampleProducts: Product[] = [
     materials: ['wood', 'glass'],
     price: 200,
     description: 'White wardrobe with a mirror door',
+    priority: false,
   },
 ]
 
