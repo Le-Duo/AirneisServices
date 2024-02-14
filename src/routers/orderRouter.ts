@@ -51,6 +51,16 @@ orderRouter.get(
   })
 );
 
+function calculateShippingPrice(itemsPrice: number): number {
+  if (itemsPrice < 400) {
+    return 39;
+  } else if (itemsPrice >= 400 && itemsPrice <= 1000) {
+    return 59;
+  } else if (itemsPrice > 1000) {
+    return 109;
+  }
+  return 0;
+}
 
 orderRouter.post(
   "/",
@@ -59,7 +69,7 @@ orderRouter.post(
     try {
       const { user, shippingAddress, paymentMethod, orderItems } = req.body;
       const itemsPrice = orderItems.reduce((acc: number, item: any) => acc + item.quantity * item.price, 0);
-      const shippingPrice = itemsPrice > 100 ? 0 : 10; // Example logic for shipping price
+      const shippingPrice = calculateShippingPrice(itemsPrice);
       const taxPrice = itemsPrice * 0.2; // Example logic for tax price
       const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
