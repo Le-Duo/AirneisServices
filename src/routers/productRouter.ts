@@ -32,6 +32,43 @@ productRouter.get(
   })
 );
 
+productRouter.get("/search", asyncHandler(async (req, res) => {
+  const { searchText, priceMin, priceMax, categories, inStock } = req.query;
+
+  let searchQuery = {
+    $search: {
+      index: 'searchIndex', 
+      text: {
+        query: searchText,
+        path: ['description', 'materials', 'name'] 
+      }
+    }
+  };
+
+  let filterQuery: any = {};
+  if (priceMin || priceMax) {
+    filterQuery.price = {};
+    if (priceMin) filterQuery.price.$gte = Number(priceMin);
+    if (priceMax) filterQuery.price.$lte = Number(priceMax);
+  }
+  if (categories) {
+    const categoriesArray = typeof categories === 'string' ? categories.split(",") : categories;
+    filterQuery["category._id"] = { $in: categoriesArray };
+  }
+  if (inStock) {
+    filterQuery.stock = { $gt: 0 };
+  }
+
+  const aggregateQuery = [
+    { $match: searchQuery },
+    { $match: filterQuery }
+  ];
+
+  const products = await ProductModel.aggregate(aggregateQuery).exec();
+
+  res.json(products);
+}));
+
 productRouter.post(
   "/",
   // isAuth,
