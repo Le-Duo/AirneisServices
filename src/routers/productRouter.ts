@@ -33,40 +33,39 @@ productRouter.get(
 );
 
 productRouter.get("/search", asyncHandler(async (req, res) => {
-  const { searchText, priceMin, priceMax, categories, inStock } = req.query;
+  const searchText = req.query.searchText; // Assuming you're passing the search text as a query parameter
 
-  let searchQuery = {
-    $search: {
-      index: 'searchIndex', 
-      text: {
-        query: searchText,
-        path: ['description', 'materials', 'name'] 
+  // Define the aggregation pipeline
+  const pipeline = [
+    {
+      $search: {
+        index: 'searchIndex', // The name of your Atlas Search index
+        text: {
+          query: searchText,
+          path: ['description', 'materials', 'name'], // Fields to search over
+          fuzzy: {} // Optional fuzzy matching
+        }
+      }
+    },
+    {
+      $limit: 10 // Limit the results to 10 documents
+    },
+    {
+      $project: { // Define which fields to include or exclude in the final result
+        _id: 1,
+        name: 1,
+        description: 1,
+        price: 1,
+        URLimage: 1
       }
     }
-  };
-
-  let filterQuery: any = {};
-  if (priceMin || priceMax) {
-    filterQuery.price = {};
-    if (priceMin) filterQuery.price.$gte = Number(priceMin);
-    if (priceMax) filterQuery.price.$lte = Number(priceMax);
-  }
-  if (categories) {
-    const categoriesArray = typeof categories === 'string' ? categories.split(",") : categories;
-    filterQuery["category._id"] = { $in: categoriesArray };
-  }
-  if (inStock) {
-    filterQuery.stock = { $gt: 0 };
-  }
-
-  const aggregateQuery = [
-    { $match: searchQuery },
-    { $match: filterQuery }
   ];
 
-  const products = await ProductModel.aggregate(aggregateQuery).exec();
+  // Execute the aggregation pipeline
+  const results = await ProductModel.aggregate(pipeline).exec();
 
-  res.json(products);
+  // Send the results back to the client
+  res.json(results);
 }));
 
 productRouter.post(
