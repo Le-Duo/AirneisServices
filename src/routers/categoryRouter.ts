@@ -14,6 +14,19 @@ categoryRouter.get(
   })
 );
 
+categoryRouter.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const category = await CategoryModel.findById(id);
+    if (category) {
+      res.json(category);
+    } else {
+      res.status(404).json({ error: "Category not found" });
+    }
+  })
+);
+
 categoryRouter.post(
   "/",
   // isAuth,
