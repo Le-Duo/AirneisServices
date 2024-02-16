@@ -4,46 +4,45 @@
  * La route 'GET /' renvoie tous les produits.
  * La route 'GET /slug/:slug' renvoie les détails d'un produit spécifique.
  */
-import express from 'express'
-import asyncHandler from 'express-async-handler'
-import { ProductModel } from '../models/product'
-import { CategoryModel } from '../models/category'
-import { isAuth } from '../utils'
-import { Types } from 'mongoose'
 
-export const productRouter = express.Router()
-productRouter.get(
-  '/',
-  asyncHandler(async (req, res) => {
-    const products = await ProductModel.find()
-    res.json(products)
-  })
-)
+import express, { Request, Response, NextFunction } from "express";
+import asyncHandler from "express-async-handler";
+import { ProductModel } from "../models/product";
+import { CategoryModel } from "../models/category";
+import { isAuth, isAdmin } from "../utils";
+import { Types } from "mongoose";
+
+const productRouter = express.Router();
 
 productRouter.get(
-  '/slug/:slug',
-  asyncHandler(async (req, res) => {
-    const product = await ProductModel.findOne({ slug: req.params.slug })
-    if (product) {
-      res.json(product)
-    } else {
-      res.status(404).json({ message: 'Product not found' })
-    }
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const products = await ProductModel.find();
+    res.json(products);
   })
-)
+);
+
+productRouter.get(
+  "/slug/:slug",
+  asyncHandler(async (req: Request, res: Response) => {
+    const product = await ProductModel.findOne({ slug: req.params.slug });
+    product
+      ? res.json(product)
+      : res.status(404).json({ message: "Product not found" });
+  })
+);
 
 productRouter.post(
-  '/search',
-  asyncHandler(async (req, res) => {
-    const { searchText } = req.body // Expecting searchText in the request body
-
+  "/search",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { searchText } = req.body;
     const pipeline = [
       {
         $search: {
-          index: 'searchIndex',
+          index: "searchIndex",
           text: {
             query: searchText,
-            path: ['description', 'materials', 'name'],
+            path: ["description", "materials", "name"],
             fuzzy: {},
           },
         },
@@ -58,17 +57,17 @@ productRouter.post(
           URLimage: 1,
         },
       },
-    ]
-
-    const results = await ProductModel.aggregate(pipeline).exec()
-    res.json(results)
+    ];
+    const results = await ProductModel.aggregate(pipeline).exec();
+    res.json(results);
   })
-)
+);
 
 productRouter.post(
-  '/',
-  // isAuth,
-  asyncHandler(async (req, res) => {
+  "/",
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
     try {
       const {
         name,
@@ -79,87 +78,75 @@ productRouter.post(
         materials,
         price,
         priority,
-      } = req.body
-
-      // Récupère le produit dans la db
-      const category = await CategoryModel.findById(categoryId)
-
-      if (category) {
-        console.log('Category found:', category)
-      } else {
-        // si la catégorie n'existe pas, il ne faut pas aller plus loin
-        console.error('Category not found')
-        res.status(500).json('Category does not exists')
+      } = req.body;
+      const category = await CategoryModel.findById(categoryId);
+      if (!category) {
+        res.status(500).json("Category does not exist");
+        return;
       }
 
       const newProduct = new ProductModel({
         name,
         slug,
         URLimage,
-        category: category, // cast la variable category en type "Category"
+        category,
         description,
         materials,
         price,
         priority,
-      })
-
-      // Enregistrez le produit dans la base de données
-      const savedProduct = await newProduct.save()
-
-      // Répondez avec le produit créé
-      res.status(201).json(savedProduct)
+      });
+      const savedProduct = await newProduct.save();
+      res.status(201).json(savedProduct);
     } catch (error) {
-      // Gérez les erreurs
-      console.error(error)
-      res.status(500).json({ error: 'Error on product creation' })
+      console.error(error);
+      res.status(500).json({ error: "Error on product creation" });
     }
   })
-)
+);
 
 productRouter.delete(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    const id = req.params.id // récupère l'id dans les paramètres de l'url
-
-    const filtreSuppression = { _id: new Types.ObjectId(id) } // filtre sur l'id pour la suppression
-
+  "/:id",
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const deletionFilter = { _id: new Types.ObjectId(id) };
     try {
-      const resultat = await ProductModel.deleteOne(filtreSuppression)
-
-      if (resultat.deletedCount && resultat.deletedCount > 0) {
-        res.json({ message: 'product deleted successfully.' })
-      } else {
-        res.status(500).json({ error: 'Product not found.' })
-      }
-    } catch (erreur) {
-      console.error('Error :', erreur)
-      res.status(500).json({ error: 'Delete error.' })
+      const result = await ProductModel.deleteOne(deletionFilter);
+      result.deletedCount > 0
+        ? res.json({ message: "Product deleted successfully." })
+        : res.status(500).json({ error: "Product not found." });
+    } catch (error) {
+      console.error("Error :", error);
+      res.status(500).json({ error: "Delete error." });
     }
   })
-)
+);
 
 productRouter.put(
-  '/:productId',
-  asyncHandler(async (req, res) => {
-    const productId = req.params.productId
-    const newData = req.body
+  "/:productId",
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const productId = req.params.productId;
+    const newData = req.body;
     try {
       const result = await ProductModel.updateOne(
         { _id: productId },
         { $set: newData }
-      )
-
-      if (result.matchedCount == 0) {
-        res.status(500).json({ error: 'No product found' })
+      );
+      if (result.matchedCount === 0) {
+        res.status(500).json({ error: "No product found" });
+      } else if (result.modifiedCount > 0) {
+        res.status(200).json({ message: "Update succeeded" });
+      } else {
+        res.status(500).json({ error: "Update error" });
       }
-      if (result.modifiedCount > 0) {
-        res.status(200).json({ message: 'update succeeded' })
-      }
-
-      res.status(500).json({ error: 'Update error' })
-    } catch (erreur) {
-      console.error('error :', erreur)
-      res.status(500).json({ error: 'Update  error' })
+    } catch (error) {
+      console.error("error :", error);
+      next(error);
     }
   })
-)
+);
+
+export { productRouter };

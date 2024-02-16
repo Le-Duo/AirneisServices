@@ -2,7 +2,7 @@ import express from "express";
 import asyncHandler from "express-async-handler";
 import { StockModel } from "../models/stock";
 import { ProductModel } from "../models/product";
-import { isAuth } from "../utils";
+import { isAuth, isAdmin } from "../utils";
 import { Types } from "mongoose";
 
 export const stockRouter = express.Router();
@@ -20,7 +20,8 @@ stockRouter.get(
     const productId = req.params.productId;
 
     // Récupérez le stock du produit en utilisant la propriété product
-    const stock = await StockModel.findOne({ "product._id": productId });
+    console.log("Querying for productId:", productId);
+    const stock = await StockModel.findOne({ "product._id": productId.toString() });
 
     if (!stock) {
       res.status(500).json({ error: "Stock not found for the product" });
@@ -32,7 +33,8 @@ stockRouter.get(
 
 stockRouter.post(
   "/",
-  // isAuth,
+  isAuth,
+  isAdmin,
   asyncHandler(async (req, res) => {
     try {
       console.log("POST stockRouter / called.");
@@ -72,6 +74,8 @@ stockRouter.post(
 stockRouter.put(
   // On fait un update du stock par produit id
   "/products/:productId",
+  isAuth,
+  isAdmin,
   asyncHandler(async (req, res) => {
     const productId = req.params.productId;
     const newData = req.body;
