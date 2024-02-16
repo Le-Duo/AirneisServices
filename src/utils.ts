@@ -15,6 +15,9 @@ import dotenv from 'dotenv' // Import dotenv for environment variables
 dotenv.config() // Load environment variables
 
 export const generateToken = (user: User) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set');
+  }
   return jwt.sign(
     {
       _id: user._id,
@@ -22,7 +25,7 @@ export const generateToken = (user: User) => {
       email: user.email,
       isAdmin: user.isAdmin,
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    process.env.JWT_SECRET,
     {
       expiresIn: '30d',
     }
@@ -42,9 +45,12 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).send({ message: 'Token not found' });
     }
     try {
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not set');
+      }
       const decode = jwt.verify(
         token,
-        process.env.JWT_SECRET || 'somethingsecret'
+        process.env.JWT_SECRET
       );
       req.user = decode as User;
       next();
@@ -58,6 +64,9 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const generatePasswordResetToken = (user: User) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set');
+  }
   const jti = new Date().getTime().toString() // Generate jti as a string
   const token = jwt.sign(
     {
@@ -65,7 +74,7 @@ export const generatePasswordResetToken = (user: User) => {
       email: user.email,
       jti: jti, // Use the generated jti
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    process.env.JWT_SECRET,
     {
       expiresIn: '1h',
     }
