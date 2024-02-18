@@ -7,9 +7,8 @@
 
 import cors from 'cors'
 import dotenv from 'dotenv'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import mongoose from 'mongoose'
-import path from 'path'
 import helmet from 'helmet'
 import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
@@ -61,11 +60,6 @@ app.use('/api/contact', contactRouter)
 app.use('/api/categories', categoryRouter)
 app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)
-
-app.use(express.static(path.join(__dirname, '../../AirneisWebApp/dist')))
-app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../../AirneisWebApp/dist/index.html'))
-})
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 

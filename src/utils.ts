@@ -16,7 +16,7 @@ dotenv.config() // Load environment variables
 
 export const generateToken = (user: User) => {
   if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not set');
+    throw new Error('JWT_SECRET is not set')
   }
   return jwt.sign(
     {
@@ -33,47 +33,45 @@ export const generateToken = (user: User) => {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers;
+  const { authorization } = req.headers
   if (authorization) {
-    console.log(`Authorization Header: ${authorization}`); // Log the full authorization header for debugging
     if (!authorization.startsWith('Bearer ')) {
-      return res.status(401).send({ message: 'Token must be prefixed with "Bearer "' });
+      return res
+        .status(401)
+        .send({ message: 'Token must be prefixed with "Bearer "' })
     }
-    const token = authorization.slice(7, authorization.length); // Bearer XXXXX
+    const token = authorization.slice(7, authorization.length) // Bearer XXXXX
     if (!token) {
-      console.log('Token not found after Bearer prefix');
-      return res.status(401).send({ message: 'Token not found' });
+      console.log('Token not found after Bearer prefix')
+      return res.status(401).send({ message: 'Token not found' })
     }
     try {
       if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not set');
+        throw new Error('JWT_SECRET is not set')
       }
-      const decode = jwt.verify(
-        token,
-        process.env.JWT_SECRET
-      );
-      req.user = decode as User;
-      next();
+      const decode = jwt.verify(token, process.env.JWT_SECRET)
+      req.user = decode as User
+      next()
     } catch (error) {
-      console.error(error);
-      res.status(401).send({ message: 'Invalid Token' });
+      console.error(error)
+      res.status(401).send({ message: 'Invalid Token' })
     }
   } else {
-    res.status(401).send({ message: 'No Token' });
+    res.status(401).send({ message: 'No Token' })
   }
-};
+}
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (req.user && req.user.isAdmin) {
-    next();
+    next()
   } else {
-    res.status(401).send({ message: 'Invalid Admin Token' });
+    res.status(401).send({ message: 'Invalid Admin Token' })
   }
-};
+}
 
 export const generatePasswordResetToken = (user: User) => {
   if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not set');
+    throw new Error('JWT_SECRET is not set')
   }
   const jti = new Date().getTime().toString() // Generate jti as a string
   const token = jwt.sign(

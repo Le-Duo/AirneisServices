@@ -5,48 +5,94 @@
  * La route 'GET /slug/:slug' renvoie les détails d'un produit spécifique.
  */
 
-import express, { Request, Response, NextFunction } from "express";
-import asyncHandler from "express-async-handler";
-import { ProductModel } from "../models/product";
-import { CategoryModel } from "../models/category";
-import { isAuth, isAdmin } from "../utils";
-import { Types } from "mongoose";
+import express, { Request, Response, NextFunction } from 'express'
+import asyncHandler from 'express-async-handler'
+import { ProductModel } from '../models/product'
+import { CategoryModel } from '../models/category'
+import { isAuth, isAdmin } from '../utils'
+import { Types } from 'mongoose'
 
-const productRouter = express.Router();
+const productRouter = express.Router()
 
 productRouter.get(
-  "/",
+  '/',
   asyncHandler(async (req: Request, res: Response) => {
-    const products = await ProductModel.find();
-    res.json(products);
+    const products = await ProductModel.find()
+    res.json(products)
   })
-);
+)
 
 productRouter.get(
-  "/slug/:slug",
+  '/slug/:slug',
   asyncHandler(async (req: Request, res: Response) => {
-    const product = await ProductModel.findOne({ slug: req.params.slug });
+    const product = await ProductModel.findOne({ slug: req.params.slug })
     product
       ? res.json(product)
-      : res.status(404).json({ message: "Product not found" });
+      : res.status(404).json({ message: 'Product not found' })
   })
-);
+)
 
 productRouter.post(
-  "/search",
+  '/search',
   asyncHandler(async (req: Request, res: Response) => {
-    const { searchText } = req.body;
+    const {
+      searchText,
+      minPrice,
+      maxPrice,
+      categories,
+      inStock,
+      materials,
+      sortBy,
+      sortOrder,
+    } = req.body
+    let matchStage = {
+      $match: {
+        ...(minPrice && { price: { $gte: minPrice } }),
+        ...(maxPrice && { price: { $lte: maxPrice } }),
+        ...(categories && { 'category.name': { $in: categories } }),
+        ...(inStock && { 'stock.quantity': { $gt: 0 } }),
+        ...(materials && { materials: { $in: materials } }),
+      },
+    }
+    let sortStage = sortBy
+      ? {
+          $sort: {
+            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
+            ...(sortBy === 'dateAdded' && {
+              createdAt: sortOrder === 'asc' ? 1 : -1,
+            }),
+            ...(sortBy === 'inStock' && {
+              'stock.quantity': sortOrder === 'asc' ? 1 : -1,
+            }),
+          },
+        }
+      : {}
     const pipeline = [
       {
         $search: {
-          index: "searchIndex",
-          text: {
-            query: searchText,
-            path: ["description", "materials", "name"],
-            fuzzy: {},
+          index: 'searchIndex',
+          compound: {
+            should: [
+              {
+                text: {
+                  query: searchText,
+                  path: ['name', 'description'],
+                  score: { boost: { value: 2 } },
+                },
+              },
+              {
+                text: {
+                  query: searchText,
+                  path: 'materials',
+                  score: { boost: { value: 1 } },
+                },
+              },
+            ],
           },
         },
       },
+      matchStage,
+      ...(Object.keys(sortStage).length ? [sortStage] : []),
       { $limit: 10 },
       {
         $project: {
@@ -55,16 +101,17 @@ productRouter.post(
           description: 1,
           price: 1,
           URLimage: 1,
+          stock: 1,
         },
       },
-    ];
-    const results = await ProductModel.aggregate(pipeline).exec();
-    res.json(results);
+    ]
+    const results = await ProductModel.aggregate(pipeline as any[]).exec()
+    res.json(results)
   })
-);
+)
 
 productRouter.post(
-  "/",
+  '/',
   isAuth,
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
@@ -78,11 +125,11 @@ productRouter.post(
         materials,
         price,
         priority,
-      } = req.body;
-      const category = await CategoryModel.findById(categoryId);
+      } = req.body
+      const category = await CategoryModel.findById(categoryId)
       if (!category) {
-        res.status(500).json("Category does not exist");
-        return;
+        res.status(500).json('Category does not exist')
+        return
       }
 
       const newProduct = new ProductModel({
@@ -94,59 +141,59 @@ productRouter.post(
         materials,
         price,
         priority,
-      });
-      const savedProduct = await newProduct.save();
-      res.status(201).json(savedProduct);
+      })
+      const savedProduct = await newProduct.save()
+      res.status(201).json(savedProduct)
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error on product creation" });
+      console.error(error)
+      res.status(500).json({ error: 'Error on product creation' })
     }
   })
-);
+)
 
 productRouter.delete(
-  "/:id",
+  '/:id',
   isAuth,
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id;
-    const deletionFilter = { _id: new Types.ObjectId(id) };
+    const id = req.params.id
+    const deletionFilter = { _id: new Types.ObjectId(id) }
     try {
-      const result = await ProductModel.deleteOne(deletionFilter);
+      const result = await ProductModel.deleteOne(deletionFilter)
       result.deletedCount > 0
-        ? res.json({ message: "Product deleted successfully." })
-        : res.status(500).json({ error: "Product not found." });
+        ? res.json({ message: 'Product deleted successfully.' })
+        : res.status(500).json({ error: 'Product not found.' })
     } catch (error) {
-      console.error("Error :", error);
-      res.status(500).json({ error: "Delete error." });
+      console.error('Error :', error)
+      res.status(500).json({ error: 'Delete error.' })
     }
   })
-);
+)
 
 productRouter.put(
-  "/:productId",
+  '/:productId',
   isAuth,
   isAdmin,
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const productId = req.params.productId;
-    const newData = req.body;
+    const productId = req.params.productId
+    const newData = req.body
     try {
       const result = await ProductModel.updateOne(
         { _id: productId },
         { $set: newData }
-      );
+      )
       if (result.matchedCount === 0) {
-        res.status(500).json({ error: "No product found" });
+        res.status(500).json({ error: 'No product found' })
       } else if (result.modifiedCount > 0) {
-        res.status(200).json({ message: "Update succeeded" });
+        res.status(200).json({ message: 'Update succeeded' })
       } else {
-        res.status(500).json({ error: "Update error" });
+        res.status(500).json({ error: 'Update error' })
       }
     } catch (error) {
-      console.error("error :", error);
-      next(error);
+      console.error('error :', error)
+      next(error)
     }
   })
-);
+)
 
-export { productRouter };
+export { productRouter }
