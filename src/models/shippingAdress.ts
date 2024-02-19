@@ -1,8 +1,12 @@
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import { User } from './user'
 
 @modelOptions({ schemaOptions: { collection: 'shippingAdresses', timestamps: true } })
 export class ShippingAdress {
     public _id?: string
+
+    @prop({ ref: () => User, required: true })
+    public user!: Ref<User>;
 
     @prop({ required: true })
     public firstName!: string

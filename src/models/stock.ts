@@ -4,7 +4,7 @@ import {
   getModelForClass,
   DocumentType,
 } from '@typegoose/typegoose'
-import { Product, ProductModel } from './product'
+import { Product } from './product'
 
 @modelOptions({ schemaOptions: { collection: 'stock', timestamps: true } })
 export class Stock {
