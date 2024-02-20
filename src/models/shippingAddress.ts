@@ -1,8 +1,8 @@
 import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
 import { User } from './user'
 
-@modelOptions({ schemaOptions: { collection: 'shippingAdresses', timestamps: true } })
-export class ShippingAdress {
+@modelOptions({ schemaOptions: { collection: 'shippingAddresses', timestamps: true } })
+export class ShippingAddress {
     public _id?: string
 
     @prop({ ref: () => User, required: true })
@@ -32,4 +32,4 @@ export class ShippingAdress {
     public phone!: string
     }
 
-export const ShippingAdressModel = getModelForClass(ShippingAdress)
+export const ShippingAddressModel = getModelForClass(ShippingAddress)

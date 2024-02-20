@@ -18,7 +18,7 @@ import { stockRouter } from './routers/stockRouter'
 import { categoryRouter } from './routers/categoryRouter'
 import { contactRouter } from './routers/contactRouter'
 import { carouselRouter } from './routers/carouselRouter'
-import { shippingAdressRouter } from './routers/shippingAdressRouter'
+import { shippingAddressRouter } from './routers/shippingAddressRouter'
 
 dotenv.config()
 
@@ -61,7 +61,7 @@ app.use('/api/contact', contactRouter)
 app.use('/api/categories', categoryRouter)
 app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)
-app.use('/api/shippingadresses', shippingAdressRouter)
+app.use('/api/shippingaddresses', shippingAddressRouter)
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 
