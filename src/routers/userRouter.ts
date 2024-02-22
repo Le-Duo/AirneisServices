@@ -55,7 +55,7 @@ userRouter.get(
 
 userRouter.put(
   "/:id",
-  isAdmin,
+  //isAdmin,
   asyncHandler(
     async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
       try {
