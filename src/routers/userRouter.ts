@@ -17,7 +17,7 @@ import {
 import rateLimit from "express-rate-limit";
 import { ParamsDictionary } from "express-serve-static-core";
 import dotenv from "dotenv";
-import {isAdmin} from "../utils";
+import {isAdmin, isAuth} from "../utils";
 
 dotenv.config();
 
@@ -55,7 +55,8 @@ userRouter.get(
 
 userRouter.put(
   "/:id",
-  //isAdmin,
+  isAdmin,
+  isAuth,
   asyncHandler(
     async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
       try {
