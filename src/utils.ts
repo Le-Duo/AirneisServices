@@ -33,41 +33,36 @@ export const generateToken = (user: User) => {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers
-  if (authorization) {
-    if (!authorization.startsWith('Bearer ')) {
-      return res
-        .status(401)
-        .send({ message: 'Token must be prefixed with "Bearer "' })
-    }
-    const token = authorization.slice(7, authorization.length) // Bearer XXXXX
-    if (!token) {
-      console.log('Token not found after Bearer prefix')
-      return res.status(401).send({ message: 'Token not found' })
-    }
-    try {
-      if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not set')
+  const { authorization } = req.headers;
+  if (authorization && authorization.startsWith('Bearer ')) {
+    const token = authorization.slice(7, authorization.length); // Extract token from Bearer
+    if (token) {
+      try {
+        if (!process.env.JWT_SECRET) {
+          throw new Error('JWT_SECRET is not set');
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded as User; // Attach user to request
+        next();
+      } catch (error) {
+        console.error(error);
+        res.status(401).send({ message: 'Invalid Token' });
       }
-      const decode = jwt.verify(token, process.env.JWT_SECRET)
-      req.user = decode as User
-      next()
-    } catch (error) {
-      console.error(error)
-      res.status(401).send({ message: 'Invalid Token' })
+    } else {
+      res.status(401).send({ message: 'Token not found' });
     }
   } else {
-    res.status(401).send({ message: 'No Token' })
+    res.status(401).send({ message: 'No Token or Bearer prefix missing' });
   }
-}
+};
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (req.user && req.user.isAdmin) {
-    next()
+    next();
   } else {
-    res.status(401).send({ message: 'Invalid Admin Token' })
+    res.status(401).send({ message: 'Not authorized as admin' });
   }
-}
+};
 
 export const generatePasswordResetToken = (user: User) => {
   if (!process.env.JWT_SECRET) {
