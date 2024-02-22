@@ -57,7 +57,6 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
-  console.log('isAdmin check, user:', req.user); // Log the user object attached to the request
   if (req.user && req.user.isAdmin) {
     next();
   } else {
