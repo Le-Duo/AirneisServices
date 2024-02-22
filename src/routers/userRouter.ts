@@ -17,6 +17,7 @@ import {
 import rateLimit from "express-rate-limit";
 import { ParamsDictionary } from "express-serve-static-core";
 import dotenv from "dotenv";
+import {isAdmin} from "../utils";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ interface UserRequestBody {
   name?: string;
   email?: string;
   password?: string;
+  isAdmin?: boolean;
 }
 
 const sendErrorResponse = (
@@ -52,6 +54,7 @@ userRouter.get(
 );
 
 userRouter.put(
+  isAdmin,
   "/:id",
   asyncHandler(
     async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
@@ -65,6 +68,9 @@ userRouter.put(
         if (req.body.password) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(req.body.password, salt);
+        }
+        if (req.body.isAdmin !== undefined) {
+          user.isAdmin = req.body.isAdmin;
         }
         const updatedUser = await user.save();
         res.json({

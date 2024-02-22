@@ -77,24 +77,36 @@ productRouter.post(
                 text: {
                   query: searchText,
                   path: ['name', 'description'],
-                  fuzzy: {
-                    maxEdits: 2,
-                    prefixLength: 0,
-                    maxExpansions: 100
-                  },
-                  score: { boost: { value: 2 } },
+                  score: { boost: { value: 4 } }, // Boost pour correspondance exacte
                 },
               },
               {
                 text: {
                   query: searchText,
-                  path: 'materials',
+                  path: ['name', 'description'],
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 0
+                  },
+                  score: { boost: { value: 3 } }, // Boost pour un caractère de différent
+                },
+              },
+              {
+                autocomplete: {
+                  query: searchText,
+                  path: 'name',
+                  score: { boost: { value: 2 } }, // Boost pour débute par
+                },
+              },
+              {
+                text: {
+                  query: searchText,
+                  path: ['name', 'description'],
                   fuzzy: {
                     maxEdits: 2,
-                    prefixLength: 0,
-                    maxExpansions: 100
+                    prefixLength: 3 // Nécessite au moins 3 caractères avant de commencer la recherche floue
                   },
-                  score: { boost: { value: 1 } },
+                  score: { boost: { value: 1 } }, // Moindre boost pour "contient"
                 },
               },
             ],
