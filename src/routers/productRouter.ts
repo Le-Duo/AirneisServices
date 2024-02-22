@@ -86,16 +86,9 @@ productRouter.post(
                   path: ['name', 'description'],
                   fuzzy: {
                     maxEdits: 1,
-                    prefixLength: 0
+                    prefixLength: 0,
                   },
                   score: { boost: { value: 3 } }, // Boost pour un caractère de différent
-                },
-              },
-              {
-                autocomplete: {
-                  query: searchText,
-                  path: 'name',
-                  score: { boost: { value: 2 } }, // Boost pour débute par
                 },
               },
               {
@@ -104,7 +97,7 @@ productRouter.post(
                   path: ['name', 'description'],
                   fuzzy: {
                     maxEdits: 2,
-                    prefixLength: 3 // Nécessite au moins 3 caractères avant de commencer la recherche floue
+                    prefixLength: 3, // Nécessite au moins 3 caractères avant de commencer la recherche floue
                   },
                   score: { boost: { value: 1 } }, // Moindre boost pour "contient"
                 },
