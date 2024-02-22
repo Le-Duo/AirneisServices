@@ -77,6 +77,11 @@ productRouter.post(
                 text: {
                   query: searchText,
                   path: ['name', 'description'],
+                  fuzzy: {
+                    maxEdits: 2,
+                    prefixLength: 0,
+                    maxExpansions: 100
+                  },
                   score: { boost: { value: 2 } },
                 },
               },
@@ -84,6 +89,11 @@ productRouter.post(
                 text: {
                   query: searchText,
                   path: 'materials',
+                  fuzzy: {
+                    maxEdits: 2,
+                    prefixLength: 0,
+                    maxExpansions: 100
+                  },
                   score: { boost: { value: 1 } },
                 },
               },
