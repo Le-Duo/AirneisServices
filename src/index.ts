@@ -62,6 +62,9 @@ app.use('/api/categories', categoryRouter)
 app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)
 app.use('/api/shippingaddresses', shippingAddressRouter)
+app.use('/api/status', (req, res) => {
+  res.send('API is running')
+})
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 
