@@ -32,7 +32,7 @@ productRouter.get(
   })
 )
 
-productRouter.post(
+productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
     const {
@@ -44,7 +44,7 @@ productRouter.post(
       materials,
       sortBy,
       sortOrder,
-    } = req.body;
+    } = req.query;
 
     let searchStage = searchText ? {
       $search: {
@@ -89,9 +89,9 @@ productRouter.post(
       $match: {
         ...(minPrice && { price: { $gte: Number(minPrice) } }),
         ...(maxPrice && { price: { $lte: Number(maxPrice) } }),
-        ...(categories && { 'category.name': { $in: categories } }),
+        ...(categories && { 'category.name': { $in: typeof categories === 'string' ? categories.split(',') : categories } }),
         ...(inStock && { 'stock.quantity': { $gt: 0 } }),
-        ...(materials && { materials: { $in: materials } }),
+        ...(materials && { materials: { $in: typeof materials === 'string' ? materials.split(',') : materials } }),
       },
     };
 
