@@ -35,7 +35,6 @@ productRouter.get(
 productRouter.post(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
-    console.log(req.body);
     const {
       searchText,
       minPrice,
@@ -45,7 +44,47 @@ productRouter.post(
       materials,
       sortBy,
       sortOrder,
-    } = req.body
+    } = req.body;
+
+    let searchStage = searchText ? {
+      $search: {
+        index: 'searchIndex',
+        compound: {
+          should: [
+            {
+              text: {
+                query: searchText,
+                path: ['name', 'description'],
+                score: { boost: { value: 4 } },
+              },
+            },
+            {
+              text: {
+                query: searchText,
+                path: ['name', 'description'],
+                fuzzy: {
+                  maxEdits: 1,
+                  prefixLength: 0,
+                },
+                score: { boost: { value: 3 } },
+              },
+            },
+            {
+              text: {
+                query: searchText,
+                path: ['name', 'description'],
+                fuzzy: {
+                  maxEdits: 2,
+                  prefixLength: 3,
+                },
+                score: { boost: { value: 1 } },
+              },
+            },
+          ],
+        },
+      },
+    } : {};
+
     let matchStage = {
       $match: {
         ...(minPrice && { price: { $gte: Number(minPrice) } }),
@@ -54,59 +93,18 @@ productRouter.post(
         ...(inStock && { 'stock.quantity': { $gt: 0 } }),
         ...(materials && { materials: { $in: materials } }),
       },
-    }
-    let sortStage = sortBy
-      ? {
-          $sort: {
-            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
-            ...(sortBy === 'dateAdded' && {
-              createdAt: sortOrder === 'asc' ? 1 : -1,
-            }),
-            ...(sortBy === 'inStock' && {
-              'stock.quantity': sortOrder === 'asc' ? 1 : -1,
-            }),
-          },
-        }
-      : {}
-    const pipeline = [
-      {
-        $search: {
-          index: 'searchIndex',
-          compound: {
-            should: [
-              {
-                text: {
-                  query: searchText,
-                  path: ['name', 'description'],
-                  score: { boost: { value: 4 } }, // Boost pour correspondance exacte
-                },
-              },
-              {
-                text: {
-                  query: searchText,
-                  path: ['name', 'description'],
-                  fuzzy: {
-                    maxEdits: 1,
-                    prefixLength: 0,
-                  },
-                  score: { boost: { value: 3 } }, // Boost pour un caractère de différent
-                },
-              },
-              {
-                text: {
-                  query: searchText,
-                  path: ['name', 'description'],
-                  fuzzy: {
-                    maxEdits: 2,
-                    prefixLength: 3, // Nécessite au moins 3 caractères avant de commencer la recherche floue
-                  },
-                  score: { boost: { value: 1 } }, // Moindre boost pour "contient"
-                },
-              },
-            ],
-          },
-        },
+    };
+
+    let sortStage = sortBy ? {
+      $sort: {
+        ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
+        ...(sortBy === 'dateAdded' && { createdAt: sortOrder === 'asc' ? 1 : -1 }),
+        ...(sortBy === 'inStock' && { 'stock.quantity': sortOrder === 'asc' ? 1 : -1 }),
       },
+    } : {};
+
+    const pipeline = [
+      ...(Object.keys(searchStage).length ? [searchStage] : []),
       matchStage,
       ...(Object.keys(sortStage).length ? [sortStage] : []),
       { $limit: 10 },
@@ -120,11 +118,12 @@ productRouter.post(
           stock: 1,
         },
       },
-    ]
-    const results = await ProductModel.aggregate(pipeline as any[]).exec()
-    res.json(results)
+    ];
+
+    const results = await ProductModel.aggregate(pipeline as any[]).exec();
+    res.json(results);
   })
-)
+);
 
 productRouter.post(
   '/',
