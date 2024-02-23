@@ -35,6 +35,7 @@ productRouter.get(
 productRouter.post(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
+    console.log(req.body);
     const {
       searchText,
       minPrice,
