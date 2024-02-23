@@ -47,8 +47,8 @@ productRouter.post(
     } = req.body
     let matchStage = {
       $match: {
-        ...(minPrice && { price: { $gte: minPrice } }),
-        ...(maxPrice && { price: { $lte: maxPrice } }),
+        ...(minPrice && { price: { $gte: Number(minPrice) } }),
+        ...(maxPrice && { price: { $lte: Number(maxPrice) } }),
         ...(categories && { 'category.name': { $in: categories } }),
         ...(inStock && { 'stock.quantity': { $gt: 0 } }),
         ...(materials && { materials: { $in: materials } }),
