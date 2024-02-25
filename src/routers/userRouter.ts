@@ -5,7 +5,7 @@
  * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
  */
 import express, { Request, Response } from 'express'
-import { User, UserModel } from '../models/user'
+import { User, UserModel, UserAddress } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
@@ -16,6 +16,7 @@ import {
 } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { PaymentCard, PaymentCardModel } from '../models/payment'
 
 export const userRouter = express.Router()
 
@@ -30,6 +31,16 @@ interface UserRequestBody {
   name?: string
   email?: string
   password?: string
+  address?: UserAddress
+  paymentCards?: PaymentCard[]
+}
+
+interface PaymentCardRequestBody{
+  bankName: string
+  number: string
+  fullName: string
+  monthExpiration: number
+  yearExpiration: number
 }
 
 userRouter.get(
@@ -37,6 +48,14 @@ userRouter.get(
   asyncHandler(async (req: Request, res: Response) => {
     const users = await UserModel.find({})
     res.json(users)
+  })
+)
+
+userRouter.get(
+  '/:id',
+  asyncHandler(async (req: Request, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    res.json(user)
   })
 )
 
@@ -51,13 +70,52 @@ userRouter.put(
         if (req.body.password) {
           user.password = bcrypt.hashSync(req.body.password, 8)
         }
+        
+        // Address
+        user.address =  req.body.address || user.address
+
+        // Paiements cards
+        user.paymentCards = req.body.paymentCards || user.paymentCards
+       
         const updatedUser = await user.save()
         res.send({
           _id: updatedUser._id,
           name: updatedUser.name,
           email: updatedUser.email,
           isAdmin: updatedUser.isAdmin,
+          address : updatedUser.address,
+          paymentCards:  user.paymentCards,
           token: generateToken(updatedUser),
+        })
+      } else {
+        res.status(404).send({ message: 'Utilisateur non trouvé' })
+      }
+    }
+  )
+)
+
+userRouter.post(
+  '/:id/payment/card/add',
+  asyncHandler(
+    async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+      const user = await UserModel.findById(req.params.id)
+      if (user) {
+
+
+        const newCard = new PaymentCardModel({
+          bankName: req.body.address.bankName,
+          number: req.body.address.number,
+          fullName: req.body.address.fullName,
+          monthExpiration: req.body.address.monthExpiration,
+          yearExpiration: req.body.address.yearExpiration
+        });
+
+        user.paymentCards.push(newCard)
+       
+        await user.save()
+
+        res.send({
+          newCard: newCard
         })
       } else {
         res.status(404).send({ message: 'Utilisateur non trouvé' })
@@ -102,10 +160,12 @@ userRouter.post(
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
+
     const user = await UserModel.create({
       name: req.body.name,
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password),
+      address: new UserAddress()
     } as User)
     res.json({
       _id: user._id,
