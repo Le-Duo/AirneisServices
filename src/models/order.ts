@@ -76,6 +76,9 @@ class PaymentResult {
 export class Order {
   public _id!: string;
 
+  @prop({ required: true })
+  public orderNumber!: string;
+
   @prop({ type: () => [Item], required: true })
   public orderItems!: Item[];
   @prop({ type: () => ShippingAddress, required: true })

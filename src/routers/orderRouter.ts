@@ -78,7 +78,10 @@ orderRouter.post(
       const taxPrice = itemsPrice * 0.2 // Example logic for tax price
       const totalPrice = itemsPrice + shippingPrice + taxPrice
 
+      const orderNumber = generateOrderNumber();
+
       const newOrder = new OrderModel({
+        orderNumber,
         user,
         shippingAddress,
         paymentMethod,

@@ -15,7 +15,7 @@ stockRouter.get(
 );
 
 stockRouter.get(
-  "/:productId",
+  "/products/:productId",
   asyncHandler(async (req: Request, res: Response) => {
     const { productId } = req.params;
     const stock = await StockModel.findOne({ "product._id": productId }).exec();
@@ -42,7 +42,7 @@ stockRouter.post(
 );
 
 stockRouter.put(
-  "/:productId",
+  "/products/:productId",
   isAuth,
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {

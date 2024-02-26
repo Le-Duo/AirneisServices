@@ -37,71 +37,107 @@ productRouter.get(
   asyncHandler(async (req: Request, res: Response) => {
     const {
       searchText,
-      minPrice,
-      maxPrice,
+      price,
       categories,
       inStock,
       materials,
       sortBy,
       sortOrder,
-    } = req.query;
+    } = req.query
 
-    let searchStage = searchText ? {
-      $search: {
-        index: 'searchIndex',
-        compound: {
-          should: [
-            {
-              text: {
-                query: searchText,
-                path: ['name', 'description'],
-                score: { boost: { value: 4 } },
-              },
-            },
-            {
-              text: {
-                query: searchText,
-                path: ['name', 'description'],
-                fuzzy: {
-                  maxEdits: 1,
-                  prefixLength: 0,
+    // Assuming price is a string like "10-100"
+    const priceRange = price ? price.toString().split('-') : []
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
+
+    // Logging the converted minPrice and maxPrice to check for NaN
+    console.log('Converted minPrice:', minPrice, 'maxPrice:', maxPrice)
+
+    let searchStage = searchText
+      ? {
+          $search: {
+            index: 'searchIndex',
+            compound: {
+              should: [
+                {
+                  text: {
+                    query: searchText,
+                    path: ['name', 'description'],
+                    score: { boost: { value: 4 } },
+                  },
                 },
-                score: { boost: { value: 3 } },
-              },
-            },
-            {
-              text: {
-                query: searchText,
-                path: ['name', 'description'],
-                fuzzy: {
-                  maxEdits: 2,
-                  prefixLength: 3,
+                {
+                  text: {
+                    query: searchText,
+                    path: ['name', 'description'],
+                    fuzzy: {
+                      maxEdits: 1,
+                      prefixLength: 0,
+                    },
+                    score: { boost: { value: 3 } },
+                  },
                 },
-                score: { boost: { value: 1 } },
-              },
+                {
+                  text: {
+                    query: searchText,
+                    path: ['name', 'description'],
+                    fuzzy: {
+                      maxEdits: 2,
+                      prefixLength: 3,
+                    },
+                    score: { boost: { value: 1 } },
+                  },
+                },
+              ],
             },
-          ],
-        },
-      },
-    } : {};
+          },
+        }
+      : {}
 
     let matchStage = {
       $match: {
-        ...(minPrice && { price: { $gte: Number(minPrice) } }),
-        ...(maxPrice && { price: { $lte: Number(maxPrice) } }),
-        ...(categories && { 'category.name': { $in: typeof categories === 'string' ? categories.split(',') : categories } }),
+        ...((price !== undefined ||
+          minPrice !== undefined ||
+          maxPrice !== undefined) && {
+          price: {
+            ...(minPrice !== undefined && { $gte: minPrice }),
+            ...(maxPrice !== undefined && { $lte: maxPrice }),
+          },
+        }),
+        ...(categories && {
+          'category.name': {
+            $in:
+              typeof categories === 'string'
+                ? categories.split(',')
+                : categories,
+          },
+        }),
         ...(inStock && { 'stock.quantity': { $gt: 0 } }),
-        ...(materials && { materials: { $in: typeof materials === 'string' ? materials.split(',') : materials } }),
+        ...(materials && {
+          materials: {
+            $in:
+              typeof materials === 'string' ? materials.split(',') : materials,
+          },
+        }),
       },
-    };
+    }
 
-    let sortStage = sortBy ? {
-      $sort: {
-        ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
-        ...(sortBy === 'dateAdded' && { createdAt: sortOrder === 'asc' ? 1 : -1 }),
-        ...(sortBy === 'inStock' && { 'stock.quantity': sortOrder === 'asc' ? 1 : -1 }),
-      },
-    } : {};
+    // Logging the matchStage object to inspect its structure
+    console.log('matchStage:', matchStage)
+
+    let sortStage = sortBy
+      ? {
+          $sort: {
+            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
+            ...(sortBy === 'dateAdded' && {
+              createdAt: sortOrder === 'asc' ? 1 : -1,
+            }),
+            ...(sortBy === 'inStock' && {
+              'stock.quantity': sortOrder === 'asc' ? 1 : -1,
+            }),
+          },
+        }
+      : {}
 
     const pipeline = [
       ...(Object.keys(searchStage).length ? [searchStage] : []),
@@ -118,12 +154,12 @@ productRouter.get(
           stock: 1,
         },
       },
-    ];
+    ]
 
-    const results = await ProductModel.aggregate(pipeline as any[]).exec();
-    res.json(results);
+    const results = await ProductModel.aggregate(pipeline as any[]).exec()
+    res.json(results)
   })
-);
+)
 
 productRouter.post(
   '/',
@@ -151,7 +187,7 @@ productRouter.post(
         name,
         slug,
         URLimage,
-        category,
+        category: category, //cast la variable category en type "Category"
         description,
         materials,
         price,
