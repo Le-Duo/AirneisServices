@@ -49,7 +49,8 @@ userRouter.put(
         user.name = req.body.name || user.name
         user.email = req.body.email || user.email
         if (req.body.password) {
-          user.password = bcrypt.hashSync(req.body.password, 8)
+          const salt = bcrypt.genSaltSync(10);
+          user.password = bcrypt.hashSync(req.body.password, salt);
         }
         const updatedUser = await user.save()
         res.send({
@@ -105,7 +106,7 @@ userRouter.post(
     const user = await UserModel.create({
       name: req.body.name,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password),
+      password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
     } as User)
     res.json({
       _id: user._id,
@@ -158,9 +159,12 @@ userRouter.post(
         .send({ message: 'Token and new password must be provided' })
       return
     }
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined');
+    }
     jwt.verify(
       token,
-      process.env.JWT_SECRET || 'your_default_secret',
+      process.env.JWT_SECRET,
       async (err: VerifyErrors | null, decoded: any) => {
         if (err) {
           res.status(401).send({ message: 'Invalid or expired token' })
@@ -176,7 +180,7 @@ userRouter.post(
             res.status(401).send({ message: 'Invalid or expired token' })
             return
           }
-          user.password = bcrypt.hashSync(newPassword)
+          user.password = bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10))
           user.passwordResetTokenJti = undefined
           await user.save()
           res.send({ message: 'Password reset successful' })

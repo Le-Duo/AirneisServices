@@ -14,7 +14,9 @@ import nodemailer from 'nodemailer' // Import nodemailer for sending emails
 import dotenv from 'dotenv' // Import dotenv for environment variables
 dotenv.config() // Load environment variables
 
+const secret = process.env.JWT_SECRET
 export const generateToken = (user: User) => {
+  
   return jwt.sign(
     {
       _id: user._id,
@@ -22,7 +24,7 @@ export const generateToken = (user: User) => {
       email: user.email,
       isAdmin: user.isAdmin,
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    secret as string,
     {
       expiresIn: '30d',
     }
@@ -44,7 +46,7 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
     try {
       const decode = jwt.verify(
         token,
-        process.env.JWT_SECRET || 'somethingsecret'
+        secret as string
       );
       req.user = decode as User;
       next();
@@ -65,7 +67,7 @@ export const generatePasswordResetToken = (user: User) => {
       email: user.email,
       jti: jti, // Use the generated jti
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    secret as string,
     {
       expiresIn: '1h',
     }
