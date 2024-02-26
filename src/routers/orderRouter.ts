@@ -9,8 +9,9 @@ import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { isAuth } from '../utils'
 import { OrderModel } from '../models/order'
-import { Product } from '../models/product'
+import { StockModel } from '../models/stock'
 import { v4 as uuidv4 } from 'uuid'
+import { Item } from '../models/order'; // Import the Item class for typing
 export const orderRouter = express.Router()
 
 orderRouter.get(
@@ -41,7 +42,7 @@ orderRouter.get(
   '/order/:orderNumber',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log('Get order by orderNumer called')
+    console.log('Get order by orderNumb er called')
     const order = await OrderModel.findOne({
       orderNumber: req.params.orderNumber,
     })
@@ -69,14 +70,28 @@ orderRouter.post(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { user, shippingAddress, paymentMethod, orderItems } = req.body
+      const { user, shippingAddress, paymentMethod, orderItems }: { user: string; shippingAddress: any; paymentMethod: string; orderItems: Item[] } = req.body;
+      
+      // Check stock availability for each item
+      for (const item of orderItems) {
+        const stockEntry = await StockModel.findOne({ 'product._id': item.product });
+        if (!stockEntry || stockEntry.quantity < item.quantity) {
+          res.status(400).json({
+            error: 'Insufficient stock',
+            productId: item.product,
+            availableStock: stockEntry ? stockEntry.quantity : 0,
+          });
+          return;
+        }
+      }
+
       const itemsPrice = orderItems.reduce(
-        (acc: number, item: any) => acc + item.quantity * item.price,
+        (acc: number, item: Item) => acc + item.quantity * item.price,
         0
-      )
-      const shippingPrice = calculateShippingPrice(itemsPrice)
-      const taxPrice = itemsPrice * 0.2 // Example logic for tax price
-      const totalPrice = itemsPrice + shippingPrice + taxPrice
+      );
+      const shippingPrice = calculateShippingPrice(itemsPrice);
+      const taxPrice = itemsPrice * 0.2; // Example logic for tax price
+      const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
       const orderNumber = generateOrderNumber();
 
@@ -91,16 +106,23 @@ orderRouter.post(
         taxPrice,
         totalPrice,
         status: 'initiated', // Assuming default status
-      })
+      });
 
-      const savedOrder = await newOrder.save()
-      res.status(201).json(savedOrder)
+      // Deduct stock
+      for (const item of orderItems) {
+        await StockModel.findOneAndUpdate({ 'product._id': item.product }, {
+          $inc: { quantity: -item.quantity }
+        });
+      }
+
+      const savedOrder = await newOrder.save();
+      res.status(201).json(savedOrder);
     } catch (error) {
-      console.error(error)
-      res.status(500).json({ error: 'Error on order creation' })
+      console.error(error);
+      res.status(500).json({ error: 'Error on order creation' });
     }
   })
-)
+);
 
 /*
   Pour le update, une fois l'ordre créer en initiated, on s'attend
@@ -161,3 +183,4 @@ function generateOrderNumber(): string {
 
   return orderNumber
 }
+

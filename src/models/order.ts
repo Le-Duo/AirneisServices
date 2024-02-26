@@ -16,7 +16,7 @@ enum OrderStatus {
   Cancelled = 'cancelled',
 }
 
-class ShippingAddress {
+export class ShippingAddress {
   @prop()
   public _id?: string;
 
@@ -48,7 +48,7 @@ class ShippingAddress {
   public phone!: string;
 }
 
-class Item {
+export class Item {
   @prop({ required: true })
   public name!: string;
   @prop({ required: true })
@@ -61,7 +61,7 @@ class Item {
   public product?: Ref<Product>;
 }
 
-class PaymentResult {
+export class PaymentResult {
   @prop()
   public paymentId!: string;
   @prop()

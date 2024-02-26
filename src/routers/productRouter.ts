@@ -22,8 +22,23 @@ productRouter.get(
   })
 )
 
+// Middleware to validate slug format
+const validateSlugFormat = (req: Request, res: Response, next: NextFunction) => {
+  const { slug } = req.params;
+  // Regex for validating slug format: lowercase letters, numbers, and hyphens
+  const regex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+  if (!regex.test(slug)) {
+    res.status(400).json({ message: 'Invalid slug format' });
+    return;
+  }
+
+  next();
+};
+
 productRouter.get(
   '/slug/:slug',
+  validateSlugFormat,
   asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductModel.findOne({ slug: req.params.slug })
     product
@@ -45,13 +60,9 @@ productRouter.get(
       sortOrder,
     } = req.query
 
-    // Assuming price is a string like "10-100"
-    const priceRange = price ? price.toString().split('-') : []
-    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
-    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
-
-    // Logging the converted minPrice and maxPrice to check for NaN
-    console.log('Converted minPrice:', minPrice, 'maxPrice:', maxPrice)
+    const priceRange = price ? price.toString().split('-').map(Number) : [];
+    const minPrice = priceRange.length > 0 ? priceRange[0] : undefined;
+    const maxPrice = priceRange.length > 1 ? priceRange[1] : undefined;
 
     let searchStage = searchText
       ? {
