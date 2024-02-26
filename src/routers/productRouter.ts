@@ -59,9 +59,14 @@ productRouter.get(
       sortBy,
       sortOrder,
     } = req.query
-    const priceRange = typeof price === 'string' ? price.split('-').map(Number) : [];
-    const minPrice = priceRange.length > 0 ? priceRange[0] : undefined;
-    const maxPrice = priceRange.length > 1 ? priceRange[1] : undefined;
+
+    // Assuming price is a string like "10-100"
+    const priceRange = price ? price.toString().split('-') : []
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
+
+    // Logging the converted minPrice and maxPrice to check for NaN
+    console.log('Converted minPrice:', minPrice, 'maxPrice:', maxPrice)
 
     let searchStage = searchText
       ? {
