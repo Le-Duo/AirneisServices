@@ -39,3 +39,16 @@ carouselRouter.put(
     }
   })
 )
+
+carouselRouter.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const deletedItem = await CarouselItemModel.findByIdAndDelete(req.params.id)
+    if (deletedItem) {
+      res.json(deletedItem)
+    } else {
+      res.status(404).send({ message: 'Carousel Item Not Found' })
+    }
+  })
+)
+
