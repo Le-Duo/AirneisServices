@@ -59,3 +59,15 @@ shippingAddressRouter.put(
       : res.status(404).json({ error: "No shipping address found" });
   })
 );
+
+shippingAddressRouter.delete(
+  "/:id",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const deletedShippingAddress = await ShippingAddressModel.findByIdAndDelete(id).exec();
+    deletedShippingAddress
+      ? res.json({ message: "Shipping address deleted" })
+      : res.status(404).json({ error: "Shipping address not found" });
+  })
+);
+
