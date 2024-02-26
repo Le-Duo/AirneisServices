@@ -59,8 +59,7 @@ productRouter.get(
       sortBy,
       sortOrder,
     } = req.query
-
-    const priceRange = price ? price.toString().split('-').map(Number) : [];
+    const priceRange = typeof price === 'string' ? price.split('-').map(Number) : [];
     const minPrice = priceRange.length > 0 ? priceRange[0] : undefined;
     const maxPrice = priceRange.length > 1 ? priceRange[1] : undefined;
 

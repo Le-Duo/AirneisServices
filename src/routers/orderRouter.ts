@@ -72,25 +72,19 @@ orderRouter.post(
     try {
       const { user, shippingAddress, paymentMethod, orderItems }: { user: string; shippingAddress: any; paymentMethod: string; orderItems: Item[] } = req.body;
       
-      // Check stock availability for each item
-      for (const item of orderItems) {
-        const stockEntry = await StockModel.findOne({ 'product._id': item.product });
-        if (!stockEntry || stockEntry.quantity < item.quantity) {
-          res.status(400).json({
-            error: 'Insufficient stock',
-            productId: item.product,
-            availableStock: stockEntry ? stockEntry.quantity : 0,
-          });
-          return;
-        }
+      if (!Array.isArray(orderItems) || !orderItems.every(item => typeof item === 'object' && 'quantity' in item && 'price' in item)) {
+        res.status(400).json({ error: 'Invalid orderItems format' });
+        return;
       }
 
-      const itemsPrice = orderItems.reduce(
-        (acc: number, item: Item) => acc + item.quantity * item.price,
-        0
-      );
+      const itemsPrice = orderItems.reduce((acc: number, item: Item) => {
+        const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
+        const price = typeof item.price === 'number' ? item.price : 0;
+      
+        return acc + quantity * price;
+      }, 0);
       const shippingPrice = calculateShippingPrice(itemsPrice);
-      const taxPrice = itemsPrice * 0.2; // Example logic for tax price
+      const taxPrice = itemsPrice * 0.2;
       const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
       const orderNumber = generateOrderNumber();
