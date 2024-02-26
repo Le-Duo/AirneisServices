@@ -18,7 +18,7 @@ import { stockRouter } from './routers/stockRouter'
 import { categoryRouter } from './routers/categoryRouter'
 import { contactRouter } from './routers/contactRouter'
 import { carouselRouter } from './routers/carouselRouter'
-import {paymentRouter} from './routers/paymentRouter'
+import { paymentRouter } from './routers/paymentRouter'
 
 dotenv.config()
 
@@ -38,7 +38,7 @@ mongoose.set('strictQuery', true)
 mongoose
   .connect(MONGODB_URI, connectionpOptions)
   .then(() => console.log('connected to MongoDB !'))
-  .catch((error) => console.error(error))
+  .catch(error => console.error(error))
 
 const app = express()
 
