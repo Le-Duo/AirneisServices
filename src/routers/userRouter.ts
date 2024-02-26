@@ -53,6 +53,20 @@ userRouter.get(
   })
 );
 
+userRouter.get(
+  "/:id",
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id);
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  })
+);
+
 userRouter.put(
   "/:id",
   isAuth,
