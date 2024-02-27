@@ -3,13 +3,12 @@ import {
   prop,
   getModelForClass,
   Ref,
-  DocumentType,
 } from '@typegoose/typegoose'
 import { Product } from './product'
 import { User } from './user'
 import { Payment } from './payment'
 
-enum OrderStatus {
+export enum OrderStatus {
   Initiated = 'initiated',
   Pending = 'pending',
   Delivered = 'delivered',
@@ -48,6 +47,8 @@ export class ShippingAddress {
   public phone!: string;
 }
 
+export const ShippingAddressModel = getModelForClass(ShippingAddress);
+
 export class Item {
   @prop({ required: true })
   public name!: string;
@@ -74,14 +75,15 @@ export class PaymentResult {
 
 @modelOptions({ schemaOptions: { collection: 'orders', timestamps: true } })
 export class Order {
+  @prop({ required: true })
   public _id!: string;
 
   @prop({ required: true })
   public orderNumber!: string;
 
-  @prop({ type: () => [Item], required: true })
+  @prop({ required: true, type: () => [Item] })
   public orderItems!: Item[];
-  @prop({ type: () => ShippingAddress, required: true })
+  @prop({ required: true, type: () => ShippingAddress })
   public shippingAddress!: ShippingAddress;
 
   @prop({ ref: () => User, required: true })

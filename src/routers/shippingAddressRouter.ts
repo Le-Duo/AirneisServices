@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import { ShippingAddressModel } from "../models/shippingAddress";
+import { ShippingAddressModel } from "../models/order";
 import { isAuth } from '../utils';
 
 export const shippingAddressRouter = express.Router();

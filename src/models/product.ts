@@ -8,6 +8,7 @@ import { Category } from './category';
 
 @modelOptions({ schemaOptions: { collection: 'products', timestamps: true } })
 export class Product {
+  @prop()
   public _id?: string;
 
   @prop({ required: true })
@@ -19,7 +20,7 @@ export class Product {
   @prop()
   public URLimage?: string;
 
-  @prop({ type: () => Category, required: true })
+  @prop({ required: true, type: () => Category })
   public category!: DocumentType<Category>;
 
   @prop({ required: true })
@@ -31,7 +32,7 @@ export class Product {
   @prop({ required: true, default: 0 })
   public price!: number;
 
-  @prop({ required: true, default: 0 })
+  @prop({ required: true, default: false })
   public priority!: boolean;
 }
 

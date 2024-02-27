@@ -10,8 +10,8 @@ export class CarouselItem {
   @prop({ required: true })
   public alt!: string
 
-  @prop({ required: true })
-  public caption!: string
+  @prop()
+  public caption?: string
 }
 
 export const CarouselItemModel = getModelForClass(CarouselItem)

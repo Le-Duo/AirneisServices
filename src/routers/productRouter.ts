@@ -143,16 +143,15 @@ productRouter.get(
     let sortStage = sortBy
       ? {
           $sort: {
-            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : -1 }),
-            ...(sortBy === 'dateAdded' && {
-              createdAt: sortOrder === 'asc' ? 1 : -1,
-            }),
-            ...(sortBy === 'inStock' && {
-              'stock.quantity': sortOrder === 'asc' ? 1 : -1,
-            }),
+            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
+            ...(sortBy === 'dateAdded' && { createdAt: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
+            ...(sortBy === 'inStock' && { 'stock.quantity': sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
           },
         }
       : {}
+
+    // Debugging: Log the sortStage to verify it's as expected
+    console.log('sortStage:', sortStage);
 
     const pipeline = [
       ...(Object.keys(searchStage).length ? [searchStage] : []),
