@@ -19,8 +19,9 @@ productRouter.get(
   asyncHandler(async (req: Request, res: Response) => {
     const products = await ProductModel.find()
       .sort({
+        'stock.quantity': 1, // Tri décroissant par quantité en stock (les produits épuisés apparaissent en dernier)
         priority: -1, // Tri décroissant par priorité (les produits avec une priorité élevée apparaissent en premier)
-        'stock.quantity': 1 // Tri décroissant par quantité en stock (les produits épuisés apparaissent en dernier)
+        
       })
     res.json(products)
   })
