@@ -75,12 +75,11 @@ productRouter.get(
     console.log("Converted inStock to boolean:", inStockBool);
 
     // Retrieve product IDs that are in stock if inStockBool is true
-    let productIdsInStock: string[] = [];
     let productIdsInStockObjectIds: Types.ObjectId[] = [];
     if (inStockBool) {
       console.log("Retrieving in-stock product IDs");
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
-      productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
+      const productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
       productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id));
       console.log("Retrieved product IDs in stock:", productIdsInStock);
 
@@ -102,7 +101,6 @@ productRouter.get(
       console.log("No specific price range provided.");
     }
 
-    // Define search stage for MongoDB aggregation pipeline
     let searchStage = searchText
       ? {
           $search: {
@@ -206,8 +204,8 @@ productRouter.get(
 
     // Compile the aggregation pipeline stages
     const pipeline = [
+      searchStage,
       lookupStage,
-      ...(Object.keys(searchStage).length ? [searchStage] : []),
       matchStage,
       ...(Object.keys(sortStage).length ? [sortStage] : []),
       { $limit: 10 }, // Limit results to 10 documents
