@@ -81,6 +81,8 @@ productRouter.get(
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
       productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
       console.log("Retrieved product IDs in stock:", productIdsInStock);
+    } else {
+      console.log("In-stock filter not applied or all products are considered.");
     }
 
     // Process price range from query, assuming format "min-max"
@@ -88,6 +90,12 @@ productRouter.get(
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
     console.log("Processed price range. Min:", minPrice, "Max:", maxPrice);
+
+    if (priceRange.length > 0) {
+      console.log("Price range provided:", priceRange);
+    } else {
+      console.log("No specific price range provided.");
+    }
 
     // Define search stage for MongoDB aggregation pipeline
     let searchStage = searchText
@@ -131,6 +139,12 @@ productRouter.get(
         }
       : {};
     console.log("Defined search stage:", searchStage);
+
+    if (Object.keys(searchStage).length > 0) {
+      console.log("Search text provided, applying search stage.");
+    } else {
+      console.log("No search text provided, skipping search stage.");
+    }
 
     // Define lookup stage to join with stock information
     let lookupStage = {
@@ -178,6 +192,12 @@ productRouter.get(
         }
       : {};
     console.log("Defined sort stage:", sortStage);
+
+    if (Object.keys(sortStage).length > 0) {
+      console.log("Sort criteria provided, applying sort stage.");
+    } else {
+      console.log("No sort criteria provided, skipping sort stage.");
+    }
 
     // Compile the aggregation pipeline stages
     const pipeline = [
