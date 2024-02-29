@@ -166,15 +166,10 @@ productRouter.get(
       },
       {
         $match: {
-          $expr: inStockBool
-            ? { $gt: ['$stock', 0] } // Use the new 'stock' field for in stock condition
-            : {
-                $or: [
-                  { $eq: ['$stock', 0] }, // Out of stock: stock = 0
-                  { $eq: [{ $size: '$stockInfo' }, 0] }, // No stock records exist
-                ],
-              },
           ...matchStage.$match, // Keep existing match conditions
+          $expr: inStockBool
+            ? { $gt: ['$stock', 0] } // In stock: stock > 0
+            : { $lte: ['$stock', 0] }, // Out of stock: stock <= 0
         },
       },
       ...(Object.keys(sortStage).length ? [sortStage] : []),
@@ -264,3 +259,4 @@ productRouter.put(
 )
 
 export { productRouter }
+
