@@ -9,6 +9,7 @@ import express, { Request, Response, NextFunction } from 'express'
 import asyncHandler from 'express-async-handler'
 import { ProductModel } from '../models/product'
 import { CategoryModel } from '../models/category'
+import { StockModel } from '../models/stock'
 import { isAuth, isAdmin } from '../utils'
 import { Types } from 'mongoose'
 
@@ -66,6 +67,12 @@ productRouter.get(
     } = req.query
 
     const inStockBool = inStock !== undefined && inStock !== 'false';
+
+    let productIdsInStock: string[] = [];
+    if (inStockBool) {
+      const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
+      productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
+    }
 
     // Assuming price is a string like "10-100"
     const priceRange = price ? price.toString().split('-') : []
@@ -143,7 +150,7 @@ productRouter.get(
                 : categories,
           },
         }),
-        ...(inStockBool && { 'stockInfo.quantity': { $gt: 0 } }),
+        ...(inStockBool && { _id: { $in: productIdsInStock } }),
         ...(materials && {
           materials: {
             $in:
