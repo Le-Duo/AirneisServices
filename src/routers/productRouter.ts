@@ -116,6 +116,15 @@ productRouter.get(
         }
       : {}
 
+    let lookupStage = {
+      $lookup: {
+        from: "stock",
+        localField: "_id",
+        foreignField: "productId",
+        as: "stockInfo"
+      }
+    };
+
     let matchStage = {
       $match: {
         ...((price !== undefined ||
@@ -134,7 +143,7 @@ productRouter.get(
                 : categories,
           },
         }),
-        ...(inStockBool && { 'stock.quantity': { $gt: 0 } }),
+        ...(inStockBool && { 'stockInfo.quantity': { $gt: 0 } }),
         ...(materials && {
           materials: {
             $in:
@@ -152,7 +161,7 @@ productRouter.get(
           $sort: {
             ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
             ...(sortBy === 'dateAdded' && { createdAt: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
-            ...(sortBy === 'inStock' && { 'stock.quantity': sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
+            ...(sortBy === 'inStock' && { 'stockInfo.quantity': sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
           },
         }
       : {}
@@ -161,6 +170,7 @@ productRouter.get(
     console.log('sortStage:', sortStage);
 
     const pipeline = [
+      lookupStage,
       ...(Object.keys(searchStage).length ? [searchStage] : []),
       matchStage,
       ...(Object.keys(sortStage).length ? [sortStage] : []),
@@ -172,7 +182,7 @@ productRouter.get(
           description: 1,
           price: 1,
           URLimage: 1,
-          stock: 1,
+          stockInfo: 1,
         },
       },
     ]
