@@ -218,7 +218,7 @@ productRouter.get(
           description: 1,
           price: 1,
           URLimage: 1,
-          stockInfo: 1,
+          quantity: { $arrayElemAt: ["$stockInfo.quantity", 0] },
         },
       },
     ];
