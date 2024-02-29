@@ -65,6 +65,8 @@ productRouter.get(
       sortOrder,
     } = req.query
 
+    const inStockBool = inStock !== undefined && inStock !== 'false';
+
     // Assuming price is a string like "10-100"
     const priceRange = price ? price.toString().split('-') : []
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
@@ -132,7 +134,7 @@ productRouter.get(
                 : categories,
           },
         }),
-        ...(inStock && { 'stock.quantity': { $gt: 0 } }),
+        ...(inStockBool && { 'stock.quantity': { $gt: 0 } }),
         ...(materials && {
           materials: {
             $in:
