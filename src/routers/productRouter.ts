@@ -17,42 +17,53 @@ const productRouter = express.Router()
 productRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
-    const products = await ProductModel.find().sort({
-      priority: -1, // Tri décroissant par priorité (les produits avec une priorité élevée apparaissent en premier)
-    })
+    const products = await ProductModel.find()
+      .sort({
+        'stock.quantity': 1, // Tri décroissant par quantité en stock (les produits épuisés apparaissent en dernier)
+        priority: -1, // Tri décroissant par priorité (les produits avec une priorité élevée apparaissent en premier)
+        
+      })
     res.json(products)
   })
 )
 
 // Middleware to validate slug format
 const validateSlugFormat = (req: Request, res: Response, next: NextFunction) => {
-  const { slug } = req.params
+  const { slug } = req.params;
   // Regex for validating slug format: lowercase letters, numbers, and hyphens
-  const regex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const regex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
   if (!regex.test(slug)) {
-    res.status(400).json({ message: 'Invalid slug format' })
-    return
+    res.status(400).json({ message: 'Invalid slug format' });
+    return;
   }
 
-  next()
-}
+  next();
+};
 
 productRouter.get(
   '/slug/:slug',
   validateSlugFormat,
   asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductModel.findOne({ slug: req.params.slug })
-    product ? res.json(product) : res.status(404).json({ message: 'Product not found' })
+    product
+      ? res.json(product)
+      : res.status(404).json({ message: 'Product not found' })
   })
 )
 
 productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
-    const { searchText, price, categories, materials, sortBy, sortOrder, inStock } = req.query
-
-    console.log('Search Query Params:', req.query)
+    const {
+      searchText,
+      price,
+      categories,
+      inStock,
+      materials,
+      sortBy,
+      sortOrder,
+    } = req.query
 
     const inStockBool = inStock !== undefined && inStock !== 'false';
 
@@ -61,6 +72,7 @@ productRouter.get(
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
 
+    // Logging the converted minPrice and maxPrice to check for NaN
     console.log('Converted minPrice:', minPrice, 'maxPrice:', maxPrice)
 
     let searchStage = searchText
@@ -106,7 +118,9 @@ productRouter.get(
 
     let matchStage = {
       $match: {
-        ...((price !== undefined || minPrice !== undefined || maxPrice !== undefined) && {
+        ...((price !== undefined ||
+          minPrice !== undefined ||
+          maxPrice !== undefined) && {
           price: {
             ...(minPrice !== undefined && { $gte: minPrice }),
             ...(maxPrice !== undefined && { $lte: maxPrice }),
@@ -114,50 +128,43 @@ productRouter.get(
         }),
         ...(categories && {
           'category.name': {
-            $in: typeof categories === 'string' ? categories.split(',') : categories,
+            $in:
+              typeof categories === 'string'
+                ? categories.split(',')
+                : categories,
           },
         }),
         ...(inStockBool && { 'stock.quantity': { $gt: 0 } }),
         ...(materials && {
           materials: {
-            $in: typeof materials === 'string' ? materials.split(',') : materials,
+            $in:
+              typeof materials === 'string' ? materials.split(',') : materials,
           },
         }),
       },
     }
 
+    // Logging the matchStage object to inspect its structure
+    console.log('matchStage:', matchStage)
+
     let sortStage = sortBy
       ? {
           $sort: {
-            ...(sortBy === 'price' && {
-              price: sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 0,
-            }),
-            ...(sortBy === 'dateAdded' && {
-              createdAt: sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 0,
-            }),
+            ...(sortBy === 'price' && { price: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
+            ...(sortBy === 'dateAdded' && { createdAt: sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
+            ...(sortBy === 'inStock' && { 'stock.quantity': sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
           },
         }
       : {}
 
-    console.log('sortStage:', sortStage)
-
-    const inStockBool = inStock === 'true'
+    // Debugging: Log the sortStage to verify it's as expected
+    console.log('sortStage:', sortStage);
 
     const pipeline = [
       ...(Object.keys(searchStage).length ? [searchStage] : []),
-      {
-        $lookup: {
-          from: 'stock', // Assuming 'stock' is the name of the collection for stock items
-          localField: '_id',
-          foreignField: 'product._id',
-          as: 'stockInfo',
-        },
-      },
-      {
-        $addFields: {
-          stock: { $sum: "$stockInfo.quantity" } // Sum up the quantities from stockInfo array
-        }
-      },
+      matchStage,
+      ...(Object.keys(sortStage).length ? [sortStage] : []),
+      { $limit: 10 },
       {
         $project: {
           _id: 1,
@@ -165,23 +172,12 @@ productRouter.get(
           description: 1,
           price: 1,
           URLimage: 1,
-          stock: 1, // Include the new 'stock' field
+          stock: 1,
         },
       },
-      {
-        $match: {
-          ...matchStage.$match, // Keep existing match conditions
-          stock: inStockBool ? { $gt: 0 } : { $lte: 0 }, // Correctly filter based on inStockBool
-        },
-      },
-      ...(Object.keys(sortStage).length ? [sortStage] : []),
-      { $limit: 10 },
     ]
 
-    console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2))
-
     const results = await ProductModel.aggregate(pipeline as any[]).exec()
-    console.log('Number of Products Found:', results.length)
     res.json(results)
   })
 )
@@ -192,7 +188,16 @@ productRouter.post(
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { name, slug, URLimage, categoryId, description, materials, price, priority } = req.body
+      const {
+        name,
+        slug,
+        URLimage,
+        categoryId,
+        description,
+        materials,
+        price,
+        priority,
+      } = req.body
       const category = await CategoryModel.findById(categoryId)
       if (!category) {
         res.status(500).json('Category does not exist')
@@ -203,7 +208,7 @@ productRouter.post(
         name,
         slug,
         URLimage,
-        category: category,
+        category: category, //cast la variable category en type "Category"
         description,
         materials,
         price,
@@ -245,7 +250,10 @@ productRouter.put(
     const productId = req.params.productId
     const newData = req.body
     try {
-      const result = await ProductModel.updateOne({ _id: productId }, { $set: newData })
+      const result = await ProductModel.updateOne(
+        { _id: productId },
+        { $set: newData }
+      )
       if (result.matchedCount === 0) {
         res.status(500).json({ error: 'No product found' })
       } else if (result.modifiedCount > 0) {
@@ -261,4 +269,3 @@ productRouter.put(
 )
 
 export { productRouter }
-
