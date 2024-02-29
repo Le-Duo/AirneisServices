@@ -150,16 +150,24 @@ productRouter.get(
         },
       },
       {
+        $project: {
+          'stockInfo.quantity': 1, // Only include the quantity field from stock
+          _id: 1,
+          name: 1,
+          description: 1,
+          price: 1,
+          URLimage: 1,
+        },
+      },
+      {
         $match: {
-          $expr: inStockBool
-            ? { $gt: [{ $sum: '$stockInfo.quantity' }, 0] } // In stock: Sum of quantities > 0
-            : {
-                $or: [
-                  { $eq: [{ $sum: '$stockInfo.quantity' }, 0] }, // Out of stock: Sum of quantities = 0
-                  { $eq: [{ $size: '$stockInfo' }, 0] }, // No stock records exist
-                ],
-              },
-          ...matchStage.$match, // Keep existing match conditions
+          $expr: {
+            // Uses a conditional operator to determine the comparison operator based on inStockBool
+            // If inStockBool is true, use $gt to find documents where the sum of stockInfo.quantity is greater than 0 (indicating in stock)
+            // If inStockBool is false, use $gte to include documents where the sum may be 0 or greater, covering both in stock and out of stock scenarios
+            [inStockBool ? '$gt' : '$gte']: [{ $sum: '$stockInfo.quantity' }, 0]
+          },
+          ...matchStage.$match, // Merge with other match conditions specified in matchStage
         },
       },
       ...(Object.keys(sortStage).length ? [sortStage] : []),
