@@ -150,22 +150,27 @@ productRouter.get(
         },
       },
       {
+        $addFields: {
+          stock: { $sum: "$stockInfo.quantity" } // Sum up the quantities from stockInfo array
+        }
+      },
+      {
         $project: {
-          'stockInfo.quantity': 1, // Only include the quantity field from stockInfo
           _id: 1,
           name: 1,
           description: 1,
           price: 1,
           URLimage: 1,
+          stock: 1, // Include the new 'stock' field
         },
       },
       {
         $match: {
           $expr: inStockBool
-            ? { $gt: [{ $sum: '$stockInfo.quantity' }, 0] } // In stock: Sum of quantities > 0
+            ? { $gt: ['$stock', 0] } // Use the new 'stock' field for in stock condition
             : {
                 $or: [
-                  { $eq: [{ $sum: '$stockInfo.quantity' }, 0] }, // Out of stock: Sum of quantities = 0
+                  { $eq: ['$stock', 0] }, // Out of stock: stock = 0
                   { $eq: [{ $size: '$stockInfo' }, 0] }, // No stock records exist
                 ],
               },
@@ -174,16 +179,6 @@ productRouter.get(
       },
       ...(Object.keys(sortStage).length ? [sortStage] : []),
       { $limit: 10 },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          description: 1,
-          price: 1,
-          URLimage: 1,
-          stockInfo: 1, // Optionally include stock info in the response
-        },
-      },
     ]
 
     console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2))
