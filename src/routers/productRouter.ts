@@ -127,7 +127,7 @@ productRouter.get(
       $lookup: {
         from: "stock",
         localField: "_id",
-        foreignField: "productId",
+        foreignField: "product._id",
         as: "stockInfo"
       }
     };
