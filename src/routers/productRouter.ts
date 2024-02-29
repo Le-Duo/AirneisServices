@@ -81,6 +81,10 @@ productRouter.get(
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
       productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
       console.log("Retrieved product IDs in stock:", productIdsInStock);
+
+      // Convert productIdsInStock to ObjectId instances
+      const productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id));
+      console.log("Converted product IDs to ObjectId instances:", productIdsInStockObjectIds);
     } else {
       console.log("In-stock filter not applied or all products are considered.");
     }
@@ -171,7 +175,7 @@ productRouter.get(
             $in: typeof categories === 'string' ? categories.split(',') : categories,
           },
         }),
-        ...(inStockBool && { _id: { $in: productIdsInStock } }),
+        ...(inStockBool && { _id: { $in: productIdsInStockObjectIds } }), // Use ObjectId instances for matching
         ...(materials && {
           materials: {
             $in: typeof materials === 'string' ? materials.split(',') : materials,
