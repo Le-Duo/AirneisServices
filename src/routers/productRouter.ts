@@ -56,6 +56,9 @@ productRouter.get(
 productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
+    console.log("Starting search operation");
+
+    // Extract query parameters for search criteria
     const {
       searchText,
       price,
@@ -64,24 +67,29 @@ productRouter.get(
       materials,
       sortBy,
       sortOrder,
-    } = req.query
+    } = req.query;
+    console.log("Extracted query parameters", req.query);
 
+    // Convert inStock query parameter to boolean
     const inStockBool = inStock !== undefined && inStock !== 'false';
+    console.log("Converted inStock to boolean:", inStockBool);
 
+    // Retrieve product IDs that are in stock if inStockBool is true
     let productIdsInStock: string[] = [];
     if (inStockBool) {
+      console.log("Retrieving in-stock product IDs");
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
       productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
+      console.log("Retrieved product IDs in stock:", productIdsInStock);
     }
 
-    // Assuming price is a string like "10-100"
-    const priceRange = price ? price.toString().split('-') : []
-    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
-    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
+    // Process price range from query, assuming format "min-max"
+    const priceRange = price ? price.toString().split('-') : [];
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+    console.log("Processed price range. Min:", minPrice, "Max:", maxPrice);
 
-    // Logging the converted minPrice and maxPrice to check for NaN
-    console.log('Converted minPrice:', minPrice, 'maxPrice:', maxPrice)
-
+    // Define search stage for MongoDB aggregation pipeline
     let searchStage = searchText
       ? {
           $search: {
@@ -121,8 +129,10 @@ productRouter.get(
             },
           },
         }
-      : {}
+      : {};
+    console.log("Defined search stage:", searchStage);
 
+    // Define lookup stage to join with stock information
     let lookupStage = {
       $lookup: {
         from: "stock",
@@ -131,12 +141,12 @@ productRouter.get(
         as: "stockInfo"
       }
     };
+    console.log("Defined lookup stage");
 
+    // Define match stage to filter results based on query parameters
     let matchStage = {
       $match: {
-        ...((price !== undefined ||
-          minPrice !== undefined ||
-          maxPrice !== undefined) && {
+        ...((price !== undefined || minPrice !== undefined || maxPrice !== undefined) && {
           price: {
             ...(minPrice !== undefined && { $gte: minPrice }),
             ...(maxPrice !== undefined && { $lte: maxPrice }),
@@ -144,25 +154,20 @@ productRouter.get(
         }),
         ...(categories && {
           'category.name': {
-            $in:
-              typeof categories === 'string'
-                ? categories.split(',')
-                : categories,
+            $in: typeof categories === 'string' ? categories.split(',') : categories,
           },
         }),
         ...(inStockBool && { _id: { $in: productIdsInStock } }),
         ...(materials && {
           materials: {
-            $in:
-              typeof materials === 'string' ? materials.split(',') : materials,
+            $in: typeof materials === 'string' ? materials.split(',') : materials,
           },
         }),
       },
-    }
+    };
+    console.log("Defined match stage:", matchStage);
 
-    // Logging the matchStage object to inspect its structure
-    console.log('matchStage:', matchStage)
-
+    // Define sort stage based on sortBy and sortOrder query parameters
     let sortStage = sortBy
       ? {
           $sort: {
@@ -171,19 +176,18 @@ productRouter.get(
             ...(sortBy === 'inStock' && { 'stockInfo.quantity': sortOrder === 'asc' ? 1 : (sortOrder === 'desc' ? -1 : 0) }),
           },
         }
-      : {}
+      : {};
+    console.log("Defined sort stage:", sortStage);
 
-    // Debugging: Log the sortStage to verify it's as expected
-    console.log('sortStage:', sortStage);
-
+    // Compile the aggregation pipeline stages
     const pipeline = [
       lookupStage,
       ...(Object.keys(searchStage).length ? [searchStage] : []),
       matchStage,
       ...(Object.keys(sortStage).length ? [sortStage] : []),
-      { $limit: 10 },
+      { $limit: 10 }, // Limit results to 10 documents
       {
-        $project: {
+        $project: { // Define the fields to include in the results
           _id: 1,
           name: 1,
           description: 1,
@@ -192,10 +196,16 @@ productRouter.get(
           stockInfo: 1,
         },
       },
-    ]
+    ];
+    console.log("Compiled aggregation pipeline:", pipeline);
 
-    const results = await ProductModel.aggregate(pipeline as any[]).exec()
-    res.json(results)
+    // Execute the aggregation pipeline
+    console.log("Executing aggregation pipeline");
+    const results = await ProductModel.aggregate(pipeline as any[]).exec();
+    console.log("Aggregation pipeline executed. Results:", results);
+
+    // Return the search results
+    res.json(results);
   })
 )
 
