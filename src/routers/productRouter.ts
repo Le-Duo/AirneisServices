@@ -76,14 +76,15 @@ productRouter.get(
 
     // Retrieve product IDs that are in stock if inStockBool is true
     let productIdsInStock: string[] = [];
+    let productIdsInStockObjectIds: Types.ObjectId[] = [];
     if (inStockBool) {
       console.log("Retrieving in-stock product IDs");
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
       productIdsInStock = stockInfo.map((stock) => stock.product._id.toString());
+      productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id));
       console.log("Retrieved product IDs in stock:", productIdsInStock);
 
       // Convert productIdsInStock to ObjectId instances
-      const productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id));
       console.log("Converted product IDs to ObjectId instances:", productIdsInStockObjectIds);
     } else {
       console.log("In-stock filter not applied or all products are considered.");
