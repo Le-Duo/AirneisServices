@@ -167,9 +167,7 @@ productRouter.get(
       {
         $match: {
           ...matchStage.$match, // Keep existing match conditions
-          $expr: inStockBool
-            ? { $gt: ['$stock', 0] } // In stock: stock > 0
-            : { $lte: ['$stock', 0] }, // Out of stock: stock <= 0
+          stock: inStockBool ? { $gt: 0 } : { $lte: 0 }, // Correctly filter based on inStockBool
         },
       },
       ...(Object.keys(sortStage).length ? [sortStage] : []),
