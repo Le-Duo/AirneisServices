@@ -54,6 +54,9 @@ productRouter.get(
 
     console.log('Search Query Params:', req.query)
 
+    const inStockBool = inStock !== undefined && inStock !== 'false';
+
+    // Assuming price is a string like "10-100"
     const priceRange = price ? price.toString().split('-') : []
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
@@ -114,6 +117,7 @@ productRouter.get(
             $in: typeof categories === 'string' ? categories.split(',') : categories,
           },
         }),
+        ...(inStockBool && { 'stock.quantity': { $gt: 0 } }),
         ...(materials && {
           materials: {
             $in: typeof materials === 'string' ? materials.split(',') : materials,
