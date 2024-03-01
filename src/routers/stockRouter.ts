@@ -18,8 +18,15 @@ stockRouter.get(
   '/products/:productId',
   asyncHandler(async (req: Request, res: Response) => {
     const { productId } = req.params
+    console.log(`Fetching stock for product ID: ${productId}`) // Added log as per instruction
     const stock = await StockModel.findOne({ 'product._id': productId }).exec()
-    stock ? res.json(stock) : res.status(404).json({ error: 'Stock not found for the product' })
+    if (stock) {
+      console.log(`Stock found for product ID: ${productId}`) // Log on successful find
+      res.json(stock)
+    } else {
+      console.log(`Stock not found for product ID: ${productId}`) // Log on failure to find stock
+      res.status(404).json({ error: 'Stock not found for the product' })
+    }
   })
 )
 
