@@ -10,6 +10,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import mongoose from 'mongoose'
 import helmet from 'helmet'
+import csurf from 'csurf'
 import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
 import { userRouter } from './routers/userRouter'
@@ -44,6 +45,8 @@ mongoose
 const app = express()
 
 app.use(helmet())
+const csrfProtection = csurf({ cookie: true });
+app.use(csrfProtection);
 app.use(
   cors({
     credentials: true,

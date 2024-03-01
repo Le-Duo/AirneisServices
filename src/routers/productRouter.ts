@@ -77,10 +77,9 @@ productRouter.get(
       console.log('In-stock filter not applied or all products are considered.')
     }
 
-    // Process price range from query, assuming format "min-max"
-    const priceRange = price ? price.toString().split('-') : []
-    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined
-    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined
+    const priceRange = typeof price === 'string' ? price.split('-').map(Number) : []
+    const minPrice = priceRange.length > 0 ? priceRange[0] : undefined
+    const maxPrice = priceRange.length > 1 ? priceRange[1] : undefined
     console.log('Processed price range. Min:', minPrice, 'Max:', maxPrice)
 
     if (priceRange.length > 0) {
