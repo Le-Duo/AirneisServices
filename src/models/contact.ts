@@ -3,9 +3,6 @@ import { modelOptions, prop, getModelForClass } from "@typegoose/typegoose";
 @modelOptions({ schemaOptions: { collection: "contacts" } })
 export class Contact {
 
-  @prop()
-  public _id?: string;
-
   @prop({ required: true })
   public mail!: string;
 
@@ -15,11 +12,6 @@ export class Contact {
   @prop({ required: true })
   public message!: string;
 
-  constructor(mail: string, subject: string, message: string) {
-    this.mail = mail;
-    this.subject = subject;
-    this.message = message;
-  }
 }
 
 export const ContactModel = getModelForClass(Contact);
