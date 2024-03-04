@@ -10,7 +10,6 @@ import dotenv from 'dotenv'
 import express from 'express'
 import mongoose from 'mongoose'
 import helmet from 'helmet'
-import csurf from 'csurf'
 import cookieParser from 'cookie-parser'
 import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
@@ -47,8 +46,6 @@ const app = express()
 
 app.use(helmet())
 app.use(cookieParser());
-const csrfProtection = csurf({ cookie: true });
-app.use(csrfProtection);
 app.use(
   cors({
     credentials: true,
@@ -69,14 +66,6 @@ app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)
 app.use('/api/shippingaddresses', shippingAddressRouter)
 app.use('/api/status', statusRouter)
-
-app.use((err: any, req: any, res: any, next: any) => {
-  if (err.code !== 'EBADCSRFTOKEN') return next(err)
-
-  // handle CSRF token errors here
-  res.status(403)
-  res.send('CSRF token mismatch')
-});
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 
