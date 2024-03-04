@@ -58,6 +58,10 @@ orderRouter.get(
   '/mine',
   isAuth,
   asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
     const orders = await OrderModel.find({ user: req.user._id })
     res.send(orders)
   })
