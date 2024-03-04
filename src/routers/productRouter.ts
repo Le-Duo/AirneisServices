@@ -249,7 +249,7 @@ productRouter.post(
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { name, slug, URLimage, categoryId, description, materials, price, priority } = req.body
+      const { name, slug, URLimage, categoryId, description, materials, price, priority, _id } = req.body
       const category = await CategoryModel.findById(categoryId)
       if (!category) {
         res.status(500).json('Category does not exist')
@@ -257,6 +257,7 @@ productRouter.post(
       }
 
       const newProduct = new ProductModel({
+        _id,
         name,
         slug,
         URLimage,
