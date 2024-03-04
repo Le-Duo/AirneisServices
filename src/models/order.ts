@@ -75,8 +75,7 @@ export class PaymentResult {
 
 @modelOptions({ schemaOptions: { collection: 'orders', timestamps: true } })
 export class Order {
-  @prop({ required: true })
-  public _id!: string;
+  public _id?: string;
 
   @prop({ required: true })
   public orderNumber!: string;
