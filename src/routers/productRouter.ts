@@ -249,13 +249,22 @@ productRouter.post(
         priority,
       })
       const savedProduct = await newProduct.save()
-      res.status(201).json(savedProduct)
+
+      // After successfully saving the product, create a stock entry with default quantity (e.g., 0)
+      const newStock = new StockModel({
+        product: savedProduct, // Reference the newly created product
+        quantity: 0, // Default quantity, adjust as needed
+      });
+      await newStock.save();
+
+      // Respond with the saved product (and optionally the stock information)
+      res.status(201).json({ product: savedProduct, stock: newStock });
     } catch (error) {
-      console.error(error)
-      res.status(500).json({ error: 'Error on product creation' })
+      console.error(error);
+      res.status(500).json({ error: 'Error on product creation' });
     }
   })
-)
+);
 
 productRouter.delete(
   '/:id',
