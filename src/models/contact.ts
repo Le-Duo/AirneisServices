@@ -1,4 +1,5 @@
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
+import { User } from './user' // Import the User class
 
 @modelOptions({ schemaOptions: { collection: 'contacts' } })
 export class Contact {
@@ -13,6 +14,9 @@ export class Contact {
 
   @prop({ required: true })
   public message!: string
+
+  @prop({ ref: () => User })
+  public user?: Ref<User>
 }
 
 export const ContactModel = getModelForClass(Contact)
