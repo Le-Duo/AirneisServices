@@ -25,6 +25,19 @@ orderRouter.get(
 )
 
 orderRouter.get(
+  '/mine',
+  isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+    const orders = await OrderModel.find({ user: req.user._id })
+    res.send(orders)
+  })
+)
+
+orderRouter.get(
   '/:id',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
@@ -51,19 +64,6 @@ orderRouter.get(
     } else {
       res.status(404).json({ message: 'Order Not Found' })
     }
-  })
-)
-
-orderRouter.get(
-  '/mine',
-  isAuth,
-  asyncHandler(async (req: Request, res: Response) => {
-    if (!req.user) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
-    }
-    const orders = await OrderModel.find({ user: req.user._id })
-    res.send(orders)
   })
 )
 
