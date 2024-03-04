@@ -34,12 +34,13 @@ categoryRouter.post(
   isAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const { _id, name, urlImage } = req.body;
+      const { _id, name, slug, urlImage } = req.body;
 
       // Création du model pour la catégorie
       const newCategory = new CategoryModel({
         _id,
         name,
+        slug,
         urlImage,
       });
 
