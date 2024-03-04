@@ -3,8 +3,8 @@ import { User } from './user'
 
 @modelOptions({ schemaOptions: { collection: 'contacts' } })
 export class Contact {
-  // @prop()
-  // public _id?: string
+  
+  public _id?: string
 
   @prop({ required: true })
   public mail!: string
