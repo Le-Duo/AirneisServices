@@ -1,5 +1,5 @@
 import { modelOptions, prop, getModelForClass, Ref } from '@typegoose/typegoose'
-import { User } from './user' // Import the User class
+import { User } from './user'
 
 @modelOptions({ schemaOptions: { collection: 'contacts' } })
 export class Contact {
