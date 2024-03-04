@@ -4,7 +4,6 @@ import { User } from './user'
 @modelOptions({ schemaOptions: { collection: 'contacts' } })
 export class Contact {
 
-  @prop({ required: false })
   public _id?: string
 
   @prop({ required: true })

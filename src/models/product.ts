@@ -8,7 +8,7 @@ import { Category } from './category';
 
 @modelOptions({ schemaOptions: { collection: 'products', timestamps: true } })
 export class Product {
-  @prop()
+
   public _id?: string;
 
   @prop({ required: true })

@@ -4,6 +4,9 @@ import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
   schemaOptions: { collection: 'carouselItems', timestamps: true },
 })
 export class CarouselItem {
+
+  public _id?: string
+  
   @prop({ required: true })
   public src!: string
 

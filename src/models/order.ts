@@ -16,8 +16,8 @@ export enum OrderStatus {
 }
 
 export class ShippingAddress {
-  // @prop()
-  // public _id?: string;
+
+  public _id?: string;
 
   @prop({ required: true })
   public user!: string;
