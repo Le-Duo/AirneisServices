@@ -50,6 +50,24 @@ productRouter.get(
 )
 
 productRouter.get(
+  '/id/:id',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+      const product = await ProductModel.findById(id);
+      if (!product) {
+        res.status(404).json({ message: 'Product not found' });
+      } else {
+        res.json(product);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error fetching product by ID' });
+    }
+  })
+);
+
+productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
     console.log('Starting search operation')
@@ -271,19 +289,29 @@ productRouter.delete(
   isAuth,
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id
-    const deletionFilter = { _id: new Types.ObjectId(id) }
+    const id = req.params.id;
+    const deletionFilter = { _id: new Types.ObjectId(id) };
     try {
-      const result = await ProductModel.deleteOne(deletionFilter)
-      result.deletedCount > 0
-        ? res.json({ message: 'Product deleted successfully.' })
-        : res.status(500).json({ error: 'Product not found.' })
+      // First, delete the product
+      const productDeletionResult = await ProductModel.deleteOne(deletionFilter);
+      if (productDeletionResult.deletedCount > 0) {
+        // If the product was successfully deleted, delete the associated stock
+        const stockDeletionResult = await StockModel.deleteOne({ 'product._id': id });
+        if (stockDeletionResult.deletedCount > 0) {
+          res.json({ message: 'Product and associated stock deleted successfully.' });
+        } else {
+          // If no stock was found (or deleted), you might want to log this or handle it differently
+          res.json({ message: 'Product deleted successfully, but no associated stock was found.' });
+        }
+      } else {
+        res.status(404).json({ error: 'Product not found.' });
+      }
     } catch (error) {
-      console.error('Error :', error)
-      res.status(500).json({ error: 'Delete error.' })
+      console.error('Error :', error);
+      res.status(500).json({ error: 'Delete error.' });
     }
   })
-)
+);
 
 productRouter.put(
   '/:productId',
