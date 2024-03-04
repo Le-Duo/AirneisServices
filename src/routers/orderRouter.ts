@@ -54,6 +54,15 @@ orderRouter.get(
   })
 )
 
+orderRouter.get(
+  '/mine',
+  isAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const orders = await OrderModel.find({ user: req.user._id })
+    res.send(orders)
+  })
+)
+
 function calculateShippingPrice(itemsPrice: number): number {
   if (itemsPrice < 400) {
     return 39
