@@ -83,7 +83,7 @@ orderRouter.post(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { user, shippingAddress, paymentMethod, orderItems }: { user: string; shippingAddress: any; paymentMethod: string; orderItems: Item[] } = req.body;
+      const { user, shippingAddress, paymentMethod, orderItems, isPaid, isDelivered }: { user: string; shippingAddress: any; paymentMethod: string; orderItems: Item[]; isPaid: boolean; isDelivered: boolean } = req.body;
       
       if (!Array.isArray(orderItems) || !orderItems.every(item => typeof item === 'object' && 'quantity' in item && 'price' in item)) {
         res.status(400).json({ error: 'Invalid orderItems format' });
@@ -112,7 +112,9 @@ orderRouter.post(
         shippingPrice,
         taxPrice,
         totalPrice,
-        status: 'initiated', // Assuming default status
+        isPaid,
+        isDelivered,
+        status: 'initiated',
       });
 
       // Deduct stock
@@ -190,4 +192,5 @@ function generateOrderNumber(): string {
 
   return orderNumber
 }
+
 
