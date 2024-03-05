@@ -73,12 +73,17 @@ productRouter.get(
     console.log('Starting search operation')
 
     // Extract query parameters for search criteria
-    const { searchText, price, categories, inStock, materials, sortBy, sortOrder } = req.query
+    const { searchText, categories, inStock, materials, minPrice, maxPrice, sortBy, sortOrder } = req.query
     console.log('Extracted query parameters', req.query)
 
     // Convert inStock query parameter to boolean
     const inStockBool = inStock !== undefined && inStock !== 'false'
     console.log('Converted inStock to boolean:', inStockBool)
+
+    // Convert minPrice and maxPrice to numbers
+    const minPriceNumber = minPrice ? Number(minPrice) : undefined;
+    const maxPriceNumber = maxPrice ? Number(maxPrice) : undefined;
+    console.log('Processed price range. Min:', minPriceNumber, 'Max:', maxPriceNumber)
 
     // Retrieve product IDs that are in stock if inStockBool is true
     let productIdsInStockObjectIds: Types.ObjectId[] = []
@@ -95,13 +100,10 @@ productRouter.get(
       console.log('In-stock filter not applied or all products are considered.')
     }
 
-    const priceRange = typeof price === 'string' ? price.split('-').map(Number) : []
-    const minPrice = priceRange.length > 0 ? priceRange[0] : undefined
-    const maxPrice = priceRange.length > 1 ? priceRange[1] : undefined
-    console.log('Processed price range. Min:', minPrice, 'Max:', maxPrice)
+    console.log('Processed price range. Min:', minPriceNumber, 'Max:', maxPriceNumber)
 
-    if (priceRange.length > 0) {
-      console.log('Price range provided:', priceRange)
+    if (minPriceNumber !== undefined || maxPriceNumber !== undefined) {
+      console.log('Price range provided:', minPriceNumber, 'to', maxPriceNumber)
     } else {
       console.log('No specific price range provided.')
     }
@@ -168,10 +170,10 @@ productRouter.get(
     // Define match stage to filter results based on query parameters
     let matchStage = {
       $match: {
-        ...((price !== undefined || minPrice !== undefined || maxPrice !== undefined) && {
+        ...((minPriceNumber !== undefined || maxPriceNumber !== undefined) && {
           price: {
-            ...(minPrice !== undefined && { $gte: minPrice }),
-            ...(maxPrice !== undefined && { $lte: maxPrice }),
+            ...(minPriceNumber !== undefined && { $gte: minPriceNumber }),
+            ...(maxPriceNumber !== undefined && { $lte: maxPriceNumber }),
           },
         }),
         ...(categories && {
