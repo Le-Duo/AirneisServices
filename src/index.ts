@@ -21,15 +21,34 @@ import { contactRouter } from './routers/contactRouter'
 import { carouselRouter } from './routers/carouselRouter'
 import { shippingAddressRouter } from './routers/shippingAddressRouter'
 import { statusRouter } from './routers/statusRouter'
+import { featuredProductRouter } from './routers/featuredProductRouter'
 
 dotenv.config()
 
 const MONGODB_URI = process.env.MONGODB_URI || ''
+const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI || 'your_local_mongodb_connection_string'
 
-if (MONGODB_URI == '') {
-  console.error('var MONGODB_URI not found')
-  process.exit(1)
+// Function to connect to MongoDB
+const connectToMongoDB = async (uri: string) => {
+  try {
+    await mongoose.connect(uri, connectionpOptions)
+    console.log(`Connected to MongoDB at ${uri}`)
+  } catch (error) {
+    console.error(`Failed to connect to MongoDB at ${uri}`, error)
+    throw error
+  }
 }
+
+// Attempt to connect to MONGODB_URI or fallback to LOCAL_MONGODB_URI
+connectToMongoDB(MONGODB_URI)
+  .catch(() => {
+    console.log('Attempting to connect to LOCAL_MONGODB_URI...')
+    connectToMongoDB(LOCAL_MONGODB_URI)
+      .catch(() => {
+        console.error('Failed to connect to both MONGODB_URI and LOCAL_MONGODB_URI')
+        process.exit(1)
+      })
+  })
 
 // Force connection on "Airneis" database; by default, mongoose create "Test" database
 const connectionpOptions = {
@@ -37,10 +56,6 @@ const connectionpOptions = {
 }
 
 mongoose.set('strictQuery', true)
-mongoose
-  .connect(MONGODB_URI, connectionpOptions)
-  .then(() => console.log('connected to MongoDB !'))
-  .catch((error) => console.error(error))
 
 const app = express()
 
@@ -66,6 +81,7 @@ app.use('/api/stocks', stockRouter)
 app.use('/api/carousel', carouselRouter)
 app.use('/api/shippingaddresses', shippingAddressRouter)
 app.use('/api/status', statusRouter)
+app.use('/api/featuredProducts', featuredProductRouter)
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 

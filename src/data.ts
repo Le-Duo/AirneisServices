@@ -18,37 +18,37 @@ export const sampleCategories: Category[] = [
   {
     _id: '60d0fe4f5311236168a109ca',
     name: 'Sofas',
-    urlImage: '../public/images/sofa.png',
+    urlImage: '../public/images/categorysofa.png',
     slug: 'sofas',
   },
   {
     _id: '60d0fe4f5311236168a109cb',
     name: 'Tables',
-    urlImage: '../public/images/table.png',
+    urlImage: '../public/images/categorytable.png',
     slug: 'tables',
   },
   {
     _id: '60d0fe4f5311236168a109cc',
     name: 'Bookcases',
-    urlImage: '../public/images/bookcase.png',
+    urlImage: '../public/images/categorybookcase.png',
     slug: 'bookcases',
   },
   {
     _id: '60d0fe4f5311236168a109cd',
     name: 'Rugs',
-    urlImage: '../public/images/rug.png',
+    urlImage: '../public/images/categoryrug.png',
     slug: 'rugs',
   },
   {
     _id: '60d0fe4f5311236168a109ce',
     name: 'Lamps',
-    urlImage: '../public/images/lamp.png',
+    urlImage: '../public/images/categorylamp.png',
     slug: 'lamps',
   },
   {
     _id: '60d0fe4f5311236168a109cf',
     name: 'Wardrobes',
-    urlImage: '../public/images/wardrobe.png',
+    urlImage: '../public/images/categorywardrobe.png',
     slug: 'wardrobes',
   },
 ]
@@ -151,7 +151,7 @@ export const sampleUsers: User[] = [
   {
     name: 'Admin User',
     email: 'admin@example.com',
-    password: bcrypt.hashSync('123456'),
+    password: bcrypt.hashSync('password'),
     isAdmin: true,
   },
   {
@@ -170,17 +170,17 @@ export const sampleUsers: User[] = [
 
 export const sampleCarouselItems: CarouselItem[] = [
   {
-    src: '../public/images/carousel1.png',
+    src: '../public/images/bedroom.png',
     alt: 'First slide',
     caption: 'First slide caption',
   },
   {
-    src: '../public/images/carousel2.png',
+    src: '../public/images/garden.png',
     alt: 'Second slide',
     caption: 'Second slide caption',
   },
   {
-    src: '../public/images/carousel3.png',
+    src: '../public/images/livingroom.png',
     alt: 'Third slide',
     caption: 'Third slide caption',
   },
@@ -228,10 +228,6 @@ export const sampleStocks: Stock[] = [
   {
     product: sampleProducts.find(product => product.slug === 'heather')! as DocumentType<Product>,
     quantity: 4,
-  },
-  {
-    product: sampleProducts.find(product => product.slug === 'macleod')! as DocumentType<Product>,
-    quantity: 6,
   },
   {
     product: sampleProducts.find(product => product.slug === 'skye')! as DocumentType<Product>,
