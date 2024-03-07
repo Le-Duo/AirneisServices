@@ -1,5 +1,5 @@
 import express from "express";
-import { FeaturedProductModel } from "../models/FeaturedProduct";
+import { FeaturedProductModel } from "../models/featuredProduct";
 import asyncHandler from "express-async-handler";
 import { isAdmin, isAuth } from "../utils";
 
