@@ -10,8 +10,9 @@ featuredProductRouter.post(
   isAuth,
   isAdmin,
   asyncHandler(async (req, res) => {
-    const { product, order } = req.body;
+    const { _id, product, order } = req.body;
     const featuredProduct = new FeaturedProductModel({
+      _id,
       product,
       order,
     });

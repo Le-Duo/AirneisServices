@@ -1,7 +1,9 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
-import { Product } from './product';
+import { prop, getModelForClass, Ref } from "@typegoose/typegoose";
+import { Product } from "./product";
 
 class FeaturedProduct {
+  public _id?: string;
+
   @prop({ ref: () => Product, required: true })
   public product!: Ref<Product>;
 
@@ -9,6 +11,8 @@ class FeaturedProduct {
   public order!: number;
 }
 
-const FeaturedProductModel = getModelForClass(FeaturedProduct, { schemaOptions: { timestamps: true } });
+const FeaturedProductModel = getModelForClass(FeaturedProduct, {
+  schemaOptions: { timestamps: true },
+});
 
 export { FeaturedProductModel };
