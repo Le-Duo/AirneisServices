@@ -29,16 +29,15 @@ contactRouter.get(
 
   contactRouter.post(
     "/",
-
     asyncHandler(async (req: Request, res: Response) => {
     try{
-      const { mail , subject, message} = req.body;
+      const { mail, subject, message, userId } = req.body;
 
-      
       const newContact = new ContactModel({
         mail,
         subject,
         message,
+        user: userId,
       });
       const savedContact = await newContact.save();
   

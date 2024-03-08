@@ -171,18 +171,18 @@ export const sampleUsers: User[] = [
 export const sampleCarouselItems: CarouselItem[] = [
   {
     src: '../public/images/bedroom.png',
-    alt: 'First slide',
-    caption: 'First slide caption',
+    alt: 'Elegant Bedroom Design',
+    caption: 'Explore our latest bedroom furniture collections',
   },
   {
     src: '../public/images/garden.png',
-    alt: 'Second slide',
-    caption: 'Second slide caption',
+    alt: 'Serene Garden Furniture',
+    caption: 'Discover the beauty of outdoor living with our garden range',
   },
   {
     src: '../public/images/livingroom.png',
-    alt: 'Third slide',
-    caption: 'Third slide caption',
+    alt: 'Modern Living Room',
+    caption: 'Transform your living space with our contemporary designs',
   },
 ]
 
