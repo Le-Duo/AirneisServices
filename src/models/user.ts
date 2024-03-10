@@ -38,7 +38,7 @@ export class User {
   @prop({ required: false })
   public address!: UserAddress
 
-  @prop({ required: false })
+  @prop({type: () => [PaymentCard], required: false })
   public paymentCards!: PaymentCard[]
 
   @prop()
