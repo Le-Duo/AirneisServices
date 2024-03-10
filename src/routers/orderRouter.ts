@@ -11,14 +11,13 @@ import { isAuth } from '../utils'
 import { OrderModel } from '../models/order'
 import { StockModel } from '../models/stock'
 import { v4 as uuidv4 } from 'uuid'
-import { Item } from '../models/order'; // Import the Item class for typing
+import { Item } from '../models/order'
 export const orderRouter = express.Router()
 
 orderRouter.get(
   '/',
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    console.log('Get all orders called')
     const orders = await OrderModel.find({}).populate('user', 'name')
     res.json(orders)
   })
@@ -29,8 +28,8 @@ orderRouter.get(
   isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
-      res.status(401).json({ message: 'User not authenticated' });
-      return;
+      res.status(401).json({ message: 'User not authenticated' })
+      return
     }
     const orders = await OrderModel.find({ user: req.user._id })
     res.send(orders)
@@ -83,24 +82,41 @@ orderRouter.post(
   // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { user, shippingAddress, paymentMethod, orderItems, isPaid, isDelivered }: { user: string; shippingAddress: any; paymentMethod: string; orderItems: Item[]; isPaid: boolean; isDelivered: boolean } = req.body;
-      
-      if (!Array.isArray(orderItems) || !orderItems.every(item => typeof item === 'object' && 'quantity' in item && 'price' in item)) {
-        res.status(400).json({ error: 'Invalid orderItems format' });
-        return;
+      const {
+        user,
+        shippingAddress,
+        paymentMethod,
+        orderItems,
+        isPaid,
+        isDelivered,
+      }: {
+        user: string
+        shippingAddress: any
+        paymentMethod: string
+        orderItems: Item[]
+        isPaid: boolean
+        isDelivered: boolean
+      } = req.body
+
+      if (
+        !Array.isArray(orderItems) ||
+        !orderItems.every(item => typeof item === 'object' && 'quantity' in item && 'price' in item)
+      ) {
+        res.status(400).json({ error: 'Invalid orderItems format' })
+        return
       }
 
       const itemsPrice = orderItems.reduce((acc: number, item: Item) => {
-        const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
-        const price = typeof item.price === 'number' ? item.price : 0;
-      
-        return acc + quantity * price;
-      }, 0);
-      const shippingPrice = calculateShippingPrice(itemsPrice);
-      const taxPrice = itemsPrice * 0.2;
-      const totalPrice = itemsPrice + shippingPrice + taxPrice;
+        const quantity = typeof item.quantity === 'number' ? item.quantity : 0
+        const price = typeof item.price === 'number' ? item.price : 0
 
-      const orderNumber = generateOrderNumber();
+        return acc + quantity * price
+      }, 0)
+      const shippingPrice = calculateShippingPrice(itemsPrice)
+      const taxPrice = itemsPrice * 0.2
+      const totalPrice = itemsPrice + shippingPrice + taxPrice
+
+      const orderNumber = generateOrderNumber()
 
       const newOrder = new OrderModel({
         orderNumber,
@@ -115,23 +131,26 @@ orderRouter.post(
         isPaid,
         isDelivered,
         status: 'initiated',
-      });
+      })
 
       // Deduct stock
       for (const item of orderItems) {
-        await StockModel.findOneAndUpdate({ 'product._id': item.product }, {
-          $inc: { quantity: -item.quantity }
-        });
+        await StockModel.findOneAndUpdate(
+          { 'product._id': item.product },
+          {
+            $inc: { quantity: -item.quantity },
+          }
+        )
       }
 
-      const savedOrder = await newOrder.save();
-      res.status(201).json(savedOrder);
+      const savedOrder = await newOrder.save()
+      res.status(201).json(savedOrder)
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error on order creation' });
+      console.error(error)
+      res.status(500).json({ error: 'Error on order creation' })
     }
   })
-);
+)
 
 /*
   Pour le update, une fois l'ordre créer en initiated, on s'attend
@@ -149,10 +168,7 @@ orderRouter.put(
     newData.updatedAt = Date.now()
 
     try {
-      const result = await OrderModel.updateOne(
-        { orderNumber: ordernumber },
-        { $set: newData }
-      )
+      const result = await OrderModel.updateOne({ orderNumber: ordernumber }, { $set: newData })
 
       if (result.matchedCount == 0) {
         res.status(500).json({ error: 'No order found' })
@@ -192,5 +208,3 @@ function generateOrderNumber(): string {
 
   return orderNumber
 }
-
-

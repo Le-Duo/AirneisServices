@@ -26,41 +26,40 @@ import { featuredProductRouter } from './routers/featuredProductRouter'
 dotenv.config()
 
 const MONGODB_URI = process.env.MONGODB_URI || ''
-const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI || 'your_local_mongodb_connection_string'
+const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI || 'mongodb://localhost:27017'
+
+// Force connection on "Airneis" database; by default, mongoose create "Test" database
+const connectionOptions = {
+  dbName: `Airneis`,
+}
 
 // Function to connect to MongoDB
 const connectToMongoDB = async (uri: string) => {
   try {
-    await mongoose.connect(uri, connectionpOptions)
-    console.log(`Connected to MongoDB at ${uri}`)
+    await mongoose.connect(uri, connectionOptions)
+    console.log(`Connected to MongoDB Atlas`)
   } catch (error) {
-    console.error(`Failed to connect to MongoDB at ${uri}`, error)
+    console.error(`Failed to connect to local MongoDB`, error)
     throw error
   }
 }
 
 // Attempt to connect to MONGODB_URI or fallback to LOCAL_MONGODB_URI
-connectToMongoDB(MONGODB_URI)
-  .catch(() => {
-    console.log('Attempting to connect to LOCAL_MONGODB_URI...')
-    connectToMongoDB(LOCAL_MONGODB_URI)
-      .catch(() => {
-        console.error('Failed to connect to both MONGODB_URI and LOCAL_MONGODB_URI')
-        process.exit(1)
-      })
+console.log('Attempting to connect to MONGODB_URI...')
+connectToMongoDB(MONGODB_URI).catch(() => {
+  console.log('Attempting to connect to LOCAL_MONGODB_URI...')
+  connectToMongoDB(LOCAL_MONGODB_URI).catch(() => {
+    console.error('Failed to connect to both MONGODB_URI and LOCAL_MONGODB_URI')
+    process.exit(1)
   })
-
-// Force connection on "Airneis" database; by default, mongoose create "Test" database
-const connectionpOptions = {
-  dbName: `Airneis`,
-}
+})
 
 mongoose.set('strictQuery', true)
 
 const app = express()
 
 app.use(helmet())
-app.use(cookieParser());
+app.use(cookieParser())
 app.use(
   cors({
     credentials: true,
@@ -89,4 +88,4 @@ app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`)
 })
 
-export default app;
+export default app
