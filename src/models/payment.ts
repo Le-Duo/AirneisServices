@@ -18,4 +18,24 @@ export class Payment {
   public updatedAt!: Date;
 }
 
+export class PaymentCard {
+  public _id?: string;
+
+  @prop({ required: true })
+  public bankName!: string;
+
+  @prop({ required: true })
+  public number!: string;
+
+  @prop({ required: true })
+  public fullName!: string;
+
+  @prop({ required: true })
+  public monthExpiration!: number;
+
+  @prop({ required: true })
+  public yearExpiration!: number;
+} 
+
 export const PaymentModel = getModelForClass(Payment);
+export const PaymentCardModel = getModelForClass(PaymentCard);
