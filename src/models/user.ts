@@ -5,6 +5,18 @@
  */
 
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import {PaymentCard } from '../models/payment'
+
+export class UserAddress {
+  @prop({default: ''})
+  public street!: string
+  @prop({default: ''})
+  public city!: string
+  @prop({default: ''})
+  public postalCode!: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
+  @prop({default: ''})
+  public country!: string
+}
 
 @modelOptions({ schemaOptions: { collection: 'users', timestamps: true } })
 export class User {
@@ -23,7 +35,14 @@ export class User {
   @prop({ default: false })
   public isAdmin!: boolean
 
+  @prop({ required: false })
+  public address!: UserAddress
+
+  @prop({type: () => [PaymentCard], required: false })
+  public paymentCards!: PaymentCard[]
+
   @prop()
   public passwordResetTokenJti?: string // Field to track jti of password reset token
 }
 export const UserModel = getModelForClass(User)
+export const UserAddressModel = getModelForClass(UserAddress)
