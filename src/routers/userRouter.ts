@@ -9,33 +9,33 @@ import { User, UserModel, UserAddress } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
-import {
-  generateToken,
-  generatePasswordResetToken,
-  sendPasswordResetEmail,
-} from '../utils'
+import { generateToken, generatePasswordResetToken, sendPasswordResetEmail } from '../utils'
+import dotenv from 'dotenv'
+import { isAdmin, isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
+
+dotenv.config()
 
 export const userRouter = express.Router()
 
 const passwordResetRequestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message:
-    'Too many password reset requests from this IP, please try again after 15 minutes.',
+  message: 'Too many password reset requests from this IP, please try again after 15 minutes.',
 })
 
 interface UserRequestBody {
   name?: string
   email?: string
   password?: string
+  isAdmin?: boolean
   address?: UserAddress
   paymentCards?: PaymentCard[]
 }
 
-interface PaymentCardRequestBody{
+interface PaymentCardRequestBody {
   bankName: string
   number: string
   fullName: string
@@ -43,11 +43,29 @@ interface PaymentCardRequestBody{
   yearExpiration: number
 }
 
+const sendErrorResponse = (res: Response, statusCode: number, message: string) => {
+  res.status(statusCode).send({ message })
+}
+
 userRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
     const users = await UserModel.find({})
     res.json(users)
+  })
+)
+
+userRouter.get(
+  '/:id',
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+      res.json(user)
+    } else {
+      res.status(404).json({ message: 'User not found' })
+    }
   })
 )
 
@@ -61,78 +79,79 @@ userRouter.get(
 
 userRouter.put(
   '/:id',
-  asyncHandler(
-    async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
+    try {
       const user = await UserModel.findById(req.params.id)
-      if (user) {
-        user.name = req.body.name || user.name
-        user.email = req.body.email || user.email
-        if (req.body.password) {
-          user.password = bcrypt.hashSync(req.body.password, 8)
-        }
-        
-        // Address
-        user.address =  req.body.address || user.address
-
-        // Paiements cards
-        user.paymentCards = req.body.paymentCards || user.paymentCards
-       
-        const updatedUser = await user.save()
-        res.send({
-          _id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          isAdmin: updatedUser.isAdmin,
-          address : updatedUser.address,
-          paymentCards:  user.paymentCards,
-          token: generateToken(updatedUser),
-        })
-      } else {
-        res.status(404).send({ message: 'Utilisateur non trouvé' })
+      if (!user) {
+        return sendErrorResponse(res, 404, 'Utilisateur non trouvé')
       }
+      user.name = req.body.name || user.name
+      user.email = req.body.email || user.email
+      if (req.body.password) {
+        const salt = await bcrypt.genSalt(10)
+        user.password = await bcrypt.hash(req.body.password, salt)
+      }
+      if (req.body.isAdmin !== undefined) {
+        user.isAdmin = req.body.isAdmin
+      }
+      user.address = req.body.address || user.address
+      user.paymentCards = req.body.paymentCards || user.paymentCards
+
+      const updatedUser = await user.save()
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+        address: updatedUser.address,
+        paymentCards: updatedUser.paymentCards,
+        token: generateToken(updatedUser),
+      })
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l’utilisateur')
     }
-  )
+  })
 )
 
 userRouter.post(
   '/:id/payment/card/add',
-  asyncHandler(
-    async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-      const user = await UserModel.findById(req.params.id)
-      if (user) {
+  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+      const newCard = new PaymentCardModel({
+        bankName: req.body.address.bankName,
+        number: req.body.address.number,
+        fullName: req.body.address.fullName,
+        monthExpiration: req.body.address.monthExpiration,
+        yearExpiration: req.body.address.yearExpiration,
+      })
 
+      user.paymentCards.push(newCard)
 
-        const newCard = new PaymentCardModel({
-          bankName: req.body.address.bankName,
-          number: req.body.address.number,
-          fullName: req.body.address.fullName,
-          monthExpiration: req.body.address.monthExpiration,
-          yearExpiration: req.body.address.yearExpiration
-        });
+      await user.save()
 
-        user.paymentCards.push(newCard)
-       
-        await user.save()
-
-        res.send({
-          newCard: newCard
-        })
-      } else {
-        res.status(404).send({ message: 'Utilisateur non trouvé' })
-      }
+      res.send({
+        newCard: newCard,
+      })
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
     }
-  )
+  })
 )
 
 userRouter.delete(
   '/:id',
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
-    if (user) {
-      await UserModel.deleteOne({ _id: req.params.id })
-      res.send({ message: 'Utilisateur supprimé' })
-    } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    try {
+      const user = await UserModel.findByIdAndDelete(req.params.id)
+      if (!user) {
+        return sendErrorResponse(res, 404, 'Utilisateur non trouvé')
+      }
+      res.json({ message: 'Utilisateur supprimé' })
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Erreur lors de la suppression de l’utilisateur')
     }
   })
 )
@@ -141,39 +160,41 @@ userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
     const user = await UserModel.findOne({ email: req.body.email })
-    if (user) {
-      if (bcrypt.compareSync(req.body.password, user.password)) {
-        res.send({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          isAdmin: user.isAdmin,
-          token: generateToken(user),
-        })
-        return
-      }
+    if (user && bcrypt.compareSync(req.body.password, user.password)) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        token: generateToken(user),
+      })
+    } else {
+      sendErrorResponse(res, 401, 'Invalid email or password')
     }
-    res.status(401).send({ message: 'Invalid email or password' })
   })
 )
 
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
-
-    const user = await UserModel.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password),
-      address: new UserAddress()
-    } as User)
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user),
-    })
+    try {
+      const salt = await bcrypt.genSalt(10)
+      const user = new UserModel({
+        name: req.body.name,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, salt),
+      })
+      const newUser = await user.save()
+      res.json({
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        isAdmin: newUser.isAdmin,
+        token: generateToken(newUser),
+      })
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Erreur lors de la création de l’utilisateur')
+    }
   })
 )
 
@@ -181,69 +202,46 @@ userRouter.post(
   '/password-reset-request',
   passwordResetRequestLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const user = await UserModel.findOne({ email: req.body.email })
-    if (user) {
+    try {
+      const user = await UserModel.findOne({ email: req.body.email })
+      if (!user) {
+        return sendErrorResponse(res, 404, 'No account with this email address exists.')
+      }
       const { token, jti } = generatePasswordResetToken(user)
-
       user.passwordResetTokenJti = jti
       await user.save()
-
-      try {
-        await sendPasswordResetEmail(user, token)
-        res.status(200).send({ message: 'Password reset email sent.' })
-      } catch (error) {
-        res.status(500).send({ message: 'Error sending password reset email.' })
-      }
-    } else {
-      res
-        .status(404)
-        .send({ message: 'No account with this email address exists.' })
+      await sendPasswordResetEmail(user, token)
+      res.status(200).send({ message: 'Password reset email sent.' })
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Error sending password reset email.')
     }
   })
 )
 
-interface DecodedToken {
-  _id: string
-  email: string
-  jti: string
-}
-
 userRouter.post(
   '/password-reset',
   asyncHandler(async (req: Request, res: Response) => {
-    const { token, newPassword } = req.body
-    if (!token || !newPassword) {
-      res
-        .status(400)
-        .send({ message: 'Token and new password must be provided' })
-      return
-    }
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'your_default_secret',
-      async (err: VerifyErrors | null, decoded: any) => {
-        if (err) {
-          res.status(401).send({ message: 'Invalid or expired token' })
-          return
-        }
-        const decodedToken = decoded as DecodedToken
-        const user = await UserModel.findOne({
-          _id: decodedToken._id,
-          email: decodedToken.email,
-        })
-        if (user) {
-          if (user.passwordResetTokenJti !== decodedToken.jti) {
-            res.status(401).send({ message: 'Invalid or expired token' })
-            return
-          }
-          user.password = bcrypt.hashSync(newPassword)
-          user.passwordResetTokenJti = undefined
-          await user.save()
-          res.send({ message: 'Password reset successful' })
-        } else {
-          res.status(404).send({ message: 'User not found' })
-        }
+    try {
+      const { token, newPassword } = req.body
+      if (!token || !newPassword) {
+        return sendErrorResponse(res, 400, 'Token and new password must be provided')
       }
-    )
+      if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not defined')
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET)
+      const user = await UserModel.findOne({
+        _id: decoded._id,
+        email: decoded.email,
+      })
+      if (!user || user.passwordResetTokenJti !== decoded.jti) {
+        return sendErrorResponse(res, 401, 'Invalid or expired token')
+      }
+      const salt = await bcrypt.genSalt(10)
+      user.password = bcrypt.hashSync(newPassword, salt)
+      user.passwordResetTokenJti = undefined
+      await user.save()
+      res.send({ message: 'Password reset successful' })
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Error resetting password')
+    }
   })
 )

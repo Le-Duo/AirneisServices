@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import { Types } from "mongoose";
 import { CategoryModel } from "../models/category";
 import { isAuth } from "../utils";
+import { isAdmin } from "../utils";
 
 export const categoryRouter = express.Router();
 
@@ -14,16 +15,32 @@ categoryRouter.get(
   })
 );
 
+categoryRouter.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const category = await CategoryModel.findById(id);
+    if (category) {
+      res.json(category);
+    } else {
+      res.status(404).json({ error: "Category not found" });
+    }
+  })
+);
+
 categoryRouter.post(
   "/",
-  // isAuth,
+  isAuth,
+  isAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const { name, urlImage } = req.body;
+      const { _id, name, slug, urlImage } = req.body;
 
       // Création du model pour la catégorie
       const newCategory = new CategoryModel({
+        _id,
         name,
+        slug,
         urlImage,
       });
 
@@ -40,7 +57,8 @@ categoryRouter.post(
 
 categoryRouter.put(
   "/:id",
-  // isAuth,
+  isAuth,
+  isAdmin,
   asyncHandler(async (req, res) => {
     const id = req.params.id;
     const nouvellesDonnees = req.body; // récupère les informations du body
@@ -65,6 +83,8 @@ categoryRouter.put(
 
 categoryRouter.delete(
   "/:id",
+  isAuth,
+  isAdmin,
   asyncHandler(async (req, res) => {
     const id = req.params.id; // récupère l'id dans les paramètres de l'url
 
@@ -84,3 +104,4 @@ categoryRouter.delete(
     }
   })
 );
+

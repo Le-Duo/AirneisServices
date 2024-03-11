@@ -12,6 +12,18 @@ carouselRouter.get(
   })
 )
 
+carouselRouter.get(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const item = await CarouselItemModel.findById(req.params.id)
+    if (item) {
+      res.json(item)
+    } else {
+      res.status(404).send({ message: 'Carousel Item Not Found' })
+    }
+  })
+)
+
 carouselRouter.post(
   '/',
   asyncHandler(async (req, res) => {
@@ -25,15 +37,23 @@ carouselRouter.put(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
-    const updatedItem = await CarouselItemModel.findByIdAndUpdate(
-      id,
-      req.body,
-      {
-        new: true,
-      }
-    )
+    const updatedItem = await CarouselItemModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    })
     if (updatedItem) {
       res.json(updatedItem)
+    } else {
+      res.status(404).send({ message: 'Carousel Item Not Found' })
+    }
+  })
+)
+
+carouselRouter.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const deletedItem = await CarouselItemModel.findByIdAndDelete(req.params.id)
+    if (deletedItem) {
+      res.json({ message: 'Carousel Item Deleted' })
     } else {
       res.status(404).send({ message: 'Carousel Item Not Found' })
     }

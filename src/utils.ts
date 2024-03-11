@@ -15,6 +15,9 @@ import dotenv from 'dotenv' // Import dotenv for environment variables
 dotenv.config() // Load environment variables
 
 export const generateToken = (user: User) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set')
+  }
   return jwt.sign(
     {
       _id: user._id,
@@ -22,7 +25,7 @@ export const generateToken = (user: User) => {
       email: user.email,
       isAdmin: user.isAdmin,
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    process.env.JWT_SECRET,
     {
       expiresIn: '30d',
     }
@@ -31,33 +34,40 @@ export const generateToken = (user: User) => {
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
-  if (authorization) {
-    console.log(`Authorization Header: ${authorization}`); // Log the full authorization header for debugging
-    if (!authorization.startsWith('Bearer ')) {
-      return res.status(401).send({ message: 'Token must be prefixed with "Bearer "' });
-    }
-    const token = authorization.slice(7, authorization.length); // Bearer XXXXX
-    if (!token) {
-      console.log('Token not found after Bearer prefix');
-      return res.status(401).send({ message: 'Token not found' });
-    }
-    try {
-      const decode = jwt.verify(
-        token,
-        process.env.JWT_SECRET || 'somethingsecret'
-      );
-      req.user = decode as User;
-      next();
-    } catch (error) {
-      console.error(error);
-      res.status(401).send({ message: 'Invalid Token' });
+  if (authorization && authorization.startsWith('Bearer ')) {
+    const token = authorization.slice(7, authorization.length); // Extract token from Bearer
+    if (token) {
+      try {
+        if (!process.env.JWT_SECRET) {
+          throw new Error('JWT_SECRET is not set');
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded as User; // Attach user to request
+        next();
+      } catch (error) {
+        console.error(error);
+        res.status(401).send({ message: 'Invalid Token' });
+      }
+    } else {
+      res.status(401).send({ message: 'Token not found' });
     }
   } else {
-    res.status(401).send({ message: 'No Token' });
+    res.status(401).send({ message: 'No Token or Bearer prefix missing' });
+  }
+};
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(401).send({ message: 'Not authorized as admin' });
   }
 };
 
 export const generatePasswordResetToken = (user: User) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set')
+  }
   const jti = new Date().getTime().toString() // Generate jti as a string
   const token = jwt.sign(
     {
@@ -65,7 +75,7 @@ export const generatePasswordResetToken = (user: User) => {
       email: user.email,
       jti: jti, // Use the generated jti
     },
-    process.env.JWT_SECRET || 'somethingsecret',
+    process.env.JWT_SECRET,
     {
       expiresIn: '1h',
     }

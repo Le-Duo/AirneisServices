@@ -1,95 +1,87 @@
-import express from "express";
-import asyncHandler from "express-async-handler";
-import { StockModel } from "../models/stock";
-import { ProductModel } from "../models/product";
-import { isAuth } from "../utils";
-import { Types } from "mongoose";
+import express, { Request, Response, NextFunction } from 'express'
+import asyncHandler from 'express-async-handler'
+import { StockModel } from '../models/stock'
+import { ProductModel } from '../models/product'
+import { isAuth, isAdmin } from '../utils'
 
-export const stockRouter = express.Router();
+export const stockRouter = express.Router()
+
 stockRouter.get(
-  "/",
-  asyncHandler(async (req, res) => {
-    const allStock = await StockModel.find();
-    res.json(allStock);
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
+    const allStock = await StockModel.find().exec()
+    res.json(allStock)
   })
-);
+)
 
 stockRouter.get(
-  "/products/:productId",
-  asyncHandler(async (req, res) => {
-    const productId = req.params.productId;
-
-    // Récupérez le stock du produit en utilisant la propriété product
-    const stock = await StockModel.findOne({ "product._id": productId });
-
-    if (!stock) {
-      res.status(500).json({ error: "Stock not found for the product" });
+  '/products/:productId',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { productId } = req.params
+    console.log(`Fetching stock for product ID: ${productId}`) // Added log as per instruction
+    const stock = await StockModel.findOne({ 'product._id': productId }).exec()
+    if (stock) {
+      console.log(`Stock found for product ID: ${productId}`) // Log on successful find
+      res.json(stock)
+    } else {
+      console.log(`Stock not found for product ID: ${productId}`) // Log on failure to find stock
+      res.status(404).json({ error: 'Stock not found for the product' })
     }
-
-    res.status(200).json(stock);
   })
-);
+)
 
 stockRouter.post(
-  "/",
-  // isAuth,
-  asyncHandler(async (req, res) => {
-    try {
-      console.log("POST stockRouter / called.");
-
-      const { productId, quantity } = req.body;
-
-      // Récupère le produit dans la db
-      const product = await ProductModel.findById(productId);
-
-      if (product) {
-        console.log("Product found:", product);
+  '/',
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { productId, quantity } = req.body
+    // Check if stock already exists for the product
+    const existingStock = await StockModel.findOne({ 'product._id': productId }).exec()
+    if (existingStock) {
+      // Update existing stock entry's quantity
+      await StockModel.updateOne({ 'product._id': productId }, { $set: { quantity } }).exec()
+      res.status(200).json({ message: 'Stock updated' })
+    } else {
+      // If no existing stock, proceed to find the product
+      const product = await ProductModel.findById(productId).exec()
+      if (!product) {
+        res.status(404).json({ error: 'Product does not exist' })
       } else {
-        // si le produit n'existe pas, il ne faut pas aller plus loin
-        console.error("Product not found");
-        res.status(500).json("Product does not exists");
+        // Create new stock entry since product exists and no stock entry exists
+        const newStock = await StockModel.create({ product, quantity })
+        res.status(201).json(newStock)
       }
-
-      // Création du model pour le stock
-      const newStock = new StockModel({
-        product: product, // cast la variable product en type "Product"
-        quantity,
-      });
-
-      // Enregistre le produit dans la base de données
-      const savedStock = await newStock.save();
-
-      // Réponds avec le produit créé
-      res.status(201).json(savedStock);
-    } catch (error) {
-      // Gérez les erreurs
-      console.error(error);
-      res.status(500).json({ error: "Error on creation" });
     }
   })
-);
+)
 
 stockRouter.put(
-  // On fait un update du stock par produit id
-  "/products/:productId",
-  asyncHandler(async (req, res) => {
-    const productId = req.params.productId;
-    const newData = req.body;
-
-    try {
-      const result = await StockModel.updateOne(
-        { "product._id": productId },
-        { $set: newData }
-      );
-
-      if (result.modifiedCount > 0) {
-        res.json({ message: "update succeeded" });
-      } else {
-        res.status(500).json({ error: "No stock found" });
-      }
-    } catch (erreur) {
-      console.error("error :", erreur);
-      res.status(500).json({ error: "Update error" });
-    }
+  '/products/:productId',
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { productId } = req.params
+    const newData = req.body
+    const result = await StockModel.updateOne(
+      { 'product._id': productId },
+      { $set: newData }
+    ).exec()
+    result.modifiedCount > 0
+      ? res.json({ message: 'Update succeeded' })
+      : res.status(404).json({ error: 'No stock found' })
   })
-);
+)
+
+stockRouter.delete(
+  '/products/:productId',
+  isAuth,
+  isAdmin,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { productId } = req.params
+    const result = await StockModel.deleteOne({ 'product._id': productId }).exec()
+    result.deletedCount > 0
+      ? res.json({ message: 'Delete succeeded' })
+      : res.status(404).json({ error: 'No stock found' })
+  })
+)

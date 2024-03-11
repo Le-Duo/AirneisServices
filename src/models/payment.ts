@@ -1,4 +1,4 @@
-import { prop, getModelForClass, DocumentType } from "@typegoose/typegoose";
+import { prop, getModelForClass } from "@typegoose/typegoose";
 
 enum PaymentStatus {
   Accepted = "accepted",
@@ -14,7 +14,7 @@ export class Payment {
   @prop({ required: true })
   public orderNumber!: String;
 
-  @prop({ required: false, default: new Date() })
+  @prop({ default: new Date() })
   public updatedAt!: Date;
 }
 

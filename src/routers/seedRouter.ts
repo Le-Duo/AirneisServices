@@ -9,9 +9,13 @@ import asyncHandler from 'express-async-handler'
 import { ProductModel } from '../models/product'
 import { UserModel } from '../models/user'
 import { CategoryModel } from '../models/category'
+import { CarouselItemModel } from '../models/carouselItem'
+import { StockModel } from '../models/stock'
 import { sampleProducts } from '../data'
 import { sampleUsers } from '../data'
 import { sampleCategories } from '../data'
+import { sampleCarouselItems } from '../data'
+import { sampleStocks } from '../data'
 
 export const seedRouter = express.Router()
 
@@ -22,6 +26,8 @@ seedRouter.get(
     await ProductModel.deleteMany({});
     await UserModel.deleteMany({});
     await CategoryModel.deleteMany({});
+    await CarouselItemModel.deleteMany({}); // Ajout pour supprimer les éléments existants du carrousel
+    await StockModel.deleteMany({}); // Ajout pour supprimer les stocks existants
 
     // Insérez d'abord les catégories
     const createdCategories = await CategoryModel.insertMany(sampleCategories);
@@ -41,7 +47,22 @@ seedRouter.get(
     // Insérez les utilisateurs
     const createdUsers = await UserModel.insertMany(sampleUsers);
 
+    // Insérez les éléments du carrousel
+    const createdCarouselItems = await CarouselItemModel.insertMany(sampleCarouselItems);
+
+    // Pour les stocks, mettez à jour les références de produits avec les produits créés
+    const updatedSampleStocks = sampleStocks.map(stock => {
+      const productDoc = createdProducts.find(p => p.slug === stock.product.slug);
+      if (!productDoc) {
+        throw new Error(`Product ${stock.product.slug} not found`);
+      }
+      return { ...stock, product: productDoc };
+    });
+
+    // Insérez les stocks mis à jour
+    const createdStocks = await StockModel.insertMany(updatedSampleStocks);
+
     // Envoyez la réponse avec toutes les données créées
-    res.json({ createdCategories, createdProducts, createdUsers });
+    res.json({ createdCategories, createdProducts, createdUsers, createdCarouselItems, createdStocks });
   })
 );
