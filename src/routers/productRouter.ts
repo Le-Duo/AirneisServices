@@ -117,14 +117,14 @@ productRouter.get(
                 {
                   text: {
                     query: searchText,
-                    path: ['name', 'description'],
+                    path: ['name', 'description', 'materials'],
                     score: { boost: { value: 4 } },
                   },
                 },
                 {
                   text: {
                     query: searchText,
-                    path: ['name', 'description'],
+                    path: ['name', 'description', 'materials'],
                     fuzzy: {
                       maxEdits: 1,
                       prefixLength: 0,
@@ -135,7 +135,7 @@ productRouter.get(
                 {
                   text: {
                     query: searchText,
-                    path: ['name', 'description'],
+                    path: ['name', 'description', 'materials'],
                     fuzzy: {
                       maxEdits: 2,
                       prefixLength: 3,
