@@ -60,7 +60,28 @@ describe('Middleware functions', () => {
 
   describe('isAdmin middleware', () => {
     it('should call next() if user is admin', () => {
-      mockRequest.user = { _id: '123', name: 'Admin User', email: 'admin@example.com', isAdmin: true, password: 'placeholderPassword' };
+      mockRequest.user = { _id: '123', name: 'Admin User', email: 'admin@example.com', isAdmin: true, password: 'placeholderPassword', address: {
+        street: '123 Main St',
+        city: 'Anytown',
+        postalCode: '12345',
+        country: 'USA',
+      },
+      paymentCards: [
+        {
+          bankName: 'Visa',
+          number: '1234 5678 1234 5678',
+          fullName: 'John Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+        {
+          bankName: 'Mastercard',
+          number: '1234 5678 1234 5678',
+          fullName: 'Jane Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+      ], };
 
       isAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -68,7 +89,28 @@ describe('Middleware functions', () => {
     });
 
     it('should return 401 if user is not admin', () => {
-      mockRequest.user = { _id: '123', name: 'Regular User', email: 'user@example.com', isAdmin: false, password: 'placeholderPassword'};
+      mockRequest.user = { _id: '123', name: 'Regular User', email: 'user@example.com', isAdmin: false, password: 'placeholderPassword', address: {
+        street: '123 Main St',
+        city: 'Anytown',
+        postalCode: '12345',
+        country: 'USA',
+      },
+      paymentCards: [
+        {
+          bankName: 'Visa',
+          number: '1234 5678 1234 5678',
+          fullName: 'John Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+        {
+          bankName: 'Mastercard',
+          number: '1234 5678 1234 5678',
+          fullName: 'Jane Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+      ],};
 
       isAdmin(mockRequest as Request, mockResponse as Response, nextFunction);
 
@@ -79,7 +121,28 @@ describe('Middleware functions', () => {
 
   describe('sendPasswordResetEmail function', () => {
     it('should send an email with the correct format', async () => {
-      const user = { _id: '123', name: 'Test User', email: 'test@example.com', isAdmin: false, password: 'placeholderPassword'};
+      const user = { _id: '123', name: 'Test User', email: 'test@example.com', isAdmin: false, password: 'placeholderPassword', address: {
+        street: '123 Main St',
+        city: 'Anytown',
+        postalCode: '12345',
+        country: 'USA',
+      },
+      paymentCards: [
+        {
+          bankName: 'Visa',
+          number: '1234 5678 1234 5678',
+          fullName: 'John Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+        {
+          bankName: 'Mastercard',
+          number: '1234 5678 1234 5678',
+          fullName: 'Jane Doe',
+          monthExpiration: 12,
+          yearExpiration: 2023,
+        },
+      ],};
       const token = 'testtoken123';
 
       await sendPasswordResetEmail(user, token);

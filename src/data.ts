@@ -153,18 +153,84 @@ export const sampleUsers: User[] = [
     email: 'admin@example.com',
     password: bcrypt.hashSync('password'),
     isAdmin: true,
+    address: {
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'USA',
+    },
+    paymentCards: [
+      {
+        bankName: 'Visa',
+        number: '1234 5678 1234 5678',
+        fullName: 'John Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+      {
+        bankName: 'Mastercard',
+        number: '1234 5678 1234 5678',
+        fullName: 'Jane Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+    ],
   },
   {
     name: 'User One',
     email: 'userone@example.com',
     password: bcrypt.hashSync('123456'),
     isAdmin: false,
+    address: {
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'USA',
+    },
+    paymentCards: [
+      {
+        bankName: 'Visa',
+        number: '1234 5678 1234 5678',
+        fullName: 'John Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+      {
+        bankName: 'Mastercard',
+        number: '1234 5678 1234 5678',
+        fullName: 'Jane Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+    ],
   },
   {
     name: 'User Two',
     email: 'usertwo@example.com',
     password: bcrypt.hashSync('123456'),
     isAdmin: false,
+    address: {
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'USA',
+    },
+    paymentCards: [
+      {
+        bankName: 'Visa',
+        number: '1234 5678 1234 5678',
+        fullName: 'John Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+      {
+        bankName: 'Mastercard',
+        number: '1234 5678 1234 5678',
+        fullName: 'Jane Doe',
+        monthExpiration: 12,
+        yearExpiration: 2023,
+      },
+    ],
   },
 ]
 
