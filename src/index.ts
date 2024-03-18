@@ -37,9 +37,9 @@ const connectionOptions = {
 const connectToMongoDB = async (uri: string) => {
   try {
     await mongoose.connect(uri, connectionOptions)
-    console.log(`Connected to MongoDB Atlas`)
+    console.log(uri === MONGODB_URI ? `Connected to MongoDB Atlas` : `Connected to local MongoDB`)
   } catch (error) {
-    console.error(`Failed to connect to local MongoDB`, error)
+    console.error(`Failed to connect to ${uri === MONGODB_URI ? 'MongoDB Atlas' : 'local MongoDB'}`, error)
     throw error
   }
 }

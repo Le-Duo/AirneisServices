@@ -25,7 +25,7 @@ featuredProductRouter.get(
   "/",
   asyncHandler(async (req, res) => {
     const featuredProducts = await FeaturedProductModel.find()
-      .populate("product")
+      .populate({ path: "product", model: "Product" })
       .sort("order");
     res.json(featuredProducts);
   })
@@ -35,9 +35,7 @@ featuredProductRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const featuredProduct = await FeaturedProductModel.findById(id).populate(
-      "product"
-    );
+    const featuredProduct = await FeaturedProductModel.findById(id).populate({ path: 'product', model: 'Product' })
     if (!featuredProduct) {
       res.status(404).json({ message: "Featured product not found" });
       return;
