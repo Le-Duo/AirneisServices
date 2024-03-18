@@ -35,6 +35,9 @@ export class PaymentCard {
 
   @prop({ required: true })
   public yearExpiration!: number;
+
+  @prop({ required: true, default: false })
+  public isDefault!: boolean;
 } 
 
 export const PaymentModel = getModelForClass(Payment);

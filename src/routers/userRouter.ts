@@ -15,6 +15,7 @@ import { isAdmin, isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
+import { Types } from "mongoose";
 
 dotenv.config()
 
@@ -58,7 +59,7 @@ userRouter.get(
 userRouter.get(
   '/:id',
   isAuth,
-  isAdmin,
+  // isAdmin, // si isAdmin = un utilisateur ne peut pas voir son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
@@ -69,18 +70,10 @@ userRouter.get(
   })
 )
 
-userRouter.get(
-  '/:id',
-  asyncHandler(async (req: Request, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
-    res.json(user)
-  })
-)
-
 userRouter.put(
   '/:id',
   isAuth,
-  isAdmin,
+  // isAdmin, // si isAdmin = un utilisateur ne peut pas modifier son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     try {
       const user = await UserModel.findById(req.params.id)
@@ -121,11 +114,12 @@ userRouter.post(
     const user = await UserModel.findById(req.params.id)
     if (user) {
       const newCard = new PaymentCardModel({
-        bankName: req.body.address.bankName,
-        number: req.body.address.number,
-        fullName: req.body.address.fullName,
-        monthExpiration: req.body.address.monthExpiration,
-        yearExpiration: req.body.address.yearExpiration,
+        bankName: req.body.bankName,
+        number: req.body.number,
+        fullName: req.body.fullName,
+        monthExpiration: req.body.monthExpiration,
+        yearExpiration: req.body.yearExpiration,
+        isDefault: false
       })
 
       user.paymentCards.push(newCard)
@@ -141,8 +135,34 @@ userRouter.post(
   })
 )
 
+
+userRouter.put(
+  '/:id/payment/card/:idCard/default',
+  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+     
+      user.paymentCards.forEach(card => {
+        if (card._id == req.params.idCard) {
+          card.isDefault = true
+        } else {
+          card.isDefault = false
+        }
+      });
+
+      await user.save();
+
+      res.json({ message: 'Default card updated' })
+
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
 userRouter.delete(
   '/:id',
+  isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)

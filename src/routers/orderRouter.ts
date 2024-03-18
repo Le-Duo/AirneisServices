@@ -79,7 +79,7 @@ function calculateShippingPrice(itemsPrice: number): number {
 
 orderRouter.post(
   '/',
-  // isAuth,
+  isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
       const {
