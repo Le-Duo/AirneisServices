@@ -222,7 +222,7 @@ productRouter.get(
           slug: 1,
           description: 1,
           price: 1,
-          URLimage: 1,
+          URLimages: 1,
           quantity: { $arrayElemAt: ['$stockInfo.quantity', 0] },
           inStock: 1, // Include this line if you want to return the inStock status
         },
@@ -243,7 +243,7 @@ productRouter.post(
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { name, slug, URLimage, categoryId, description, materials, price, priority, _id } = req.body
+      const { name, slug, URLimages, categoryId, description, materials, price, priority, _id } = req.body
       const category = await CategoryModel.findById(categoryId)
       if (!category) {
         res.status(500).json('Category does not exist')
@@ -254,7 +254,7 @@ productRouter.post(
         _id,
         name,
         slug,
-        URLimage,
+        URLimages,
         category: category, //cast la variable category en type "Category"
         description,
         materials,

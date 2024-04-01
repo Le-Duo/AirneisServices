@@ -17,8 +17,8 @@ export class Product {
   @prop({ required: true, unique: true })
   public slug!: string;
 
-  @prop()
-  public URLimage?: string;
+  @prop({ type: () => [String] })
+  public URLimages?: string[];
 
   @prop({ required: true, type: () => Category })
   public category!: DocumentType<Category>;
