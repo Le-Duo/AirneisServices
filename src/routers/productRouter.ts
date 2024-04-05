@@ -21,7 +21,7 @@ productRouter.get(
     const products = await ProductModel.aggregate([
       {
         $lookup: {
-          from: "stocks",
+          from: "stock",
           localField: "_id",
           foreignField: "product",
           as: "stockInfo"
@@ -186,19 +186,25 @@ productRouter.get(
       },
     }
 
-    // Define sort stage based on sortBy and sortOrder query parameters
-    let sortStage = {
-      $sort: {
-        priority: -1, // Products with priority come first
-        inStock: -1, // Products in stock come first
-        ...(sortBy === 'price' && {
-          price: sortOrder === 'asc' ? 1 : -1, // Sort by price, default to descending if sortOrder is not 'asc'
-        }),
-        ...(sortBy === 'dateAdded' && {
-          createdAt: sortOrder === 'asc' ? 1 : -1, // Sort by date added, default to descending if sortOrder is not 'asc'
-        }),
-      },
-    }
+// Define sort stage based on sortBy and sortOrder query parameters
+let sortStage = {
+  $sort: {
+    // If sortBy is provided and matches 'price', sort by price
+    ...(sortBy === 'price' ? {
+      price: sortOrder === 'asc' ? 1 : -1,
+    } : {}),
+    // If sortBy is provided and matches 'createdAt', sort by createdAt
+    ...(sortBy === 'createdAt' ? {
+      createdAt: sortOrder === 'asc' ? 1 : -1,
+    } : {}),
+    // If no sortBy is provided or if it doesn't match any expected value, default to sorting by priority and inStock
+    // This ensures there's always at least one sort key
+    ...(!sortBy || (sortBy !== 'price' && sortBy !== 'createdAt') ? {
+      priority: -1, // Products with priority come first
+      inStock: -1, // Products in stock come first
+    } : {}),
+  },
+}
 
     // Before the sort stage, add a stage to calculate the inStock status
     let addFieldsStage = {
@@ -207,7 +213,7 @@ productRouter.get(
       }
     }
 
-    // Compile the aggregation pipeline stages
+    // Compile the aggregation pipeline stages and use explain() to analyze the execution
     const pipeline = [
       ...(Object.keys(searchStage).length > 0 ? [searchStage] : []),
       lookupStage,
@@ -225,6 +231,7 @@ productRouter.get(
           URLimages: 1,
           quantity: { $arrayElemAt: ['$stockInfo.quantity', 0] },
           inStock: 1, // Include this line if you want to return the inStock status
+          priority: 1, // Include the priority field in the results
         },
       },
     ]
