@@ -5,7 +5,7 @@
  * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
  */
 import express, { Request, Response } from 'express'
-import { User, UserModel, UserAddress } from '../models/user'
+import { User, UserModel, UserAddress, UserAddressModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
@@ -33,7 +33,15 @@ interface UserRequestBody {
   password?: string
   isAdmin?: boolean
   address?: UserAddress
+  addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
+}
+
+interface AddressRequestBody {
+  street: string
+  city: string
+  postalCode: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
+  country: string
 }
 
 interface PaymentCardRequestBody {
@@ -90,6 +98,8 @@ userRouter.put(
         user.isAdmin = req.body.isAdmin
       }
       user.address = req.body.address || user.address
+      user.addresses = req.body.addresses || user.addresses
+
       user.paymentCards = req.body.paymentCards || user.paymentCards
 
       const updatedUser = await user.save()
@@ -99,6 +109,7 @@ userRouter.put(
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
         address: updatedUser.address,
+        addresses: updatedUser.addresses,
         paymentCards: updatedUser.paymentCards,
         token: generateToken(updatedUser),
       })
@@ -108,6 +119,60 @@ userRouter.put(
   })
 )
 
+//address
+userRouter.post(
+  '/:id/address/add',
+  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+
+      const newAddress = new UserAddressModel({
+        street:req.body.street,
+        city:req.body.city,
+        postalCode:req.body.postalCode,
+        country:req.body.country,
+        isDefault: false
+      })
+
+      user.addresses.push(newAddress)
+
+      await user.save()
+
+      res.send({
+        newAddress: newAddress,
+      })
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
+//address
+userRouter.put(
+  '/:id/address/:idAddress/default',
+  asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+     
+      user.addresses.forEach(addr => {
+        if (addr._id == req.params.idAddress) {
+          addr.isDefault = true
+        } else {
+          addr.isDefault = false
+        }
+      });
+
+      await user.save();
+
+      res.json({ message: 'Default address updated' })
+
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
+// payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
@@ -135,7 +200,7 @@ userRouter.post(
   })
 )
 
-
+// payment card
 userRouter.put(
   '/:id/payment/card/:idCard/default',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
