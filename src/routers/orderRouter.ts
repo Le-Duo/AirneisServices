@@ -8,7 +8,7 @@
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { isAuth } from '../utils'
-import { OrderModel } from '../models/order'
+import { OrderModel, ShippingAddress } from '../models/order'
 import { StockModel } from '../models/stock'
 import { v4 as uuidv4 } from 'uuid'
 import { Item } from '../models/order'
@@ -91,7 +91,7 @@ orderRouter.post(
         isDelivered,
       }: {
         user: string
-        shippingAddress: any
+        shippingAddress: ShippingAddress
         paymentMethod: string
         orderItems: Item[]
         isPaid: boolean
@@ -112,6 +112,7 @@ orderRouter.post(
 
         return acc + quantity * price
       }, 0)
+
       const shippingPrice = calculateShippingPrice(itemsPrice)
       const taxPrice = itemsPrice * 0.2
       const totalPrice = itemsPrice + shippingPrice + taxPrice
