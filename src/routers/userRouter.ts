@@ -55,7 +55,7 @@ interface PaymentCardRequestBody {
 const sendErrorResponse = (res: Response, statusCode: number, message: string) => {
   res.status(statusCode).send({ message })
 }
-
+// Get all users
 userRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
@@ -63,7 +63,7 @@ userRouter.get(
     res.json(users)
   })
 )
-
+// Get user by id
 userRouter.get(
   '/:id',
   isAuth,
@@ -77,7 +77,7 @@ userRouter.get(
     }
   })
 )
-
+// Update user
 userRouter.put(
   '/:id',
   isAuth,
@@ -119,7 +119,7 @@ userRouter.put(
   })
 )
 
-//address
+// new address
 userRouter.post(
   '/:id/address/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
@@ -147,7 +147,7 @@ userRouter.post(
   })
 )
 
-//address
+//address default
 userRouter.put(
   '/:id/address/:idAddress/default',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
@@ -172,7 +172,54 @@ userRouter.put(
   })
 )
 
-// payment card
+// update address
+userRouter.put(
+  '/:id/address/:addressId',
+  isAuth,
+  //isAdmin,
+  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>,res: Response) => {
+    try {
+      const user = await UserModel.findById(req.params.id)
+      if(!user){
+        return sendErrorResponse(res, 400, "Utilisateur non trouvé")
+      }
+
+      var indexAddress= -1
+      var addressFound = false
+
+      for (let index = 0; index < user.addresses.length; index++) {
+        if (user.addresses[index]._id == req.params.addressId) {
+          addressFound = true
+          indexAddress = index;
+          var address = user.addresses[index]
+
+          address.city =  req.body.city || address.city
+          address.country =  req.body.country || address.country
+          address.postalCode =  req.body.postalCode || address.postalCode
+          address.street =  req.body.street ||address.street
+
+          break;
+        }
+      }
+
+      if (!addressFound){
+        return sendErrorResponse(res, 400, "Adresse non trouvée")
+      }
+
+      const updatedUser = await user.save()
+      res.json({
+        updatedAddress: updatedUser.addresses[indexAddress],
+      })
+      
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l\'adresse utilisateur')
+
+    }
+  })
+
+)
+
+// add payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
@@ -200,7 +247,7 @@ userRouter.post(
   })
 )
 
-// payment card
+// payment card default
 userRouter.put(
   '/:id/payment/card/:idCard/default',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
@@ -224,7 +271,7 @@ userRouter.put(
     }
   })
 )
-
+// delete user
 userRouter.delete(
   '/:id',
   isAdmin,
@@ -240,7 +287,7 @@ userRouter.delete(
     }
   })
 )
-
+// signin
 userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
@@ -258,7 +305,7 @@ userRouter.post(
     }
   })
 )
-
+// sign up
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
@@ -282,7 +329,7 @@ userRouter.post(
     }
   })
 )
-
+// password request
 userRouter.post(
   '/password-reset-request',
   passwordResetRequestLimiter,
@@ -302,7 +349,7 @@ userRouter.post(
     }
   })
 )
-
+// password reset
 userRouter.post(
   '/password-reset',
   asyncHandler(async (req: Request, res: Response) => {
