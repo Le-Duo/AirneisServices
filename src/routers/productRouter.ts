@@ -18,10 +18,33 @@ const productRouter = express.Router()
 productRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
-    const products = await ProductModel.find().sort({
-      'stock.quantity': 1, // Tri décroissant par quantité en stock (les produits épuisés apparaissent en dernier)
-      priority: -1, // Tri décroissant par priorité (les produits avec une priorité élevée apparaissent en premier)
-    })
+    const products = await ProductModel.aggregate([
+      {
+        $lookup: {
+          from: "stock",
+          localField: "_id",
+          foreignField: "product",
+          as: "stockInfo"
+        }
+      },
+      {
+        $addFields: {
+          inStock: { $gt: [{ $arrayElemAt: ["$stockInfo.quantity", 0] }, 0] }
+        }
+      },
+      {
+        $sort: {
+          priority: -1,
+          inStock: -1,
+          'stockInfo.quantity': 1
+        }
+      },
+      {
+        $project: {
+          stockInfo: 0 // Exclude stockInfo from final output
+        }
+      }
+    ]).exec()
     res.json(products)
   })
 )
@@ -70,42 +93,23 @@ productRouter.get(
 productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
-    console.log('Starting search operation')
 
     // Extract query parameters for search criteria
     const { searchText, categories, inStock, materials, minPrice, maxPrice, sortBy, sortOrder } = req.query
-    console.log('Extracted query parameters', req.query)
 
     // Convert inStock query parameter to boolean
     const inStockBool = inStock !== undefined && inStock !== 'false'
-    console.log('Converted inStock to boolean:', inStockBool)
 
     // Convert minPrice and maxPrice to numbers
     const minPriceNumber = minPrice ? Number(minPrice) : undefined;
     const maxPriceNumber = maxPrice ? Number(maxPrice) : undefined;
-    console.log('Processed price range. Min:', minPriceNumber, 'Max:', maxPriceNumber)
 
     // Retrieve product IDs that are in stock if inStockBool is true
     let productIdsInStockObjectIds: Types.ObjectId[] = []
     if (inStockBool) {
-      console.log('Retrieving in-stock product IDs')
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec()
       const productIdsInStock = stockInfo.map(stock => stock.product._id.toString())
       productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id))
-      console.log('Retrieved product IDs in stock:', productIdsInStock)
-
-      // Convert productIdsInStock to ObjectId instances
-      console.log('Converted product IDs to ObjectId instances:', productIdsInStockObjectIds)
-    } else {
-      console.log('In-stock filter not applied or all products are considered.')
-    }
-
-    console.log('Processed price range. Min:', minPriceNumber, 'Max:', maxPriceNumber)
-
-    if (minPriceNumber !== undefined || maxPriceNumber !== undefined) {
-      console.log('Price range provided:', minPriceNumber, 'to', maxPriceNumber)
-    } else {
-      console.log('No specific price range provided.')
     }
 
     let searchStage = searchText
@@ -148,13 +152,6 @@ productRouter.get(
           },
         }
       : {}
-    console.log('Defined search stage:', searchStage)
-
-    if (Object.keys(searchStage).length > 0) {
-      console.log('Search text provided, applying search stage.')
-    } else {
-      console.log('No search text provided, skipping search stage.')
-    }
 
     // Define lookup stage to join with stock information
     let lookupStage = {
@@ -165,7 +162,6 @@ productRouter.get(
         as: 'stockInfo',
       },
     }
-    console.log('Defined lookup stage')
 
     // Define match stage to filter results based on query parameters
     let matchStage = {
@@ -189,36 +185,39 @@ productRouter.get(
         }),
       },
     }
-    console.log('Defined match stage:', matchStage)
 
-    // Define sort stage based on sortBy and sortOrder query parameters
-    let sortStage = sortBy
-      ? {
-          $sort: {
-            ...(sortBy === 'price' && {
-              price: sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 0,
-            }),
-            ...(sortBy === 'dateAdded' && {
-              createdAt: sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 0,
-            }),
-            ...(sortBy === 'inStock' && {
-              'stockInfo.quantity': sortOrder === 'asc' ? 1 : sortOrder === 'desc' ? -1 : 0,
-            }),
-          },
-        }
-      : {}
-    console.log('Defined sort stage:', sortStage)
+// Define sort stage based on sortBy and sortOrder query parameters
+let sortStage = {
+  $sort: {
+    // If sortBy is provided and matches 'price', sort by price
+    ...(sortBy === 'price' ? {
+      price: sortOrder === 'asc' ? 1 : -1,
+    } : {}),
+    // If sortBy is provided and matches 'createdAt', sort by createdAt
+    ...(sortBy === 'createdAt' ? {
+      createdAt: sortOrder === 'asc' ? 1 : -1,
+    } : {}),
+    // If no sortBy is provided or if it doesn't match any expected value, default to sorting by priority and inStock
+    // This ensures there's always at least one sort key
+    ...(!sortBy || (sortBy !== 'price' && sortBy !== 'createdAt') ? {
+      priority: -1, // Products with priority come first
+      inStock: -1, // Products in stock come first
+    } : {}),
+  },
+}
 
-    if (Object.keys(sortStage).length > 0) {
-      console.log('Sort criteria provided, applying sort stage.')
-    } else {
-      console.log('No sort criteria provided, skipping sort stage.')
+    // Before the sort stage, add a stage to calculate the inStock status
+    let addFieldsStage = {
+      $addFields: {
+        inStock: { $gt: [{ $arrayElemAt: ["$stockInfo.quantity", 0] }, 0] }
+      }
     }
 
-    // Compile the aggregation pipeline stages
+    // Compile the aggregation pipeline stages and use explain() to analyze the execution
     const pipeline = [
       ...(Object.keys(searchStage).length > 0 ? [searchStage] : []),
       lookupStage,
+      addFieldsStage, // Add this line to include the inStock calculation
       ...(Object.keys(matchStage.$match).length > 0 ? [matchStage] : []),
       ...(Object.keys(sortStage).length > 0 ? [sortStage] : []),
       { $limit: 10 },
@@ -226,19 +225,19 @@ productRouter.get(
         $project: {
           _id: 1,
           name: 1,
+          slug: 1,
           description: 1,
           price: 1,
-          URLimage: 1,
+          URLimages: 1,
           quantity: { $arrayElemAt: ['$stockInfo.quantity', 0] },
+          inStock: 1, // Include this line if you want to return the inStock status
+          priority: 1, // Include the priority field in the results
         },
       },
     ]
-    console.log('Compiled aggregation pipeline:', pipeline)
 
     // Execute the aggregation pipeline
-    console.log('Executing aggregation pipeline')
     const results = await ProductModel.aggregate(pipeline as any[]).exec()
-    console.log('Aggregation pipeline executed. Results:', results)
 
     // Return the search results
     res.json(results)
@@ -251,7 +250,7 @@ productRouter.post(
   isAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { name, slug, URLimage, categoryId, description, materials, price, priority, _id } = req.body
+      const { name, slug, URLimages, categoryId, description, materials, price, priority, _id } = req.body
       const category = await CategoryModel.findById(categoryId)
       if (!category) {
         res.status(500).json('Category does not exist')
@@ -262,7 +261,7 @@ productRouter.post(
         _id,
         name,
         slug,
-        URLimage,
+        URLimages,
         category: category, //cast la variable category en type "Category"
         description,
         materials,
