@@ -5,13 +5,13 @@
  * La route 'POST /' crée une nouvelle commande avec les détails fournis dans le corps de la requête. Elle nécessite également une authentification.
  */
 
-import express, { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
-import { isAuth } from "../utils";
-import { OrderModel, Item } from "../models/order";
-import { StockModel } from "../models/stock";
-import { v4 as uuidv4 } from "uuid";
-export const orderRouter = express.Router();
+import express, { Request, Response } from 'express'
+import asyncHandler from 'express-async-handler'
+import { isAuth } from '../utils'
+import { OrderModel, ShippingAddress, Item } from '../models/order'
+import { StockModel } from '../models/stock'
+import { v4 as uuidv4 } from 'uuid'
+export const orderRouter = express.Router()
 
 orderRouter.get(
   "/",
@@ -114,8 +114,8 @@ function calculateShippingPrice(itemsPrice: number): number {
 }
 
 orderRouter.post(
-  "/",
-  // isAuth,
+  '/',
+  isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     try {
       const {
@@ -126,13 +126,13 @@ orderRouter.post(
         isPaid,
         isDelivered,
       }: {
-        user: string;
-        shippingAddress: any;
-        paymentMethod: string;
-        orderItems: Item[];
-        isPaid: boolean;
-        isDelivered: boolean;
-      } = req.body;
+        user: string
+        shippingAddress: ShippingAddress
+        paymentMethod: string
+        orderItems: Item[]
+        isPaid: boolean
+        isDelivered: boolean
+      } = req.body
 
       if (
         !Array.isArray(orderItems) ||
@@ -149,11 +149,12 @@ orderRouter.post(
         const quantity = typeof item.quantity === "number" ? item.quantity : 0;
         const price = typeof item.price === "number" ? item.price : 0;
 
-        return acc + quantity * price;
-      }, 0);
-      const shippingPrice = calculateShippingPrice(itemsPrice);
-      const taxPrice = itemsPrice * 0.2;
-      const totalPrice = itemsPrice + shippingPrice + taxPrice;
+        return acc + quantity * price
+      }, 0)
+
+      const shippingPrice = calculateShippingPrice(itemsPrice)
+      const taxPrice = itemsPrice * 0.2
+      const totalPrice = itemsPrice + shippingPrice + taxPrice
 
       const orderNumber = generateOrderNumber();
 

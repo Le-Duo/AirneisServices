@@ -8,6 +8,9 @@ import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 import {PaymentCard } from '../models/payment'
 
 export class UserAddress {
+
+  public _id?: string;
+  
   @prop({default: ''})
   public street!: string
   @prop({default: ''})
@@ -16,6 +19,8 @@ export class UserAddress {
   public postalCode!: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
   @prop({default: ''})
   public country!: string
+  @prop({required: true, default: false})
+  public isDefault!: boolean
 }
 
 @modelOptions({ schemaOptions: { collection: 'users', timestamps: true } })
@@ -28,6 +33,9 @@ export class User {
   @prop({ required: true })
   public email!: string
 
+  @prop({ required: false, default: ''})
+  public phoneNumber!: number
+
   @prop({ required: true })
   public password!: string
 
@@ -36,6 +44,9 @@ export class User {
 
   @prop({ required: false })
   public address!: UserAddress
+
+  @prop({type: () => [UserAddress], required: false })
+  public addresses!: UserAddress[]
 
   @prop({type: () => [PaymentCard], required: false })
   public paymentCards!: PaymentCard[]

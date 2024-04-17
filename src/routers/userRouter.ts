@@ -5,7 +5,7 @@
  * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
  */
 import express, { Request, Response } from 'express'
-import { User, UserModel, UserAddress } from '../models/user'
+import { User, UserModel, UserAddress, UserAddressModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
@@ -15,6 +15,7 @@ import { isAdmin, isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
+import { Types } from "mongoose";
 
 dotenv.config()
 
@@ -32,7 +33,15 @@ interface UserRequestBody {
   password?: string
   isAdmin?: boolean
   address?: UserAddress
+  addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
+}
+
+interface AddressRequestBody {
+  street: string
+  city: string
+  postalCode: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
+  country: string
 }
 
 interface PaymentCardRequestBody {
@@ -46,7 +55,7 @@ interface PaymentCardRequestBody {
 const sendErrorResponse = (res: Response, statusCode: number, message: string) => {
   res.status(statusCode).send({ message })
 }
-
+// Get all users
 userRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
@@ -54,11 +63,11 @@ userRouter.get(
     res.json(users)
   })
 )
-
+// Get user by id
 userRouter.get(
   '/:id',
   isAuth,
-  isAdmin,
+  // isAdmin, // si isAdmin = un utilisateur ne peut pas voir son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
@@ -68,19 +77,11 @@ userRouter.get(
     }
   })
 )
-
-userRouter.get(
-  '/:id',
-  asyncHandler(async (req: Request, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
-    res.json(user)
-  })
-)
-
+// Update user
 userRouter.put(
   '/:id',
   isAuth,
-  isAdmin,
+  // isAdmin, // si isAdmin = un utilisateur ne peut pas modifier son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     try {
       const user = await UserModel.findById(req.params.id)
@@ -97,6 +98,8 @@ userRouter.put(
         user.isAdmin = req.body.isAdmin
       }
       user.address = req.body.address || user.address
+      user.addresses = req.body.addresses || user.addresses
+
       user.paymentCards = req.body.paymentCards || user.paymentCards
 
       const updatedUser = await user.save()
@@ -106,6 +109,7 @@ userRouter.put(
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
         address: updatedUser.address,
+        addresses: updatedUser.addresses,
         paymentCards: updatedUser.paymentCards,
         token: generateToken(updatedUser),
       })
@@ -115,17 +119,119 @@ userRouter.put(
   })
 )
 
+// new address
+userRouter.post(
+  '/:id/address/add',
+  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+
+      const newAddress = new UserAddressModel({
+        street:req.body.street,
+        city:req.body.city,
+        postalCode:req.body.postalCode,
+        country:req.body.country,
+        isDefault: false
+      })
+
+      user.addresses.push(newAddress)
+
+      await user.save()
+
+      res.send({
+        newAddress: newAddress,
+      })
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
+//address default
+userRouter.put(
+  '/:id/address/:idAddress/default',
+  asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+     
+      user.addresses.forEach(addr => {
+        if (addr._id == req.params.idAddress) {
+          addr.isDefault = true
+        } else {
+          addr.isDefault = false
+        }
+      });
+
+      await user.save();
+
+      res.json({ message: 'Default address updated' })
+
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+
+// update address
+userRouter.put(
+  '/:id/address/:addressId',
+  isAuth,
+  //isAdmin,
+  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>,res: Response) => {
+    try {
+      const user = await UserModel.findById(req.params.id)
+      if(!user){
+        return sendErrorResponse(res, 400, "Utilisateur non trouvé")
+      }
+
+      var indexAddress= -1
+      var addressFound = false
+
+      for (let index = 0; index < user.addresses.length; index++) {
+        if (user.addresses[index]._id == req.params.addressId) {
+          addressFound = true
+          indexAddress = index;
+          var address = user.addresses[index]
+
+          address.city =  req.body.city || address.city
+          address.country =  req.body.country || address.country
+          address.postalCode =  req.body.postalCode || address.postalCode
+          address.street =  req.body.street ||address.street
+
+          break;
+        }
+      }
+
+      if (!addressFound){
+        return sendErrorResponse(res, 400, "Adresse non trouvée")
+      }
+
+      const updatedUser = await user.save()
+      res.json({
+        updatedAddress: updatedUser.addresses[indexAddress],
+      })
+      
+    } catch (error) {
+      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l\'adresse utilisateur')
+
+    }
+  })
+
+)
+
+// add payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
       const newCard = new PaymentCardModel({
-        bankName: req.body.address.bankName,
-        number: req.body.address.number,
-        fullName: req.body.address.fullName,
-        monthExpiration: req.body.address.monthExpiration,
-        yearExpiration: req.body.address.yearExpiration,
+        bankName: req.body.bankName,
+        number: req.body.number,
+        fullName: req.body.fullName,
+        monthExpiration: req.body.monthExpiration,
+        yearExpiration: req.body.yearExpiration,
+        isDefault: false
       })
 
       user.paymentCards.push(newCard)
@@ -141,8 +247,34 @@ userRouter.post(
   })
 )
 
+// payment card default
+userRouter.put(
+  '/:id/payment/card/:idCard/default',
+  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id)
+    if (user) {
+     
+      user.paymentCards.forEach(card => {
+        if (card._id == req.params.idCard) {
+          card.isDefault = true
+        } else {
+          card.isDefault = false
+        }
+      });
+
+      await user.save();
+
+      res.json({ message: 'Default card updated' })
+
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
+    }
+  })
+)
+// delete user
 userRouter.delete(
   '/:id',
+  isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)
@@ -155,7 +287,7 @@ userRouter.delete(
     }
   })
 )
-
+// signin
 userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
@@ -173,7 +305,7 @@ userRouter.post(
     }
   })
 )
-
+// sign up
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
@@ -197,7 +329,7 @@ userRouter.post(
     }
   })
 )
-
+// password request
 userRouter.post(
   '/password-reset-request',
   passwordResetRequestLimiter,
@@ -217,7 +349,7 @@ userRouter.post(
     }
   })
 )
-
+// password reset
 userRouter.post(
   '/password-reset',
   asyncHandler(async (req: Request, res: Response) => {

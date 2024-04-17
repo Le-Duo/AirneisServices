@@ -20,13 +20,7 @@ export class ShippingAddress {
   public _id?: string;
 
   @prop({ required: true })
-  public user!: string;
-
-  @prop({ required: true })
-  public firstName!: string;
-
-  @prop({ required: true })
-  public lastName!: string;
+  public fullName!: string;
 
   @prop({ required: true })
   public street!: string;
@@ -42,9 +36,6 @@ export class ShippingAddress {
 
   @prop({ required: true })
   public country!: string;
-
-  @prop({ required: true })
-  public phone!: string;
 }
 
 export const ShippingAddressModel = getModelForClass(ShippingAddress);
@@ -54,8 +45,8 @@ export class Item {
   public name!: string;
   @prop({ required: true })
   public quantity!: number;
-  @prop({ required: true })
-  public image!: string;
+  @prop({ required: false })
+  public image?: string;
   @prop({ required: true })
   public price!: number;
   @prop({ ref: () => Product })
