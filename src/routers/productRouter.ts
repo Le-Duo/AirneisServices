@@ -112,6 +112,14 @@ productRouter.get(
       productIdsInStockObjectIds = productIdsInStock.map(id => new Types.ObjectId(id))
     }
 
+    let categoryIds: string[] = [];
+    if (categories) {
+      // Assuming categories is a comma-separated list of slugs
+      const categorySlugs = typeof categories === 'string' ? categories.split(',') : [];
+      const categoryDocs = await CategoryModel.find({ slug: { $in: categorySlugs } });
+      categoryIds = categoryDocs.map(doc => doc._id);
+    }
+
     let searchStage = searchText
       ? {
           $search: {
@@ -172,9 +180,9 @@ productRouter.get(
             ...(maxPriceNumber !== undefined && { $lte: maxPriceNumber }),
           },
         }),
-        ...(categories && {
-          'category.name': {
-            $in: typeof categories === 'string' ? categories.split(',') : categories,
+        ...(categoryIds.length > 0 && {
+          'category._id': {
+            $in: categoryIds,
           },
         }),
         ...(inStockBool && { _id: { $in: productIdsInStockObjectIds } }), // Use ObjectId instances for matching

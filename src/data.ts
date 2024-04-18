@@ -20,36 +20,42 @@ export const sampleCategories: Category[] = [
     name: 'Sofas',
     urlImage: '../public/images/categorysofa.png',
     slug: 'sofas',
+    description: 'Discover the ultimate comfort with our luxurious sofa collection, perfect for elevating your living space.',
   },
   {
     _id: '60d0fe4f5311236168a109cb',
     name: 'Tables',
     urlImage: '../public/images/categorytable.png',
     slug: 'tables',
+    description: 'Elevate your dining experience with our stylish and functional tables, designed to fit any space.',
   },
   {
     _id: '60d0fe4f5311236168a109cc',
     name: 'Bookcases',
     urlImage: '../public/images/categorybookcase.png',
     slug: 'bookcases',
+    description: 'Organize your favorite reads and accentuate your space with our elegant and versatile bookcases.',
   },
   {
     _id: '60d0fe4f5311236168a109cd',
     name: 'Rugs',
     urlImage: '../public/images/categoryrug.png',
     slug: 'rugs',
+    description: 'Add a touch of warmth and style to any room with our exquisite collection of rugs.',
   },
   {
     _id: '60d0fe4f5311236168a109ce',
     name: 'Lamps',
     urlImage: '../public/images/categorylamp.png',
     slug: 'lamps',
+    description: 'Illuminate your home with our range of beautiful and functional lamps, perfect for setting the mood.',
   },
   {
     _id: '60d0fe4f5311236168a109cf',
     name: 'Wardrobes',
     urlImage: '../public/images/categorywardrobe.png',
     slug: 'wardrobes',
+    description: 'Keep your clothes organized and your bedroom tidy with our stylish and spacious wardrobes.',
   },
 ]
 
@@ -151,12 +157,14 @@ export const sampleUsers: User[] = [
     email: 'admin@example.com',
     password: bcrypt.hashSync('password'),
     isAdmin: true,
-    address: {
+    phoneNumber: '555-1234',
+    addresses: [{
       street: '123 Main St',
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
-    },
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: 'Visa',
@@ -164,6 +172,7 @@ export const sampleUsers: User[] = [
         fullName: 'John Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: true,
       },
       {
         bankName: 'Mastercard',
@@ -171,6 +180,7 @@ export const sampleUsers: User[] = [
         fullName: 'Jane Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: false,
       },
     ],
   },
@@ -179,12 +189,14 @@ export const sampleUsers: User[] = [
     email: 'userone@example.com',
     password: bcrypt.hashSync('123456'),
     isAdmin: false,
-    address: {
+    phoneNumber: '555-5678',
+    addresses: [{
       street: '123 Main St',
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
-    },
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: 'Visa',
@@ -192,6 +204,7 @@ export const sampleUsers: User[] = [
         fullName: 'John Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: true,
       },
       {
         bankName: 'Mastercard',
@@ -199,6 +212,7 @@ export const sampleUsers: User[] = [
         fullName: 'Jane Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: false,
       },
     ],
   },
@@ -207,12 +221,14 @@ export const sampleUsers: User[] = [
     email: 'usertwo@example.com',
     password: bcrypt.hashSync('123456'),
     isAdmin: false,
-    address: {
+    phoneNumber: '555-6789',
+    addresses: [{
       street: '123 Main St',
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
-    },
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: 'Visa',
@@ -220,6 +236,7 @@ export const sampleUsers: User[] = [
         fullName: 'John Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: true,
       },
       {
         bankName: 'Mastercard',
@@ -227,6 +244,7 @@ export const sampleUsers: User[] = [
         fullName: 'Jane Doe',
         monthExpiration: 12,
         yearExpiration: 2023,
+        isDefault: false,
       },
     ],
   },
@@ -252,17 +270,17 @@ export const sampleCarouselItems: CarouselItem[] = [
 
 export const sampleContacts: Contact[] = [
   {
-    mail: 'contact@example.com',
+    mail: 'userone@example.com',
     subject: 'Inquiry about product availability',
     message: 'I would like to know when the MACLEOD sofa will be back in stock. Thank you.',
   },
   {
-    mail: 'feedback@example.com',
+    mail: 'usertwo@example.com',
     subject: 'Feedback on recent purchase',
     message: 'I recently purchased the NESSIE sofa and am extremely satisfied with the quality. Thank you!',
   },
   {
-    mail: 'support@example.com',
+    mail: 'userone@example.com',
     subject: 'Issue with delivery',
     message: 'My order for the THISTLE sofa was delayed, and I would like to inquire about the new delivery date.',
   },
@@ -279,7 +297,7 @@ export const sampleStocks: Stock[] = [
   },
   {
     product: sampleProducts.find(product => product.slug === 'thistle')! as DocumentType<Product>,
-    quantity: 8,
+    quantity: 0,
   },
   {
     product: sampleProducts.find(product => product.slug === 'glen')! as DocumentType<Product>,
@@ -292,6 +310,10 @@ export const sampleStocks: Stock[] = [
   {
     product: sampleProducts.find(product => product.slug === 'heather')! as DocumentType<Product>,
     quantity: 4,
+  },
+  {
+    product: sampleProducts.find(product => product.slug === 'stirling')! as DocumentType<Product>,
+    quantity: 1,
   },
   {
     product: sampleProducts.find(product => product.slug === 'skye')! as DocumentType<Product>,
@@ -315,15 +337,14 @@ export const sampleOrders: Order[] = [
     shippingAddress: {
       _id: '60d0fe4f5311236168a109f1',
       user: 'Admin User',
-      firstName: 'John',
-      lastName: 'Doe',
+      fullName: 'John Doe',
       street: '123 Main St',
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
       phone: '555-1234',
     } as ShippingAddress,
-    user: sampleUsers.find(user => user.email === 'admin@example.com') as DocumentType<User>,
+    user: sampleUsers.find(user => user.email === 'admin@example.com')?._id!,
     paymentMethod: 'PayPal',
     itemsPrice: 200,
     shippingPrice: 20,
@@ -335,4 +356,4 @@ export const sampleOrders: Order[] = [
     deliveredAt: new Date('2023-01-05'),
     status: OrderStatus.Delivered,
   },
-]
+];

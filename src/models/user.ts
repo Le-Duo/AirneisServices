@@ -34,7 +34,7 @@ export class User {
   public email!: string
 
   @prop({ required: false, default: ''})
-  public phoneNumber!: number
+  public phoneNumber?: string
 
   @prop({ required: true })
   public password!: string
@@ -43,13 +43,13 @@ export class User {
   public isAdmin!: boolean
 
   @prop({ required: false })
-  public address!: UserAddress
+  public address?: UserAddress
 
   @prop({type: () => [UserAddress], required: false })
-  public addresses!: UserAddress[]
+  public addresses?: UserAddress[]
 
   @prop({type: () => [PaymentCard], required: false })
-  public paymentCards!: PaymentCard[]
+  public paymentCards?: PaymentCard[]
 
   @prop()
   public passwordResetTokenJti?: string // Field to track jti of password reset token

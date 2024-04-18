@@ -28,13 +28,26 @@ categoryRouter.get(
   })
 );
 
+categoryRouter.get(
+  "/slug/:slug",
+  asyncHandler(async (req, res) => {
+    const slug = req.params.slug;
+    const category = await CategoryModel.findOne({ slug: slug });
+    if (category) {
+      res.json(category);
+    } else {
+      res.status(404).json({ error: "Category not found" });
+    }
+  })
+);
+
 categoryRouter.post(
   "/",
   isAuth,
   isAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const { _id, name, slug, urlImage } = req.body;
+      const { _id, name, slug, urlImage, description } = req.body;
 
       // Création du model pour la catégorie
       const newCategory = new CategoryModel({
@@ -42,6 +55,7 @@ categoryRouter.post(
         name,
         slug,
         urlImage,
+        description,
       });
 
       // Enregistre le produit dans la base de données
