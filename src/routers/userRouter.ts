@@ -122,109 +122,101 @@ userRouter.put(
 // new address
 userRouter.post(
   '/:id/address/add',
-  asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
-    if (user) {
-
-      const newAddress = new UserAddressModel({
-        street:req.body.street,
-        city:req.body.city,
-        postalCode:req.body.postalCode,
-        country:req.body.country,
-        isDefault: false
-      })
-
-      user.addresses.push(newAddress)
-
-      await user.save()
-
-      res.send({
-        newAddress: newAddress,
-      })
-    } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' })
-    }
-  })
-)
-
-//address default
-userRouter.put(
-  '/:id/address/:idAddress/default',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
-     
+      // Ensure addresses array is initialized
+      if (!user.addresses) {
+        user.addresses = [];
+      }
+
+      const newAddress = new UserAddressModel({
+        street: req.body.street,
+        city: req.body.city,
+        postalCode: req.body.postalCode,
+        country: req.body.country,
+        isDefault: false
+      });
+
+      user.addresses.push(newAddress);
+      await user.save();
+      res.send({ newAddress: newAddress });
+    } else {
+      res.status(404).send({ message: 'Utilisateur non trouvé' });
+    }
+  })
+);
+
+// address default
+userRouter.put(
+  '/:id/address/:idAddress/default',
+  asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id);
+    if (user && user.addresses) {
       user.addresses.forEach(addr => {
-        if (addr._id == req.params.idAddress) {
-          addr.isDefault = true
-        } else {
-          addr.isDefault = false
-        }
+        addr.isDefault = (addr._id == req.params.idAddress);
       });
 
       await user.save();
-
-      res.json({ message: 'Default address updated' })
-
+      res.json({ message: 'Default address updated' });
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' })
+      res.status(404).send({ message: 'Utilisateur non trouvé' });
     }
   })
-)
+);
 
 // update address
 userRouter.put(
   '/:id/address/:addressId',
   isAuth,
-  //isAdmin,
-  asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>,res: Response) => {
-    try {
-      const user = await UserModel.findById(req.params.id)
-      if(!user){
-        return sendErrorResponse(res, 400, "Utilisateur non trouvé")
+  asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
+    const user = await UserModel.findById(req.params.id);
+    if (user) {
+      // Ensure addresses array is initialized
+      if (!user.addresses) {
+        user.addresses = [];
       }
 
-      var indexAddress= -1
-      var addressFound = false
+      let addressFound = false;
+      const indexAddress = user.addresses.findIndex(addr => addr._id == req.params.addressId);
 
-      for (let index = 0; index < user.addresses.length; index++) {
-        if (user.addresses[index]._id == req.params.addressId) {
-          addressFound = true
-          indexAddress = index;
-          var address = user.addresses[index]
-
-          address.city =  req.body.city || address.city
-          address.country =  req.body.country || address.country
-          address.postalCode =  req.body.postalCode || address.postalCode
-          address.street =  req.body.street ||address.street
-
-          break;
-        }
+      if (indexAddress !== -1) {
+        addressFound = true;
+        const address = user.addresses[indexAddress];
+        address.city = req.body.city || address.city;
+        address.country = req.body.country || address.country;
+        address.postalCode = req.body.postalCode || address.postalCode;
+        address.street = req.body.street || address.street;
       }
 
-      if (!addressFound){
-        return sendErrorResponse(res, 400, "Adresse non trouvée")
+      if (!addressFound) {
+        return sendErrorResponse(res, 400, "Adresse non trouvée");
       }
 
-      const updatedUser = await user.save()
-      res.json({
-        updatedAddress: updatedUser.addresses[indexAddress],
-      })
-      
-    } catch (error) {
-      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l\'adresse utilisateur')
-
+      const updatedUser = await user.save();
+      // Check again to ensure addresses is not undefined after saving
+      if (updatedUser.addresses && updatedUser.addresses.length > indexAddress) {
+        res.json({ updatedAddress: updatedUser.addresses[indexAddress] });
+      } else {
+        sendErrorResponse(res, 500, "Erreur lors de la mise à jour de l'adresse");
+      }
+    } else {
+      sendErrorResponse(res, 400, "Utilisateur non trouvé");
     }
   })
-
-)
+);
 
 // add payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
+    const user = await UserModel.findById(req.params.id);
     if (user) {
+      // Ensure paymentCards array is initialized
+      if (!user.paymentCards) {
+        user.paymentCards = [];
+      }
+
       const newCard = new PaymentCardModel({
         bankName: req.body.bankName,
         number: req.body.number,
@@ -232,45 +224,35 @@ userRouter.post(
         monthExpiration: req.body.monthExpiration,
         yearExpiration: req.body.yearExpiration,
         isDefault: false
-      })
+      });
 
-      user.paymentCards.push(newCard)
-
-      await user.save()
-
-      res.send({
-        newCard: newCard,
-      })
+      user.paymentCards.push(newCard);
+      await user.save();
+      res.send({ newCard: newCard });
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' })
+      res.status(404).send({ message: 'Utilisateur non trouvé' });
     }
   })
-)
+);
 
 // payment card default
 userRouter.put(
   '/:id/payment/card/:idCard/default',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id)
-    if (user) {
-     
+    const user = await UserModel.findById(req.params.id);
+    if (user && user.paymentCards) {
       user.paymentCards.forEach(card => {
-        if (card._id == req.params.idCard) {
-          card.isDefault = true
-        } else {
-          card.isDefault = false
-        }
+        card.isDefault = (card._id == req.params.idCard);
       });
 
       await user.save();
-
-      res.json({ message: 'Default card updated' })
-
+      res.json({ message: 'Default card updated' });
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' })
+      res.status(404).send({ message: 'Utilisateur non trouvé' });
     }
   })
-)
+);
+
 // delete user
 userRouter.delete(
   '/:id',

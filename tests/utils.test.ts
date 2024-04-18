@@ -65,6 +65,7 @@ describe('Middleware functions', () => {
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
+        isDefault: true,
       },
       paymentCards: [
         {
@@ -73,6 +74,7 @@ describe('Middleware functions', () => {
           fullName: 'John Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: true,
         },
         {
           bankName: 'Mastercard',
@@ -80,6 +82,7 @@ describe('Middleware functions', () => {
           fullName: 'Jane Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: false,
         },
       ], };
 
@@ -94,6 +97,7 @@ describe('Middleware functions', () => {
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
+        isDefault: true,
       },
       paymentCards: [
         {
@@ -102,6 +106,7 @@ describe('Middleware functions', () => {
           fullName: 'John Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: true,
         },
         {
           bankName: 'Mastercard',
@@ -109,6 +114,7 @@ describe('Middleware functions', () => {
           fullName: 'Jane Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: false,
         },
       ],};
 
@@ -126,6 +132,7 @@ describe('Middleware functions', () => {
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
+        isDefault: true,
       },
       paymentCards: [
         {
@@ -134,6 +141,7 @@ describe('Middleware functions', () => {
           fullName: 'John Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: true,
         },
         {
           bankName: 'Mastercard',
@@ -141,6 +149,7 @@ describe('Middleware functions', () => {
           fullName: 'Jane Doe',
           monthExpiration: 12,
           yearExpiration: 2023,
+          isDefault: false,
         },
       ],};
       const token = 'testtoken123';

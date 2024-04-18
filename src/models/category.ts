@@ -15,8 +15,11 @@ export class Category {
   @prop({ required: true })
   public slug!: string
 
-  @prop()
+  @prop({ required: false })
   public urlImage?: string
+
+  @prop({ required: false })
+  public description?: string
 }
 
 export const CategoryModel = getModelForClass(Category)
