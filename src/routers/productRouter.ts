@@ -90,6 +90,43 @@ productRouter.get(
   })
 );
 
+productRouter.get('/similar/:categoryId', async (req: Request, res: Response) => {
+  const { categoryId } = req.params;
+  try {
+    const products = await ProductModel.aggregate([
+      { $match: { 'category._id': new Types.ObjectId(categoryId) } },
+      {
+        $lookup: {
+          from: 'stock',
+          localField: '_id',
+          foreignField: 'product',
+          as: 'stockInfo',
+        },
+      },
+      { $unwind: { path: '$stockInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          slug: 1,
+          description: 1,
+          price: 1,
+          URLimages: 1,
+          quantity: '$stockInfo.quantity',
+          inStock: { $gt: [{ $ifNull: ['$stockInfo.quantity', 0] }, 0] },
+        },
+      },
+      { $match: { inStock: true } },
+      { $limit: 6 },
+    ]).exec();
+
+    res.json(products);
+  } catch (error) {
+    console.error('Fetch Error:', error);
+    res.status(500).json({ message: 'Error fetching similar products' });
+  }
+});
+
 productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
