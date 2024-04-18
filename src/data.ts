@@ -297,7 +297,7 @@ export const sampleStocks: Stock[] = [
   },
   {
     product: sampleProducts.find(product => product.slug === 'thistle')! as DocumentType<Product>,
-    quantity: 8,
+    quantity: 0,
   },
   {
     product: sampleProducts.find(product => product.slug === 'glen')! as DocumentType<Product>,
@@ -310,6 +310,10 @@ export const sampleStocks: Stock[] = [
   {
     product: sampleProducts.find(product => product.slug === 'heather')! as DocumentType<Product>,
     quantity: 4,
+  },
+  {
+    product: sampleProducts.find(product => product.slug === 'stirling')! as DocumentType<Product>,
+    quantity: 1,
   },
   {
     product: sampleProducts.find(product => product.slug === 'skye')! as DocumentType<Product>,
