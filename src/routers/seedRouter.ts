@@ -11,11 +11,15 @@ import { UserModel } from '../models/user'
 import { CategoryModel } from '../models/category'
 import { CarouselItemModel } from '../models/carouselItem'
 import { StockModel } from '../models/stock'
+import { OrderModel } from '../models/order'
+import { ContactModel } from '../models/contact'
 import { sampleProducts } from '../data'
 import { sampleUsers } from '../data'
 import { sampleCategories } from '../data'
 import { sampleCarouselItems } from '../data'
 import { sampleStocks } from '../data'
+import { sampleOrders } from '../data'
+import { sampleContacts } from '../data'
 
 export const seedRouter = express.Router()
 
@@ -26,8 +30,10 @@ seedRouter.get(
     await ProductModel.deleteMany({});
     await UserModel.deleteMany({});
     await CategoryModel.deleteMany({});
-    await CarouselItemModel.deleteMany({}); // Ajout pour supprimer les éléments existants du carrousel
-    await StockModel.deleteMany({}); // Ajout pour supprimer les stocks existants
+    await CarouselItemModel.deleteMany({});
+    await StockModel.deleteMany({});
+    await OrderModel.deleteMany({});
+    await ContactModel.deleteMany({});
 
     // Insérez d'abord les catégories
     const createdCategories = await CategoryModel.insertMany(sampleCategories);
@@ -62,7 +68,19 @@ seedRouter.get(
     // Insérez les stocks mis à jour
     const createdStocks = await StockModel.insertMany(updatedSampleStocks);
 
+    // Mettez à jour les commandes d'exemple avec les ID d'utilisateur créés
+    const updatedSampleOrders = sampleOrders.map(order => {
+      const userDoc = createdUsers.find(u => u.email === 'admin@example.com');
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+      return { ...order, user: userDoc._id };
+    });
+
+    const createdOrders = await OrderModel.insertMany(updatedSampleOrders);
+    const createdContacts = await ContactModel.insertMany(sampleContacts);
+
     // Envoyez la réponse avec toutes les données créées
-    res.json({ createdCategories, createdProducts, createdUsers, createdCarouselItems, createdStocks });
+    res.json({ createdCategories, createdProducts, createdUsers, createdCarouselItems, createdStocks, createdOrders, createdContacts });
   })
 );

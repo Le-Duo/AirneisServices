@@ -270,17 +270,17 @@ export const sampleCarouselItems: CarouselItem[] = [
 
 export const sampleContacts: Contact[] = [
   {
-    mail: 'contact@example.com',
+    mail: 'userone@example.com',
     subject: 'Inquiry about product availability',
     message: 'I would like to know when the MACLEOD sofa will be back in stock. Thank you.',
   },
   {
-    mail: 'feedback@example.com',
+    mail: 'usertwo@example.com',
     subject: 'Feedback on recent purchase',
     message: 'I recently purchased the NESSIE sofa and am extremely satisfied with the quality. Thank you!',
   },
   {
-    mail: 'support@example.com',
+    mail: 'userone@example.com',
     subject: 'Issue with delivery',
     message: 'My order for the THISTLE sofa was delayed, and I would like to inquire about the new delivery date.',
   },
@@ -344,7 +344,7 @@ export const sampleOrders: Order[] = [
       country: 'USA',
       phone: '555-1234',
     } as ShippingAddress,
-    user: sampleUsers.find(user => user.email === 'admin@example.com') as DocumentType<User>,
+    user: sampleUsers.find(user => user.email === 'admin@example.com')?._id!,
     paymentMethod: 'PayPal',
     itemsPrice: 200,
     shippingPrice: 20,
@@ -356,4 +356,4 @@ export const sampleOrders: Order[] = [
     deliveredAt: new Date('2023-01-05'),
     status: OrderStatus.Delivered,
   },
-]
+];
