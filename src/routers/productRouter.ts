@@ -90,33 +90,16 @@ productRouter.get(
   })
 );
 
-productRouter.get('/similar/:categoryId', async (req: Request, res: Response) => {
-  const { categoryId } = req.params;
+productRouter.get('/similar/:categoryId/:productId', async (req: Request, res: Response) => {
+  const { categoryId, productId } = req.params;
   try {
     const products = await ProductModel.aggregate([
-      { $match: { 'category._id': new Types.ObjectId(categoryId) } },
-      {
-        $lookup: {
-          from: 'stock',
-          localField: '_id',
-          foreignField: 'product',
-          as: 'stockInfo',
-        },
+      { 
+        $match: { 
+          'category._id': new Types.ObjectId(categoryId),
+          '_id': { $ne: new Types.ObjectId(productId) }
+        } 
       },
-      { $unwind: { path: '$stockInfo', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          slug: 1,
-          description: 1,
-          price: 1,
-          URLimages: 1,
-          quantity: '$stockInfo.quantity',
-          inStock: { $gt: [{ $ifNull: ['$stockInfo.quantity', 0] }, 0] },
-        },
-      },
-      { $match: { inStock: true } },
       { $limit: 6 },
     ]).exec();
 
