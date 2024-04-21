@@ -21,6 +21,9 @@ export class ShippingAddress {
 
   @prop({ required: true })
   public fullName!: string;
+  
+  @prop({ required: true })
+  public phoneNumber!: string;
 
   @prop({ required: true })
   public street!: string;
