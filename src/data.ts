@@ -153,6 +153,7 @@ export const sampleProducts: Product[] = [
 
 export const sampleUsers: User[] = [
   {
+    _id: '65b2de45860c1db56605434d',
     name: 'Admin User',
     email: 'admin@example.com',
     password: bcrypt.hashSync('password'),
@@ -185,6 +186,7 @@ export const sampleUsers: User[] = [
     ],
   },
   {
+    _id: '65b2de45860c1db56605434e',
     name: 'User One',
     email: 'userone@example.com',
     password: bcrypt.hashSync('123456'),
@@ -217,6 +219,7 @@ export const sampleUsers: User[] = [
     ],
   },
   {
+    _id: '65b2de45860c1db56605434f',
     name: 'User Two',
     email: 'usertwo@example.com',
     password: bcrypt.hashSync('123456'),
@@ -342,9 +345,14 @@ export const sampleOrders: Order[] = [
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
-      phone: '555-1234',
+      phoneNumber: '555-1234',
     } as ShippingAddress,
-    user: sampleUsers.find(user => user.email === 'admin@example.com')?._id!,
+    user: (() => {
+      const user = sampleUsers.find(user => user.email === 'admin@example.com');
+      if (!user) throw new Error('User not found');
+      if (!user._id) throw new Error('User ID not found');
+      return user._id;
+    })(),
     paymentMethod: 'PayPal',
     itemsPrice: 200,
     shippingPrice: 20,
