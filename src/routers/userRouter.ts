@@ -33,7 +33,6 @@ interface UserRequestBody {
   phoneNumber?:string
   password?: string
   isAdmin?: boolean
-  address?: UserAddress
   addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
 }
@@ -99,7 +98,6 @@ userRouter.put(
       if (req.body.isAdmin !== undefined) {
         user.isAdmin = req.body.isAdmin
       }
-      user.address = req.body.address || user.address
       user.addresses = req.body.addresses || user.addresses
 
       user.paymentCards = req.body.paymentCards || user.paymentCards
@@ -111,7 +109,6 @@ userRouter.put(
         email: updatedUser.email,
         phoneNumber: updatedUser.phoneNumber,
         isAdmin: updatedUser.isAdmin,
-        address: updatedUser.address,
         addresses: updatedUser.addresses,
         paymentCards: updatedUser.paymentCards,
         token: generateToken(updatedUser),

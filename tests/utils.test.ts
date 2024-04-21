@@ -60,13 +60,13 @@ describe('Middleware functions', () => {
 
   describe('isAdmin middleware', () => {
     it('should call next() if user is admin', () => {
-      mockRequest.user = { _id: '123', name: 'Admin User', email: 'admin@example.com', isAdmin: true, password: 'placeholderPassword', address: {
+      mockRequest.user = { _id: '123', name: 'Admin User', email: 'admin@example.com', isAdmin: true, password: 'placeholderPassword', addresses: [{
         street: '123 Main St',
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
         isDefault: true,
-      },
+      }],
       paymentCards: [
         {
           bankName: 'Visa',
@@ -92,13 +92,13 @@ describe('Middleware functions', () => {
     });
 
     it('should return 401 if user is not admin', () => {
-      mockRequest.user = { _id: '123', name: 'Regular User', email: 'user@example.com', isAdmin: false, password: 'placeholderPassword', address: {
+      mockRequest.user = { _id: '123', name: 'Regular User', email: 'user@example.com', isAdmin: false, password: 'placeholderPassword', addresses: [{
         street: '123 Main St',
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
         isDefault: true,
-      },
+      }],
       paymentCards: [
         {
           bankName: 'Visa',
@@ -127,13 +127,13 @@ describe('Middleware functions', () => {
 
   describe('sendPasswordResetEmail function', () => {
     it('should send an email with the correct format', async () => {
-      const user = { _id: '123', name: 'Test User', email: 'test@example.com', isAdmin: false, password: 'placeholderPassword', address: {
+      const user = { _id: '123', name: 'Test User', email: 'test@example.com', isAdmin: false, password: 'placeholderPassword', addresses: [{
         street: '123 Main St',
         city: 'Anytown',
         postalCode: '12345',
         country: 'USA',
         isDefault: true,
-      },
+      }],
       paymentCards: [
         {
           bankName: 'Visa',
