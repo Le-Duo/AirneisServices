@@ -30,9 +30,9 @@ const passwordResetRequestLimiter = rateLimit({
 interface UserRequestBody {
   name?: string
   email?: string
+  phoneNumber?:string
   password?: string
   isAdmin?: boolean
-  address?: UserAddress
   addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
 }
@@ -90,6 +90,7 @@ userRouter.put(
       }
       user.name = req.body.name || user.name
       user.email = req.body.email || user.email
+      user.phoneNumber = req.body.phoneNumber|| user.phoneNumber
       if (req.body.password) {
         const salt = await bcrypt.genSalt(10)
         user.password = await bcrypt.hash(req.body.password, salt)
@@ -97,7 +98,6 @@ userRouter.put(
       if (req.body.isAdmin !== undefined) {
         user.isAdmin = req.body.isAdmin
       }
-      user.address = req.body.address || user.address
       user.addresses = req.body.addresses || user.addresses
 
       user.paymentCards = req.body.paymentCards || user.paymentCards
@@ -107,8 +107,8 @@ userRouter.put(
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        phoneNumber: updatedUser.phoneNumber,
         isAdmin: updatedUser.isAdmin,
-        address: updatedUser.address,
         addresses: updatedUser.addresses,
         paymentCards: updatedUser.paymentCards,
         token: generateToken(updatedUser),
@@ -280,6 +280,7 @@ userRouter.post(
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        phoneNumber: user.phoneNumber,
         token: generateToken(user),
       })
     } else {

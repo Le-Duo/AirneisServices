@@ -42,9 +42,6 @@ export class User {
   @prop({ default: false })
   public isAdmin!: boolean
 
-  @prop({ required: false })
-  public address?: UserAddress
-
   @prop({type: () => [UserAddress], required: false })
   public addresses?: UserAddress[]
 
