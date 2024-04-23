@@ -453,14 +453,14 @@ export const sampleOrders: Order[] = [
       },
     ],
     shippingAddress: {
-      _id: "60d0fe4f5311236168a109f1",
-      user: "Admin User",
-      fullName: "John Doe",
-      street: "123 Main St",
-      city: "Anytown",
-      postalCode: "12345",
-      country: "USA",
-      phoneNumber: "555-1234",
+      _id: '60d0fe4f5311236168a109f1',
+      user: 'Admin User',
+      fullName: 'John Doe',
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'USA',
+      phoneNumber: '555-1234',
     } as ShippingAddress,
     user: (() => {
       const user = sampleUsers.find(

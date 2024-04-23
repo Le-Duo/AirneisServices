@@ -95,7 +95,7 @@ export const sendPasswordResetEmail = async (user: User, token: string) => {
   })
 
   const mailOptions = {
-    from: '"Airneis Support" <support@airneis.com>',
+    from: '"Àirneis Support" <support@airneis.com>',
     to: user.email,
     subject: 'Password Reset Request',
     text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\nhttp://localhost:5173/password-reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
