@@ -342,7 +342,7 @@ export const sampleOrders: Order[] = [
       city: 'Anytown',
       postalCode: '12345',
       country: 'USA',
-      phone: '555-1234',
+      phoneNumber: '555-1234',
     } as ShippingAddress,
     user: sampleUsers.find(user => user.email === 'admin@example.com')?._id!,
     paymentMethod: 'PayPal',
