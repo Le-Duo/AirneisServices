@@ -187,7 +187,7 @@ export const sampleUsers: User[] = [
   {
     name: 'User One',
     email: 'userone@example.com',
-    password: bcrypt.hashSync('123456'),
+    password: bcrypt.hashSync('password'),
     isAdmin: false,
     phoneNumber: '555-5678',
     addresses: [{
@@ -219,7 +219,7 @@ export const sampleUsers: User[] = [
   {
     name: 'User Two',
     email: 'usertwo@example.com',
-    password: bcrypt.hashSync('123456'),
+    password: bcrypt.hashSync('password'),
     isAdmin: false,
     phoneNumber: '555-6789',
     addresses: [{
