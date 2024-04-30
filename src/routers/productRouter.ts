@@ -113,9 +113,8 @@ productRouter.get('/similar/:categoryId/:productId', async (req: Request, res: R
 productRouter.get(
   '/search',
   asyncHandler(async (req: Request, res: Response) => {
-
-    // Extract query parameters for search criteria
-    const { searchText, categories, inStock, materials, minPrice, maxPrice, sortBy, sortOrder } = req.query
+    const { searchText, categories, inStock, materials, minPrice, maxPrice, sortBy, sortOrder, page = 1, limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
 
     // Convert inStock query parameter to boolean
     const inStockBool = inStock !== undefined && inStock !== 'false'
@@ -194,25 +193,13 @@ productRouter.get(
     // Define match stage to filter results based on query parameters
     let matchStage = {
       $match: {
-        ...((minPriceNumber !== undefined || maxPriceNumber !== undefined) && {
-          price: {
-            ...(minPriceNumber !== undefined && { $gte: minPriceNumber }),
-            ...(maxPriceNumber !== undefined && { $lte: maxPriceNumber }),
-          },
-        }),
-        ...(categoryIds.length > 0 && {
-          'category._id': {
-            $in: categoryIds,
-          },
-        }),
-        ...(inStockBool && { _id: { $in: productIdsInStockObjectIds } }), // Use ObjectId instances for matching
-        ...(materials && {
-          materials: {
-            $in: typeof materials === 'string' ? materials.split(',') : materials,
-          },
-        }),
-      },
-    }
+        ...(minPriceNumber !== undefined && { price: { $gte: minPriceNumber } }),
+        ...(maxPriceNumber !== undefined && { price: { $lte: maxPriceNumber } }),
+        ...(categories && { 'category._id': { $in: categoryIds } }),
+        ...(inStockBool && { _id: { $in: productIdsInStockObjectIds } }),
+        ...(materials && { materials: { $in: typeof materials === 'string' ? materials.split(',') : materials } }),
+      }
+    };
 
 // Define sort stage based on sortBy and sortOrder query parameters
 let sortStage = {
@@ -248,7 +235,8 @@ let sortStage = {
       addFieldsStage, // Add this line to include the inStock calculation
       ...(Object.keys(matchStage.$match).length > 0 ? [matchStage] : []),
       ...(Object.keys(sortStage).length > 0 ? [sortStage] : []),
-      { $limit: 10 },
+      { $skip: skip },
+      { $limit: Number(limit) },
       {
         $project: {
           _id: 1,
@@ -266,9 +254,8 @@ let sortStage = {
 
     // Execute the aggregation pipeline
     const results = await ProductModel.aggregate(pipeline as any[]).exec()
-
-    // Return the search results
-    res.json(results)
+    const totalResults = await ProductModel.countDocuments(matchStage.$match);
+    res.json({ results, totalResults });
   })
 )
 
