@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { StockModel } from '../models/stock'
 import { ProductModel } from '../models/product'
@@ -34,7 +34,7 @@ stockRouter.post(
   '/',
   isAuth,
   isAdmin,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { productId, quantity } = req.body
     // Check if stock already exists for the product
     const existingStock = await StockModel.findOne({ 'product._id': productId }).exec()

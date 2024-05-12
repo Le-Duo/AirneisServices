@@ -1,11 +1,5 @@
 import request from 'supertest';
 import app from '../index';
-import express, { Request, Response } from 'express'
-import asyncHandler from 'express-async-handler'
-import { isAuth } from '../utils'
-import { OrderModel } from '../models/order'
-import { StockModel } from '../models/stock'
-import { v4 as uuidv4 } from 'uuid'
 
 jest.mock('../models/stock', () => ({
   StockModel: {
