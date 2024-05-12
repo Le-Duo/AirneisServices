@@ -6,7 +6,7 @@ import {
 } from '@typegoose/typegoose'
 import { Product } from './product'
 import { User } from './user'
-import { Payment } from './payment'
+
 
 export enum OrderStatus {
   Initiated = 'initiated',

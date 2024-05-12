@@ -11,7 +11,7 @@ import { ProductModel } from "../models/product";
 import { CategoryModel } from "../models/category";
 import { StockModel } from "../models/stock";
 import { isAuth, isAdmin } from "../utils";
-import { Types } from "mongoose";
+import { Types, PipelineStage } from "mongoose";
 
 const productRouter = express.Router();
 
@@ -295,7 +295,7 @@ productRouter.get(
     ];
 
     // Execute the aggregation pipeline
-    const results = await ProductModel.aggregate(pipeline as any[]).exec();
+    const results = await ProductModel.aggregate(pipeline as PipelineStage[]).exec();
     const totalResults = await ProductModel.countDocuments(matchStage.$match);
     res.json({ results, totalResults });
   })

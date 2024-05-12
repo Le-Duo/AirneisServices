@@ -11,7 +11,6 @@ import express from 'express'
 import mongoose from 'mongoose'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
-import csurf from 'csurf'
 import { productRouter } from './routers/productRouter'
 import { seedRouter } from './routers/seedRouter'
 import { userRouter } from './routers/userRouter'
@@ -67,9 +66,6 @@ app.use(
     origin: '*',
   })
 )
-
-// const csrfProtection = csurf({ cookie: true });
-// app.use(csrfProtection);
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
