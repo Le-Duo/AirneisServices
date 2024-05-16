@@ -5,17 +5,16 @@
  * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
  */
 import express, { Request, Response } from 'express'
-import { User, UserModel, UserAddress, UserAddressModel } from '../models/user'
+import { UserModel, UserAddress, UserAddressModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
-import jwt, { VerifyErrors } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { generateToken, generatePasswordResetToken, sendPasswordResetEmail } from '../utils'
 import dotenv from 'dotenv'
 import { isAdmin, isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
-import { Types } from "mongoose";
 
 dotenv.config()
 
@@ -342,7 +341,13 @@ userRouter.post(
         return sendErrorResponse(res, 400, 'Token and new password must be provided')
       }
       if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not defined')
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET)
+      interface DecodedToken {
+        _id: string;
+        email: string;
+        jti?: string;
+      }
+
+      const decoded: DecodedToken = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken;
       const user = await UserModel.findOne({
         _id: decoded._id,
         email: decoded.email,

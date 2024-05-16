@@ -12,7 +12,7 @@ export class Payment {
   public status!: PaymentStatus;
   
   @prop({ required: true })
-  public orderNumber!: String;
+  public orderNumber!: string;
 
   @prop({ default: new Date() })
   public updatedAt!: Date;

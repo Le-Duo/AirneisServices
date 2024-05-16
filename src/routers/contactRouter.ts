@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
-import { Contact, ContactModel } from '../models/contact'
+import { ContactModel } from '../models/contact'
 import { Types } from 'mongoose'
 
 export const contactRouter = express.Router()

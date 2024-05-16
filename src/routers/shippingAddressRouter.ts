@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { ShippingAddressModel } from '../models/order'
 import { isAuth } from '../utils'
@@ -33,7 +33,7 @@ shippingAddressRouter.get(
 shippingAddressRouter.post(
   '/',
   isAuth,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' })
       return // Exit the function after sending the response

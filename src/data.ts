@@ -185,16 +185,14 @@ export const sampleUsers: User[] = [
     email: "admin@example.com",
     password: bcrypt.hashSync("password"),
     isAdmin: true,
-    phoneNumber: "555-1234",
-    addresses: [
-      {
-        street: "123 Main St",
-        city: "Anytown",
-        postalCode: "12345",
-        country: "USA",
-        isDefault: true,
-      },
-    ],
+    phoneNumber: '555-1234',
+    addresses: [{
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'United Kingdom',
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: "Visa",
@@ -215,21 +213,18 @@ export const sampleUsers: User[] = [
     ],
   },
   {
-    _id: "65b2de45860c1db56605434e",
-    name: "User One",
-    email: "userone@example.com",
-    password: bcrypt.hashSync("123456"),
+    name: 'User One',
+    email: 'userone@example.com',
+    password: bcrypt.hashSync('password'),
     isAdmin: false,
-    phoneNumber: "555-5678",
-    addresses: [
-      {
-        street: "123 Main St",
-        city: "Anytown",
-        postalCode: "12345",
-        country: "USA",
-        isDefault: true,
-      },
-    ],
+    phoneNumber: '555-5678',
+    addresses: [{
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'United Kingdom',
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: "Visa",
@@ -250,21 +245,18 @@ export const sampleUsers: User[] = [
     ],
   },
   {
-    _id: "65b2de45860c1db56605434f",
-    name: "User Two",
-    email: "usertwo@example.com",
-    password: bcrypt.hashSync("123456"),
+    name: 'User Two',
+    email: 'usertwo@example.com',
+    password: bcrypt.hashSync('password'),
     isAdmin: false,
-    phoneNumber: "555-6789",
-    addresses: [
-      {
-        street: "123 Main St",
-        city: "Anytown",
-        postalCode: "12345",
-        country: "USA",
-        isDefault: true,
-      },
-    ],
+    phoneNumber: '555-6789',
+    addresses: [{
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'United Kingdom',
+      isDefault: true,
+    }],
     paymentCards: [
       {
         bankName: "Visa",
@@ -453,24 +445,17 @@ export const sampleOrders: Order[] = [
       },
     ],
     shippingAddress: {
-      _id: "60d0fe4f5311236168a109f1",
-      user: "Admin User",
-      fullName: "John Doe",
-      street: "123 Main St",
-      city: "Anytown",
-      postalCode: "12345",
-      country: "USA",
-      phoneNumber: "555-1234",
+      _id: '60d0fe4f5311236168a109f1',
+      user: 'Admin User',
+      fullName: 'John Doe',
+      street: '123 Main St',
+      city: 'Anytown',
+      postalCode: '12345',
+      country: 'United Kingdom',
+      phoneNumber: '555-1234',
     } as ShippingAddress,
-    user: (() => {
-      const user = sampleUsers.find(
-        (user) => user.email === "admin@example.com"
-      );
-      if (!user) throw new Error("User not found");
-      if (!user._id) throw new Error("User ID not found");
-      return user._id;
-    })(),
-    paymentMethod: "PayPal",
+    user: sampleUsers.find(user => user.email === 'admin@example.com')?._id!,
+    paymentMethod: 'Card',
     itemsPrice: 200,
     shippingPrice: 20,
     taxPrice: 0,
