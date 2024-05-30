@@ -125,14 +125,16 @@ orderRouter.post(
         orderItems,
         isPaid,
         isDelivered,
+        orderNumber: customOrderNumber,
       }: {
-        user: string
-        shippingAddress: ShippingAddress
-        paymentMethod: string
-        orderItems: Item[]
-        isPaid: boolean
-        isDelivered: boolean
-      } = req.body
+        user: string,
+        shippingAddress: ShippingAddress,
+        paymentMethod: string,
+        orderItems: Item[],
+        isPaid: boolean,
+        isDelivered: boolean,
+        orderNumber?: string
+      } = req.body;
 
       if (
         !Array.isArray(orderItems) ||
@@ -149,14 +151,14 @@ orderRouter.post(
         const quantity = typeof item.quantity === "number" ? item.quantity : 0;
         const price = typeof item.price === "number" ? item.price : 0;
 
-        return acc + quantity * price
-      }, 0)
+        return acc + quantity * price;
+      }, 0);
 
-      const shippingPrice = calculateShippingPrice(itemsPrice)
-      const taxPrice = itemsPrice * 0.2
-      const totalPrice = itemsPrice + shippingPrice + taxPrice
+      const shippingPrice = calculateShippingPrice(itemsPrice);
+      const taxPrice = itemsPrice * 0.2;
+      const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
-      const orderNumber = generateOrderNumber();
+      const orderNumber = customOrderNumber || generateOrderNumber();
 
       const newOrder = new OrderModel({
         orderNumber,

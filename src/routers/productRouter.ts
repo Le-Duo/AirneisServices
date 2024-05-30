@@ -41,7 +41,7 @@ productRouter.get(
       },
       {
         $project: {
-          stockInfo: 0, // Exclude stockInfo from final output
+          stockInfo: 0,
         },
       },
     ]).exec();
@@ -49,14 +49,13 @@ productRouter.get(
   })
 );
 
-// Middleware to validate slug format
 const validateSlugFormat = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const { slug } = req.params;
-  // Regex for validating slug format: lowercase letters, numbers, and hyphens
+
   const regex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
   if (!regex.test(slug)) {
@@ -136,14 +135,10 @@ productRouter.get(
     } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    // Convert inStock query parameter to boolean
     const inStockBool = inStock !== undefined && inStock !== "false";
-
-    // Convert minPrice and maxPrice to numbers
     const minPriceNumber = minPrice ? Number(minPrice) : undefined;
     const maxPriceNumber = maxPrice ? Number(maxPrice) : undefined;
 
-    // Retrieve product IDs that are in stock if inStockBool is true
     let productIdsInStockObjectIds: Types.ObjectId[] = [];
     if (inStockBool) {
       const stockInfo = await StockModel.find({ quantity: { $gt: 0 } }).exec();
@@ -157,7 +152,6 @@ productRouter.get(
 
     let categoryIds: string[] = [];
     if (categories) {
-      // Assuming categories is a comma-separated list of slugs
       const categorySlugs =
         typeof categories === "string" ? categories.split(",") : [];
       const categoryDocs = await CategoryModel.find({
@@ -166,7 +160,7 @@ productRouter.get(
       categoryIds = categoryDocs.map((doc) => doc._id);
     }
 
-    const searchStage = searchText
+    const searchStage: PipelineStage = searchText
       ? {
           $search: {
             index: "searchIndex",
@@ -205,9 +199,8 @@ productRouter.get(
             },
           },
         }
-      : {};
+      : { $match: {} };
 
-    // Define lookup stage to join with stock information
     const lookupStage = {
       $lookup: {
         from: "stock",
@@ -217,15 +210,20 @@ productRouter.get(
       },
     };
 
-    // Define match stage to filter results based on query parameters
-    const matchStage = {
+    const matchStage: PipelineStage = {
       $match: {
-        ...(minPriceNumber !== undefined && {
-          price: { $gte: minPriceNumber },
-        }),
-        ...(maxPriceNumber !== undefined && {
-          price: { $lte: maxPriceNumber },
-        }),
+        ...(minPriceNumber !== undefined &&
+          maxPriceNumber !== undefined && {
+            price: { $gte: minPriceNumber, $lte: maxPriceNumber },
+          }),
+        ...(minPriceNumber !== undefined &&
+          maxPriceNumber === undefined && {
+            price: { $gte: minPriceNumber },
+          }),
+        ...(minPriceNumber === undefined &&
+          maxPriceNumber !== undefined && {
+            price: { $lte: maxPriceNumber },
+          }),
         ...(categories && { "category._id": { $in: categoryIds } }),
         ...(inStockBool && { _id: { $in: productIdsInStockObjectIds } }),
         ...(materials && {
@@ -237,46 +235,39 @@ productRouter.get(
       },
     };
 
-    // Define sort stage based on sortBy and sortOrder query parameters
-    const sortStage = {
+    const sortStage: PipelineStage = {
       $sort: {
-        // If sortBy is provided and matches 'price', sort by price
         ...(sortBy === "price"
           ? {
               price: sortOrder === "asc" ? 1 : -1,
             }
           : {}),
-        // If sortBy is provided and matches 'createdAt', sort by createdAt
         ...(sortBy === "createdAt"
           ? {
               createdAt: sortOrder === "asc" ? 1 : -1,
             }
           : {}),
-        // If no sortBy is provided or if it doesn't match any expected value, default to sorting by priority and inStock
-        // This ensures there's always at least one sort key
         ...(!sortBy || (sortBy !== "price" && sortBy !== "createdAt")
           ? {
-              priority: -1, // Products with priority come first
-              inStock: -1, // Products in stock come first
+              priority: -1,
+              inStock: -1,
             }
           : {}),
       },
     };
 
-    // Before the sort stage, add a stage to calculate the inStock status
     const addFieldsStage = {
       $addFields: {
         inStock: { $gt: [{ $arrayElemAt: ["$stockInfo.quantity", 0] }, 0] },
       },
     };
 
-    // Compile the aggregation pipeline stages and use explain() to analyze the execution
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       ...(Object.keys(searchStage).length > 0 ? [searchStage] : []),
       lookupStage,
-      addFieldsStage, // Add this line to include the inStock calculation
-      ...(Object.keys(matchStage.$match).length > 0 ? [matchStage] : []),
-      ...(Object.keys(sortStage).length > 0 ? [sortStage] : []),
+      addFieldsStage,
+      matchStage,
+      sortStage,
       { $skip: skip },
       { $limit: Number(limit) },
       {
@@ -288,14 +279,13 @@ productRouter.get(
           price: 1,
           URLimages: 1,
           quantity: { $arrayElemAt: ["$stockInfo.quantity", 0] },
-          inStock: 1, // Include this line if you want to return the inStock status
-          priority: 1, // Include the priority field in the results
+          inStock: 1,
+          priority: 1,
         },
       },
     ];
 
-    // Execute the aggregation pipeline
-    const results = await ProductModel.aggregate(pipeline as PipelineStage[]).exec();
+    const results = await ProductModel.aggregate(pipeline).exec();
     const totalResults = await ProductModel.countDocuments(matchStage.$match);
     res.json({ results, totalResults });
   })
@@ -329,7 +319,7 @@ productRouter.post(
         name,
         slug,
         URLimages,
-        category: category, //cast la variable category en type "Category"
+        category: category,
         description,
         materials,
         price,
@@ -337,14 +327,12 @@ productRouter.post(
       });
       const savedProduct = await newProduct.save();
 
-      // After successfully saving the product, create a stock entry with default quantity (e.g., 0)
       const newStock = new StockModel({
-        product: savedProduct, // Reference the newly created product
-        quantity: 0, // Default quantity, adjust as needed
+        product: savedProduct,
+        quantity: 0,
       });
       await newStock.save();
 
-      // Respond with the saved product (and optionally the stock information)
       res.status(201).json({ product: savedProduct, stock: newStock });
     } catch (error) {
       console.error(error);
@@ -361,12 +349,10 @@ productRouter.delete(
     const id = req.params.id;
     const deletionFilter = { _id: new Types.ObjectId(id) };
     try {
-      // First, delete the product
       const productDeletionResult = await ProductModel.deleteOne(
         deletionFilter
       );
       if (productDeletionResult.deletedCount > 0) {
-        // If the product was successfully deleted, delete the associated stock
         const stockDeletionResult = await StockModel.deleteOne({
           "product._id": id,
         });
@@ -375,7 +361,6 @@ productRouter.delete(
             message: "Product and associated stock deleted successfully.",
           });
         } else {
-          // If no stock was found (or deleted), you might want to log this or handle it differently
           res.json({
             message:
               "Product deleted successfully, but no associated stock was found.",

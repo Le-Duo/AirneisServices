@@ -15,6 +15,7 @@ import { isAdmin, isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
+import { ObjectId } from 'mongodb'
 
 dotenv.config()
 
@@ -34,6 +35,7 @@ interface UserRequestBody {
   isAdmin?: boolean
   addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
+  _id?: string;
 }
 
 interface AddressRequestBody {
@@ -113,7 +115,7 @@ userRouter.put(
         token: generateToken(updatedUser),
       })
     } catch (error) {
-      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l’utilisateur')
+      sendErrorResponse(res, 500, 'Erreur lors de la mise à jour de l\'utilisateur')
     }
   })
 )
@@ -255,7 +257,8 @@ userRouter.put(
 // delete user
 userRouter.delete(
   '/:id',
-  isAdmin,
+  isAuth,
+  // isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)
@@ -264,7 +267,7 @@ userRouter.delete(
       }
       res.json({ message: 'Utilisateur supprimé' })
     } catch (error) {
-      sendErrorResponse(res, 500, 'Erreur lors de la suppression de l’utilisateur')
+      sendErrorResponse(res, 500, 'Erreur lors de la suppression de l\'utilisateur')
     }
   })
 )
@@ -292,22 +295,51 @@ userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const salt = await bcrypt.genSalt(10)
+      const { name, email, password } = req.body;
+      console.log('Received signup request with data:', { name, email });
+
+      // Check if the email already exists
+      console.log('Checking if email already exists...');
+      const existingUser = await UserModel.findOne({ email });
+      if (existingUser) {
+        console.log('Email already exists:', email);
+        return sendErrorResponse(res, 400, 'Email already exists');
+      }
+      console.log('Email is unique, proceeding with user creation...');
+
+      console.log('Generating salt for password hashing...');
+      const salt = await bcrypt.genSalt(10);
+      console.log('Salt generated:', salt);
       const user = new UserModel({
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, salt),
-      })
-      const newUser = await user.save()
+        _id: new ObjectId(),
+        name,
+        email,
+        password: bcrypt.hashSync(password, salt),
+        isAdmin: false
+      });
+      console.log('User object created:', user);
+
+      console.log('Saving user to the database...');
+      const newUser = await user.save();
+      console.log('User saved successfully:', newUser);
       res.json({
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         isAdmin: newUser.isAdmin,
         token: generateToken(newUser),
-      })
-    } catch (error) {
-      sendErrorResponse(res, 500, 'Erreur lors de la création de l’utilisateur')
+      });
+      console.log('Signup response sent:', {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        isAdmin: newUser.isAdmin,
+      });
+    } catch (error: any) {
+      console.error('Error during user creation:', error);
+      console.error('Error details:', error.stack);
+      sendErrorResponse(res, 500, 'Erreur lors de la création de l\'utilisateur');
+      console.log('Error response sent:', 'Erreur lors de la création de l\'utilisateur');
     }
   })
 )
@@ -365,3 +397,4 @@ userRouter.post(
     }
   })
 )
+
