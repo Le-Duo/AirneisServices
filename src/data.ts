@@ -18,7 +18,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109ca",
     name: "Sofas",
-    urlImage: "../public/images/categorysofa.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categorysofa.png",
     slug: "sofas",
     description:
       "Discover the ultimate comfort with our luxurious sofa collection, perfect for elevating your living space.",
@@ -26,7 +26,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109cb",
     name: "Tables",
-    urlImage: "../public/images/categorytable.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categorytable.png",
     slug: "tables",
     description:
       "Elevate your dining experience with our stylish and functional tables, designed to fit any space.",
@@ -34,7 +34,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109cc",
     name: "Bookcases",
-    urlImage: "../public/images/categorybookcase.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categorybookcase.png",
     slug: "bookcases",
     description:
       "Organize your favorite reads and accentuate your space with our elegant and versatile bookcases.",
@@ -42,7 +42,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109cd",
     name: "Rugs",
-    urlImage: "../public/images/categoryrug.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categoryrug.png",
     slug: "rugs",
     description:
       "Add a touch of warmth and style to any room with our exquisite collection of rugs.",
@@ -50,7 +50,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109ce",
     name: "Lamps",
-    urlImage: "../public/images/categorylamp.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categorylamp.png",
     slug: "lamps",
     description:
       "Illuminate your home with our range of beautiful and functional lamps, perfect for setting the mood.",
@@ -58,7 +58,7 @@ export const sampleCategories: Category[] = [
   {
     _id: "60d0fe4f5311236168a109cf",
     name: "Wardrobes",
-    urlImage: "../public/images/categorywardrobe.png",
+    urlImage: "https://airneisstaticassets.onrender.com/images/categorywardrobe.png",
     slug: "wardrobes",
     description:
       "Keep your clothes organized and your bedroom tidy with our stylish and spacious wardrobes.",
@@ -70,7 +70,7 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d0",
     name: "MACLEOD",
     slug: "macleod",
-    URLimages: ["../public/images/blue-3-seater-sofa.png"],
+    URLimages: ["https://airneisstaticassets.onrender.com/images/blue-3-seater-sofa.png"],
     category: sampleCategories.find(
       (cat) => cat.slug === "sofas"
     ) as DocumentType<Category>,
@@ -83,7 +83,7 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d1",
     name: "NESSIE",
     slug: "nessie",
-    URLimages: ["../public/images/red-2-seater-sofa-in-living-room.png"],
+    URLimages: ["https://airneisstaticassets.onrender.com/images/red-2-seater-sofa-in-living-room.png"],
     category: sampleCategories.find(
       (cat) => cat.slug === "sofas"
     ) as DocumentType<Category>,
@@ -96,7 +96,7 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d2",
     name: "THISTLE",
     slug: "thistle",
-    URLimages: ["../public/images/single-seat-green-sofa-in-living-room.png"],
+    URLimages: ["https://airneisstaticassets.onrender.com/images/single-seat-green-sofa-in-living-room.png"],
     category: sampleCategories.find(
       (cat) => cat.slug === "sofas"
     ) as DocumentType<Category>,
@@ -109,7 +109,7 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d3",
     name: "GLEN",
     slug: "glen",
-    URLimages: ["../public/images/modern-brown-coffee-table (1).png"],
+    URLimages: ["https://airneisstaticassets.onrender.com/images/modern-brown-coffee-table (1).png"],
     category: sampleCategories.find(
       (cat) => cat.slug === "tables"
     ) as DocumentType<Category>,
@@ -123,7 +123,7 @@ export const sampleProducts: Product[] = [
     name: "WALLACE",
     slug: "wallace",
     URLimages: [
-      "../public/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png",
+      "https://airneisstaticassets.onrender.com/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png",
     ],
     category: sampleCategories.find(
       (cat) => cat.slug === "bookcases"
@@ -137,7 +137,7 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d5",
     name: "HEATHER",
     slug: "heather",
-    URLimages: ["../public/images/modern-purple-rug-with-floral-pattern.png"],
+    URLimages: ["https://airneisstaticassets.onrender.com/images/modern-purple-rug-with-floral-pattern.png"],
     category: sampleCategories.find(
       (cat) => cat.slug === "rugs"
     ) as DocumentType<Category>,
@@ -151,7 +151,7 @@ export const sampleProducts: Product[] = [
     name: "STIRLING",
     slug: "stirling",
     URLimages: [
-      "../public/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png",
+      "https://airneisstaticassets.onrender.com/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png",
     ],
     category: sampleCategories.find(
       (cat) => cat.slug === "lamps"
@@ -166,7 +166,7 @@ export const sampleProducts: Product[] = [
     name: "SKYE",
     slug: "skye",
     URLimages: [
-      "../public/images/wardrobe-with-a-white-colour-and-3-doors.png",
+      "https://airneisstaticassets.onrender.com/images/wardrobe-with-a-white-colour-and-3-doors.png",
     ],
     category: sampleCategories.find(
       (cat) => cat.slug === "wardrobes"
@@ -341,17 +341,17 @@ export const sampleUsers: User[] = [
 
 export const sampleCarouselItems: CarouselItem[] = [
   {
-    src: "../public/images/bedroom.png",
+    src: "https://airneisstaticassets.onrender.com/images/bedroom.png",
     alt: "Elegant Bedroom Design",
     caption: "Explore our latest bedroom furniture collections",
   },
   {
-    src: "../public/images/garden.png",
+    src: "https://airneisstaticassets.onrender.com/images/garden.png",
     alt: "Serene Garden Furniture",
     caption: "Discover the beauty of outdoor living with our garden range",
   },
   {
-    src: "../public/images/livingroom.png",
+    src: "https://airneisstaticassets.onrender.com/images/livingroom.png",
     alt: "Modern Living Room",
     caption: "Transform your living space with our contemporary designs",
   },
@@ -437,7 +437,7 @@ export const sampleOrders: Order[] = [
       {
         name: "MACLEOD",
         quantity: 1,
-        image: "../public/images/blue-3-seater-sofa.png",
+        image: "https://airneisstaticassets.onrender.com/images/blue-3-seater-sofa.png",
         price: 200,
         product: sampleProducts.find(
           (product) => product.slug === "macleod"
