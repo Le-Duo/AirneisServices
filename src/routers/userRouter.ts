@@ -34,6 +34,7 @@ interface UserRequestBody {
   isAdmin?: boolean
   addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
+  _id?: string;
 }
 
 interface AddressRequestBody {
@@ -255,7 +256,8 @@ userRouter.put(
 // delete user
 userRouter.delete(
   '/:id',
-  isAdmin,
+  isAuth,
+  // isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)
@@ -292,20 +294,23 @@ userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const salt = await bcrypt.genSalt(10)
+      const { name, email, password, _id } = req.body;
+      const salt = await bcrypt.genSalt(10);
       const user = new UserModel({
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, salt),
-      })
-      const newUser = await user.save()
+        _id,
+        name,
+        email,
+        password: bcrypt.hashSync(password, salt),
+        isAdmin: false
+      });
+      const newUser = await user.save();
       res.json({
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         isAdmin: newUser.isAdmin,
         token: generateToken(newUser),
-      })
+      });
     } catch (error) {
       sendErrorResponse(res, 500, 'Erreur lors de la création de l’utilisateur')
     }
