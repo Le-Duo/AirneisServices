@@ -25,6 +25,7 @@ export class UserAddress {
 
 @modelOptions({ schemaOptions: { collection: 'users', timestamps: true } })
 export class User {
+  @prop()
   public _id?: string
   
   @prop({ required: true })
