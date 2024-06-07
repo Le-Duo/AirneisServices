@@ -25,7 +25,7 @@ export class UserAddress {
 
 @modelOptions({ schemaOptions: { collection: 'users', timestamps: true } })
 export class User {
-  @prop()
+  @prop({ required: false, auto: true }) // Ensure _id is optional and auto-generated
   public _id?: string
   
   @prop({ required: true })
