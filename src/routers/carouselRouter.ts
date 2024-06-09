@@ -1,61 +1,61 @@
-import express, { Request, Response } from 'express'
-import asyncHandler from 'express-async-handler'
-import { CarouselItemModel } from '../models/carouselItem'
+import express, { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
+import { CarouselItemModel } from "../models/carouselItem";
 
-export const carouselRouter = express.Router()
+export const carouselRouter = express.Router();
 
 carouselRouter.get(
-  '/',
-  asyncHandler(async (req, res) => {
-    const items = await CarouselItemModel.find()
-    res.json(items)
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const items = await CarouselItemModel.find();
+    res.json(items);
   })
-)
+);
 
 carouselRouter.get(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    const item = await CarouselItemModel.findById(req.params.id)
+  "/:id",
+  asyncHandler(async (req: Request, res: Response) => {
+    const item = await CarouselItemModel.findById(req.params.id);
     if (item) {
-      res.json(item)
+      res.json(item);
     } else {
-      res.status(404).send({ message: 'Carousel Item Not Found' })
+      res.status(404).send({ message: "Carousel Item Not Found" });
     }
   })
-)
+);
 
 carouselRouter.post(
-  '/',
-  asyncHandler(async (req, res) => {
-    const newItem = new CarouselItemModel(req.body)
-    const savedItem = await newItem.save()
-    res.status(201).json(savedItem)
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const newItem = new CarouselItemModel(req.body);
+    const savedItem = await newItem.save();
+    res.status(201).json(savedItem);
   })
-)
+);
 
 carouselRouter.put(
-  '/:id',
+  "/:id",
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params
+    const { id } = req.params;
     const updatedItem = await CarouselItemModel.findByIdAndUpdate(id, req.body, {
       new: true,
-    })
+    });
     if (updatedItem) {
-      res.json(updatedItem)
+      res.json(updatedItem);
     } else {
-      res.status(404).send({ message: 'Carousel Item Not Found' })
+      res.status(404).send({ message: "Carousel Item Not Found" });
     }
   })
-)
+);
 
 carouselRouter.delete(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    const deletedItem = await CarouselItemModel.findByIdAndDelete(req.params.id)
+  "/:id",
+  asyncHandler(async (req: Request, res: Response) => {
+    const deletedItem = await CarouselItemModel.findByIdAndDelete(req.params.id);
     if (deletedItem) {
-      res.json({ message: 'Carousel Item Deleted' })
+      res.json({ message: "Carousel Item Deleted" });
     } else {
-      res.status(404).send({ message: 'Carousel Item Not Found' })
+      res.status(404).send({ message: "Carousel Item Not Found" });
     }
   })
-)
+);

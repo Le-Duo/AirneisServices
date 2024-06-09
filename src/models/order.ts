@@ -1,27 +1,20 @@
-import {
-  modelOptions,
-  prop,
-  getModelForClass,
-  Ref,
-} from '@typegoose/typegoose'
-import { Product } from './product'
-import { User } from './user'
-
+import { modelOptions, prop, getModelForClass, Ref } from "@typegoose/typegoose";
+import { Product } from "./product";
+import { User } from "./user";
 
 export enum OrderStatus {
-  Initiated = 'initiated',
-  Pending = 'pending',
-  Delivered = 'delivered',
-  Cancelled = 'cancelled',
+  Initiated = "initiated",
+  Pending = "pending",
+  Delivered = "delivered",
+  Cancelled = "cancelled",
 }
 
 export class ShippingAddress {
-
   public _id?: string;
 
   @prop({ required: true })
   public fullName!: string;
-  
+
   @prop({ required: true })
   public phoneNumber!: string;
 
@@ -46,12 +39,16 @@ export const ShippingAddressModel = getModelForClass(ShippingAddress);
 export class Item {
   @prop({ required: true })
   public name!: string;
+
   @prop({ required: true })
   public quantity!: number;
+
   @prop({ required: false })
   public image?: string;
+
   @prop({ required: true })
   public price!: number;
+
   @prop({ ref: () => Product })
   public product?: Ref<Product>;
 }
@@ -59,15 +56,18 @@ export class Item {
 export class PaymentResult {
   @prop()
   public paymentId!: string;
+
   @prop()
   public status!: string;
+
   @prop()
   public update_time!: string;
+
   @prop()
   public email_address!: string;
 }
 
-@modelOptions({ schemaOptions: { collection: 'orders', timestamps: true } })
+@modelOptions({ schemaOptions: { collection: "orders", timestamps: true } })
 export class Order {
   public _id?: string;
 
@@ -76,6 +76,7 @@ export class Order {
 
   @prop({ required: true, type: () => [Item] })
   public orderItems!: Item[];
+
   @prop({ required: true, type: () => ShippingAddress })
   public shippingAddress!: ShippingAddress;
 
@@ -84,25 +85,31 @@ export class Order {
 
   @prop({ required: true })
   public paymentMethod!: string;
+
   @prop()
   public paymentResult?: PaymentResult;
 
   @prop({ required: true, default: 0 })
   public itemsPrice!: number;
+
   @prop({ required: true, default: 0 })
   public shippingPrice!: number;
+
   @prop({ required: true, default: 0 })
   public taxPrice!: number;
+
   @prop({ required: true, default: 0 })
   public totalPrice!: number;
 
   @prop({ required: true, default: false })
   public isPaid!: boolean;
+
   @prop()
   public paidAt?: Date;
 
   @prop({ required: true, default: false })
   public isDelivered!: boolean;
+
   @prop()
   public deliveredAt?: Date;
 
@@ -110,4 +117,4 @@ export class Order {
   public status!: OrderStatus;
 }
 
-export const OrderModel = getModelForClass(Order)
+export const OrderModel = getModelForClass(Order);

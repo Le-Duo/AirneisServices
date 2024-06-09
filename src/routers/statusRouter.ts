@@ -8,7 +8,7 @@ statusRouter.get('/', (req, res) => {
 });
 
 statusRouter.get('/admin-only-route', isAuth, isAdmin, (req, res) => {
-  res.send('Admin only route')
-})
+  res.send('Admin only route');
+});
 
 export { statusRouter };

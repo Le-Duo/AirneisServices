@@ -1,14 +1,8 @@
-import {
-  modelOptions,
-  prop,
-  getModelForClass,
-  DocumentType,
-} from '@typegoose/typegoose';
-import { Category } from './category';
+import { modelOptions, prop, getModelForClass, DocumentType } from "@typegoose/typegoose";
+import { Category } from "./category";
 
-@modelOptions({ schemaOptions: { collection: 'products', timestamps: true } })
+@modelOptions({ schemaOptions: { collection: "products", timestamps: true } })
 export class Product {
-
   public _id?: string;
 
   @prop({ required: true })

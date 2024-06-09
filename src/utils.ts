@@ -1,18 +1,10 @@
-/**
- * J'ai choisi d'utiliser TypeScript, Express et jsonwebtoken pour construire cette API REST car ils offrent une excellente compatibilité et des fonctionnalités robustes.
- * Ce fichier, 'utils.ts', contient des fonctions utilitaires pour générer et vérifier les tokens JWT.
- * La fonction 'generateToken' prend un utilisateur comme argument et génère un token JWT qui est ensuite renvoyé.
- * La fonction 'isAuth' est un middleware qui vérifie si un token est fourni dans les en-têtes de la requête. Si un token est présent, il est vérifié et les informations de l'utilisateur sont extraites et attachées à la requête.
- * La fonction 'generatePasswordResetToken' génère un token unique pour la réinitialisation du mot de passe.
- * La fonction 'sendPasswordResetEmail' envoie un e-mail à l'utilisateur avec un lien pour réinitialiser le mot de passe.
- */
 
 import { Request, Response, NextFunction } from 'express'
 import { User } from './models/user'
 import jwt from 'jsonwebtoken'
-import nodemailer from 'nodemailer' // Import nodemailer for sending emails
-import dotenv from 'dotenv' // Import dotenv for environment variables
-dotenv.config() // Load environment variables
+import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const generateToken = (user: User) => {
   if (!process.env.JWT_SECRET) {
@@ -33,54 +25,54 @@ export const generateToken = (user: User) => {
 }
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers;
+  const { authorization } = req.headers
   if (authorization && authorization.startsWith('Bearer ')) {
-    const token = authorization.slice(7, authorization.length); // Extract token from Bearer
+    const token = authorization.slice(7, authorization.length)
     if (token) {
       try {
         if (!process.env.JWT_SECRET) {
-          throw new Error('JWT_SECRET is not set');
+          throw new Error('JWT_SECRET is not set')
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded as User; // Attach user to request
-        next();
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = decoded as User
+        next()
       } catch (error) {
-        console.error(error);
-        res.status(401).send({ message: 'Invalid Token' });
+        console.error(error)
+        res.status(401).send({ message: 'Invalid Token' })
       }
     } else {
-      res.status(401).send({ message: 'Token not found' });
+      res.status(401).send({ message: 'Token not found' })
     }
   } else {
-    res.status(401).send({ message: 'No Token or Bearer prefix missing' });
+    res.status(401).send({ message: 'No Token or Bearer prefix missing' })
   }
-};
+}
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (req.user && req.user.isAdmin) {
-    next();
+    next()
   } else {
-    res.status(401).send({ message: 'Not authorized as admin' });
+    res.status(401).send({ message: 'Not authorized as admin' })
   }
-};
+}
 
 export const generatePasswordResetToken = (user: User) => {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not set')
   }
-  const jti = new Date().getTime().toString() // Generate jti as a string
+  const jti = new Date().getTime().toString()
   const token = jwt.sign(
     {
       _id: user._id,
       email: user.email,
-      jti: jti, // Use the generated jti
+      jti: jti,
     },
     process.env.JWT_SECRET,
     {
       expiresIn: '1h',
     }
   )
-  return { token, jti } // Return both the token and jti
+  return { token, jti }
 }
 
 export const sendPasswordResetEmail = async (user: User, token: string) => {
@@ -92,21 +84,21 @@ export const sendPasswordResetEmail = async (user: User, token: string) => {
       pass: process.env.MAILTRAP_PASS,
     },
     secure: false,
-  });
+  })
 
-  const appDeepLink = `airneisapp://reset-password/${token}`;
-  const webLink = `https://airneiswebapp.onrender.com/password-reset/${token}`;
+  const appDeepLink = `airneisapp://reset-password/${token}`
+  const webLink = `https://airneiswebapp.onrender.com/password-reset/${token}`
 
   const mailOptions = {
     from: '"Àirneis Support" <support@airneis.com>',
     to: user.email,
     subject: 'Password Reset Request',
     text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link to reset your password in the mobile app:\n\n${appDeepLink}\n\nOr, you can use the following link to reset your password on the website:\n\n${webLink}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
-  };
+  }
 
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions)
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }

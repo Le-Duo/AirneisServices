@@ -1,8 +1,8 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from 'mongoose';
-import { Category, CategoryModel } from '../models/category';
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
+import { Category, CategoryModel } from "../models/category";
 
-describe('Category Model Test', () => {
+describe("Category Model Test", () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
@@ -15,12 +15,15 @@ describe('Category Model Test', () => {
     await mongoServer.stop();
   });
 
-  it('Create & save category successfully', async () => {
-    const categoryData: Category = { name: 'sofas', slug: 'sofas', urlImage: 'http://example.com/sofas.png' };
+  it("Create & save category successfully", async () => {
+    const categoryData: Category = {
+      name: "sofas",
+      slug: "sofas",
+      urlImage: "http://example.com/sofas.png",
+    };
     const validCategory = new CategoryModel(categoryData);
     const savedCategory = await validCategory.save();
 
-    // Assertions
     expect(savedCategory._id).toBeDefined();
     expect(savedCategory.name).toBe(categoryData.name);
     expect(savedCategory.slug).toBe(categoryData.slug);

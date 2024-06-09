@@ -10,7 +10,7 @@ export class Payment {
 
   @prop({ required: true })
   public status!: PaymentStatus;
-  
+
   @prop({ required: true })
   public orderNumber!: string;
 
@@ -38,7 +38,7 @@ export class PaymentCard {
 
   @prop({ required: true, default: false })
   public isDefault!: boolean;
-} 
+}
 
 export const PaymentModel = getModelForClass(Payment);
 export const PaymentCardModel = getModelForClass(PaymentCard);

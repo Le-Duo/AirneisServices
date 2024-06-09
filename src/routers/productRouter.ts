@@ -1,9 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express et Typegoose pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'productRouter.ts', gère les routes pour les produits. Il contient deux routes principales : une pour obtenir tous les produits et une autre pour obtenir un produit spécifique par son slug.
- * La route 'GET /' renvoie tous les produits.
- * La route 'GET /slug/:slug' renvoie les détails d'un produit spécifique.
- */
 
 import express, { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
@@ -55,14 +49,11 @@ const validateSlugFormat = (
   next: NextFunction
 ) => {
   const { slug } = req.params;
-
   const regex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
   if (!regex.test(slug)) {
     res.status(400).json({ message: "Invalid slug format" });
     return;
   }
-
   next();
 };
 
@@ -109,7 +100,6 @@ productRouter.get(
         },
         { $limit: 6 },
       ]).exec();
-
       res.json(products);
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -134,7 +124,6 @@ productRouter.get(
       limit = 10,
     } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
-
     const inStockBool = inStock !== undefined && inStock !== "false";
     const minPriceNumber = minPrice ? Number(minPrice) : undefined;
     const maxPriceNumber = maxPrice ? Number(maxPrice) : undefined;
@@ -190,8 +179,7 @@ productRouter.get(
                     path: ["name", "description", "materials"],
                     fuzzy: {
                       maxEdits: 2,
-                      prefixLength: 3,
-                    },
+                      prefixLength: 3 },
                     score: { boost: { value: 1 } },
                   },
                 },

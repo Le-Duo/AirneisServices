@@ -2,8 +2,7 @@ import express from "express";
 import asyncHandler from "express-async-handler";
 import { Types } from "mongoose";
 import { CategoryModel } from "../models/category";
-import { isAuth } from "../utils";
-import { isAdmin } from "../utils";
+import { isAuth, isAdmin } from "../utils";
 
 export const categoryRouter = express.Router();
 
@@ -18,7 +17,7 @@ categoryRouter.get(
 categoryRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     const category = await CategoryModel.findById(id);
     if (category) {
       res.json(category);
@@ -31,8 +30,8 @@ categoryRouter.get(
 categoryRouter.get(
   "/slug/:slug",
   asyncHandler(async (req, res) => {
-    const slug = req.params.slug;
-    const category = await CategoryModel.findOne({ slug: slug });
+    const { slug } = req.params;
+    const category = await CategoryModel.findOne({ slug });
     if (category) {
       res.json(category);
     } else {
@@ -48,19 +47,8 @@ categoryRouter.post(
   asyncHandler(async (req, res) => {
     try {
       const { _id, name, slug, urlImage, description } = req.body;
-
-      // Création du model pour la catégorie
-      const newCategory = new CategoryModel({
-        _id,
-        name,
-        slug,
-        urlImage,
-        description,
-      });
-
-      // Enregistre le produit dans la base de données
+      const newCategory = new CategoryModel({ _id, name, slug, urlImage, description });
       const savedCategory = await newCategory.save();
-
       res.status(201).json(savedCategory);
     } catch (error) {
       console.error(error);
@@ -74,22 +62,17 @@ categoryRouter.put(
   isAuth,
   isAdmin,
   asyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const nouvellesDonnees = req.body; // récupère les informations du body
-
+    const { id } = req.params;
+    const nouvellesDonnees = req.body;
     try {
-      const resultat = await CategoryModel.updateOne(
-        { _id: id },
-        { $set: nouvellesDonnees }
-      );
-
+      const resultat = await CategoryModel.updateOne({ _id: id }, { $set: nouvellesDonnees });
       if (resultat.modifiedCount > 0) {
         res.json({ message: "Update succeeded" });
       } else {
         res.status(500).json({ error: "Category not found" });
       }
-    } catch (erreur) {
-      console.error("Update error :", erreur);
+    } catch (error) {
+      console.error("Update error:", error);
       res.status(500).json({ error: "Update error" });
     }
   })
@@ -100,22 +83,18 @@ categoryRouter.delete(
   isAuth,
   isAdmin,
   asyncHandler(async (req, res) => {
-    const id = req.params.id; // récupère l'id dans les paramètres de l'url
-
-    const filtreSuppression = { _id: new Types.ObjectId(id) }; // filtre sur l'id pour la suppression
-
+    const { id } = req.params;
+    const filtreSuppression = { _id: new Types.ObjectId(id) };
     try {
       const resultat = await CategoryModel.deleteOne(filtreSuppression);
-
-      if (resultat.deletedCount && resultat.deletedCount > 0) {
-        res.json({ message: "category deleted successfully" });
+      if (resultat.deletedCount > 0) {
+        res.json({ message: "Category deleted successfully" });
       } else {
         res.status(500).json({ error: "Category not found." });
       }
-    } catch (erreur) {
-      console.error("Erreur lors de la suppression :", erreur);
+    } catch (error) {
+      console.error("Delete error:", error);
       res.status(500).json({ error: "Delete error." });
     }
   })
 );
-

@@ -12,22 +12,22 @@ describe('POST /', () => {
     const orderData = {
       user: '65b2de45860c1db56605434d',
       shippingAddress: {
-        "user": "65b2de45860c1db56605434d",
-        "firstName": "Fergus",
-        "lastName": "Gray",
-        "street": "79 Northgate Street",
-        "city": "BICKTON",
-        "postalCode": "SP6 6GN",
-        "country": "United Kingdom",
-        "phone": "43453"
+        user: '65b2de45860c1db56605434d',
+        firstName: 'Fergus',
+        lastName: 'Gray',
+        street: '79 Northgate Street',
+        city: 'BICKTON',
+        postalCode: 'SP6 6GN',
+        country: 'United Kingdom',
+        phone: '43453'
       },
       paymentMethod: 'Credit Card',
       orderItems: [{
-        product: '65b2de45860c1db56605433c', // Remplacer par un ObjectId valide
+        product: '65b2de45860c1db56605433c',
         quantity: 2,
         price: 100,
-        image: 'path/to/image.jpg', // Ajouter le chemin de l'image
-        name: 'Nom du produit' // Ajouter le nom du produit
+        image: 'path/to/image.jpg',
+        name: 'Nom du produit'
       }],
       isPaid: false,
       isDelivered: false,

@@ -11,11 +11,7 @@ featuredProductRouter.post(
   isAdmin,
   asyncHandler(async (req, res) => {
     const { _id, product, order } = req.body;
-    const featuredProduct = new FeaturedProductModel({
-      _id,
-      product,
-      order,
-    });
+    const featuredProduct = new FeaturedProductModel({ _id, product, order });
     const savedFeaturedProduct = await featuredProduct.save();
     res.status(201).json(savedFeaturedProduct);
   })
@@ -35,7 +31,10 @@ featuredProductRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const featuredProduct = await FeaturedProductModel.findById(id).populate({ path: 'product', model: 'Product' })
+    const featuredProduct = await FeaturedProductModel.findById(id).populate({
+      path: "product",
+      model: "Product",
+    });
     if (!featuredProduct) {
       res.status(404).json({ message: "Featured product not found" });
       return;

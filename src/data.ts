@@ -1,8 +1,3 @@
-/**
- * J'ai choisi d'utiliser TypeScript, Express et bcryptjs pour construire cette API REST car ils offrent une excellente compatibilité et des fonctionnalités robustes.
- * Ce fichier, 'data.ts', contient des données d'échantillon pour les produits et les utilisateurs qui sont utilisées pour peupler la base de données lors de l'initialisation de l'application.
- * Les produits et les utilisateurs sont définis avec leurs attributs respectifs, tels que le nom, l'image, la catégorie, la marque, le prix, le stock pour les produits et le nom, l'email, le mot de passe pour les utilisateurs.
- */
 
 import { DocumentType } from "@typegoose/typegoose";
 import { CarouselItem } from "./models/carouselItem";
@@ -20,48 +15,42 @@ export const sampleCategories: Category[] = [
     name: "Sofas",
     urlImage: "https://airneisstaticassets.onrender.com/images/categorysofa.png",
     slug: "sofas",
-    description:
-      "Discover the ultimate comfort with our luxurious sofa collection, perfect for elevating your living space.",
+    description: "Discover the ultimate comfort with our luxurious sofa collection, perfect for elevating your living space.",
   },
   {
     _id: "60d0fe4f5311236168a109cb",
     name: "Tables",
     urlImage: "https://airneisstaticassets.onrender.com/images/categorytable.png",
     slug: "tables",
-    description:
-      "Elevate your dining experience with our stylish and functional tables, designed to fit any space.",
+    description: "Elevate your dining experience with our stylish and functional tables, designed to fit any space.",
   },
   {
     _id: "60d0fe4f5311236168a109cc",
     name: "Bookcases",
     urlImage: "https://airneisstaticassets.onrender.com/images/categorybookcase.png",
     slug: "bookcases",
-    description:
-      "Organize your favorite reads and accentuate your space with our elegant and versatile bookcases.",
+    description: "Organize your favorite reads and accentuate your space with our elegant and versatile bookcases.",
   },
   {
     _id: "60d0fe4f5311236168a109cd",
     name: "Rugs",
     urlImage: "https://airneisstaticassets.onrender.com/images/categoryrug.png",
     slug: "rugs",
-    description:
-      "Add a touch of warmth and style to any room with our exquisite collection of rugs.",
+    description: "Add a touch of warmth and style to any room with our exquisite collection of rugs.",
   },
   {
     _id: "60d0fe4f5311236168a109ce",
     name: "Lamps",
     urlImage: "https://airneisstaticassets.onrender.com/images/categorylamp.png",
     slug: "lamps",
-    description:
-      "Illuminate your home with our range of beautiful and functional lamps, perfect for setting the mood.",
+    description: "Illuminate your home with our range of beautiful and functional lamps, perfect for setting the mood.",
   },
   {
     _id: "60d0fe4f5311236168a109cf",
     name: "Wardrobes",
     urlImage: "https://airneisstaticassets.onrender.com/images/categorywardrobe.png",
     slug: "wardrobes",
-    description:
-      "Keep your clothes organized and your bedroom tidy with our stylish and spacious wardrobes.",
+    description: "Keep your clothes organized and your bedroom tidy with our stylish and spacious wardrobes.",
   },
 ];
 
@@ -71,9 +60,7 @@ export const sampleProducts: Product[] = [
     name: "MACLEOD",
     slug: "macleod",
     URLimages: ["https://airneisstaticassets.onrender.com/images/blue-3-seater-sofa.png"],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "sofas"
-    ) as DocumentType<Category>,
+    category: sampleCategories.find((cat) => cat.slug === "sofas") as DocumentType<Category>,
     materials: ["cotton", "wood"],
     price: 200,
     description: "Blue 3-seater sofa",
@@ -84,9 +71,7 @@ export const sampleProducts: Product[] = [
     name: "NESSIE",
     slug: "nessie",
     URLimages: ["https://airneisstaticassets.onrender.com/images/red-2-seater-sofa-in-living-room.png"],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "sofas"
-    ) as DocumentType<Category>,
+    category: sampleCategories.find((cat) => cat.slug === "sofas") as DocumentType<Category>,
     materials: ["cotton", "wood"],
     price: 150,
     description: "Red 2-seater sofa",
@@ -97,9 +82,7 @@ export const sampleProducts: Product[] = [
     name: "THISTLE",
     slug: "thistle",
     URLimages: ["https://airneisstaticassets.onrender.com/images/single-seat-green-sofa-in-living-room.png"],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "sofas"
-    ) as DocumentType<Category>,
+    category: sampleCategories.find((cat) => cat.slug === "sofas") as DocumentType<Category>,
     materials: ["cotton", "wood"],
     price: 100,
     description: "Green 1-seater sofa",
@@ -110,9 +93,7 @@ export const sampleProducts: Product[] = [
     name: "GLEN",
     slug: "glen",
     URLimages: ["https://airneisstaticassets.onrender.com/images/modern-brown-coffee-table (1).png"],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "tables"
-    ) as DocumentType<Category>,
+    category: sampleCategories.find((cat) => cat.slug === "tables") as DocumentType<Category>,
     materials: ["wood"],
     price: 80,
     description: "Brown coffee table",
@@ -122,12 +103,8 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d4",
     name: "WALLACE",
     slug: "wallace",
-    URLimages: [
-      "https://airneisstaticassets.onrender.com/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png",
-    ],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "bookcases"
-    ) as DocumentType<Category>,
+    URLimages: ["https://airneisstaticassets.onrender.com/images/bookcase-with-a-wooden-finish-and-a-metal-frame.png"],
+    category: sampleCategories.find((cat) => cat.slug === "bookcases") as DocumentType<Category>,
     materials: ["wood", "metal"],
     price: 80,
     description: "Bookcase with wooden finish and metal frame.",
@@ -138,9 +115,7 @@ export const sampleProducts: Product[] = [
     name: "HEATHER",
     slug: "heather",
     URLimages: ["https://airneisstaticassets.onrender.com/images/modern-purple-rug-with-floral-pattern.png"],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "rugs"
-    ) as DocumentType<Category>,
+    category: sampleCategories.find((cat) => cat.slug === "rugs") as DocumentType<Category>,
     materials: ["wool"],
     price: 35,
     description: "Rug with a wool texture and a purple color",
@@ -150,12 +125,8 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d6",
     name: "STIRLING",
     slug: "stirling",
-    URLimages: [
-      "https://airneisstaticassets.onrender.com/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png",
-    ],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "lamps"
-    ) as DocumentType<Category>,
+    URLimages: ["https://airneisstaticassets.onrender.com/images/ad-of-a-lamp-with-glass-shade-and-thin-silver-base.png"],
+    category: sampleCategories.find((cat) => cat.slug === "lamps") as DocumentType<Category>,
     materials: ["glass", "metal"],
     price: 20,
     description: "Lamp with glass shade and thin silver base",
@@ -165,12 +136,8 @@ export const sampleProducts: Product[] = [
     _id: "60d0fe4f5311236168a109d7",
     name: "SKYE",
     slug: "skye",
-    URLimages: [
-      "https://airneisstaticassets.onrender.com/images/wardrobe-with-a-white-colour-and-3-doors.png",
-    ],
-    category: sampleCategories.find(
-      (cat) => cat.slug === "wardrobes"
-    ) as DocumentType<Category>,
+    URLimages: ["https://airneisstaticassets.onrender.com/images/wardrobe-with-a-white-colour-and-3-doors.png"],
+    category: sampleCategories.find((cat) => cat.slug === "wardrobes") as DocumentType<Category>,
     materials: ["wood", "glass"],
     price: 200,
     description: "White wardrobe with a mirror door",
@@ -361,70 +328,51 @@ export const sampleContacts: Contact[] = [
   {
     mail: "userone@example.com",
     subject: "Inquiry about product availability",
-    message:
-      "I would like to know when the MACLEOD sofa will be back in stock. Thank you.",
+    message: "I would like to know when the MACLEOD sofa will be back in stock. Thank you.",
   },
   {
     mail: "usertwo@example.com",
     subject: "Feedback on recent purchase",
-    message:
-      "I recently purchased the NESSIE sofa and am extremely satisfied with the quality. Thank you!",
+    message: "I recently purchased the NESSIE sofa and am extremely satisfied with the quality. Thank you!",
   },
   {
     mail: "userone@example.com",
     subject: "Issue with delivery",
-    message:
-      "My order for the THISTLE sofa was delayed, and I would like to inquire about the new delivery date.",
+    message: "My order for the THISTLE sofa was delayed, and I would like to inquire about the new delivery date.",
   },
 ];
 
 export const sampleStocks: Stock[] = [
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "macleod"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "macleod")! as DocumentType<Product>,
     quantity: 5,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "nessie"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "nessie")! as DocumentType<Product>,
     quantity: 3,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "thistle"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "thistle")! as DocumentType<Product>,
     quantity: 0,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "glen"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "glen")! as DocumentType<Product>,
     quantity: 10,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "wallace"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "wallace")! as DocumentType<Product>,
     quantity: 2,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "heather"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "heather")! as DocumentType<Product>,
     quantity: 4,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "stirling"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "stirling")! as DocumentType<Product>,
     quantity: 1,
   },
   {
-    product: sampleProducts.find(
-      (product) => product.slug === "skye"
-    )! as DocumentType<Product>,
+    product: sampleProducts.find((product) => product.slug === "skye")! as DocumentType<Product>,
     quantity: 1,
   },
 ];
@@ -439,9 +387,7 @@ export const sampleOrders: Order[] = [
         quantity: 1,
         image: "https://airneisstaticassets.onrender.com/images/blue-3-seater-sofa.png",
         price: 200,
-        product: sampleProducts.find(
-          (product) => product.slug === "macleod"
-        ) as DocumentType<Product>,
+        product: sampleProducts.find((product) => product.slug === "macleod") as DocumentType<Product>,
       },
     ],
     shippingAddress: {

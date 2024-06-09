@@ -11,11 +11,10 @@ shippingAddressRouter.get(
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' })
-      return // Exit the function after sending the response
+      return
     }
-    const userShippingAddresses = await ShippingAddressModel.find({ user: req.user._id }).exec() // Filter by user ID
+    const userShippingAddresses = await ShippingAddressModel.find({ user: req.user._id }).exec()
     res.json(userShippingAddresses)
-    // No need to return anything here
   })
 )
 
@@ -36,15 +35,14 @@ shippingAddressRouter.post(
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
       res.status(401).json({ error: 'User not authenticated' })
-      return // Exit the function after sending the response
+      return
     }
     const newShippingAddress = new ShippingAddressModel({
       ...req.body,
-      user: req.user._id, // Assuming req.user contains the authenticated user's info
+      user: req.user._id,
     })
     const savedShippingAddress = await newShippingAddress.save()
     res.status(201).json(savedShippingAddress)
-    // No need to return anything here
   })
 )
 

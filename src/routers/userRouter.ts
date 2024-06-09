@@ -1,9 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express, Typegoose et bcryptjs pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'userRouter.ts', gère les routes pour les utilisateurs. Il contient deux routes principales : une pour la connexion des utilisateurs et une autre pour l'inscription des utilisateurs.
- * La route 'POST /signin' permet aux utilisateurs de se connecter en utilisant leur email et leur mot de passe. Si les informations sont correctes, un token est généré et renvoyé avec les informations de l'utilisateur.
- * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
- */
 import express, { Request, Response } from 'express'
 import { UserModel, UserAddress, UserAddressModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
@@ -11,7 +5,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { generateToken, generatePasswordResetToken, sendPasswordResetEmail } from '../utils'
 import dotenv from 'dotenv'
-import { isAdmin, isAuth } from '../utils'
+import { isAuth } from '../utils'
 import rateLimit from 'express-rate-limit'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { PaymentCard, PaymentCardModel } from '../models/payment'
@@ -30,18 +24,18 @@ const passwordResetRequestLimiter = rateLimit({
 interface UserRequestBody {
   name?: string
   email?: string
-  phoneNumber?:string
+  phoneNumber?: string
   password?: string
   isAdmin?: boolean
   addresses?: UserAddress[]
   paymentCards?: PaymentCard[]
-  _id?: string;
+  _id?: string
 }
 
 interface AddressRequestBody {
   street: string
   city: string
-  postalCode: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
+  postalCode: string
   country: string
 }
 
@@ -56,7 +50,7 @@ interface PaymentCardRequestBody {
 const sendErrorResponse = (res: Response, statusCode: number, message: string) => {
   res.status(statusCode).send({ message })
 }
-// Get all users
+
 userRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
@@ -64,11 +58,10 @@ userRouter.get(
     res.json(users)
   })
 )
-// Get user by id
+
 userRouter.get(
   '/:id',
   isAuth,
-  // isAdmin, // si isAdmin = un utilisateur ne peut pas voir son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
@@ -78,11 +71,10 @@ userRouter.get(
     }
   })
 )
-// Update user
+
 userRouter.put(
   '/:id',
   isAuth,
-  // isAdmin, // si isAdmin = un utilisateur ne peut pas modifier son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     try {
       const user = await UserModel.findById(req.params.id)
@@ -91,7 +83,7 @@ userRouter.put(
       }
       user.name = req.body.name || user.name
       user.email = req.body.email || user.email
-      user.phoneNumber = req.body.phoneNumber|| user.phoneNumber
+      user.phoneNumber = req.body.phoneNumber || user.phoneNumber
       if (req.body.password) {
         const salt = await bcrypt.genSalt(10)
         user.password = await bcrypt.hash(req.body.password, salt)
@@ -100,7 +92,6 @@ userRouter.put(
         user.isAdmin = req.body.isAdmin
       }
       user.addresses = req.body.addresses || user.addresses
-
       user.paymentCards = req.body.paymentCards || user.paymentCards
 
       const updatedUser = await user.save()
@@ -120,15 +111,13 @@ userRouter.put(
   })
 )
 
-// new address
 userRouter.post(
   '/:id/address/add',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
-      // Ensure addresses array is initialized
       if (!user.addresses) {
-        user.addresses = [];
+        user.addresses = []
       }
 
       const newAddress = new UserAddressModel({
@@ -137,85 +126,79 @@ userRouter.post(
         postalCode: req.body.postalCode,
         country: req.body.country,
         isDefault: false
-      });
+      })
 
-      user.addresses.push(newAddress);
-      await user.save();
-      res.send({ newAddress: newAddress });
+      user.addresses.push(newAddress)
+      await user.save()
+      res.send({ newAddress: newAddress })
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' });
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
     }
   })
-);
+)
 
-// address default
 userRouter.put(
   '/:id/address/:idAddress/default',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id)
     if (user && user.addresses) {
       user.addresses.forEach(addr => {
-        addr.isDefault = (addr._id == req.params.idAddress);
-      });
+        addr.isDefault = (addr._id == req.params.idAddress)
+      })
 
-      await user.save();
-      res.json({ message: 'Default address updated' });
+      await user.save()
+      res.json({ message: 'Default address updated' })
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' });
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
     }
   })
-);
+)
 
-// update address
 userRouter.put(
   '/:id/address/:addressId',
   isAuth,
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id)
     if (user) {
-      // Ensure addresses array is initialized
       if (!user.addresses) {
-        user.addresses = [];
+        user.addresses = []
       }
 
-      let addressFound = false;
-      const indexAddress = user.addresses.findIndex(addr => addr._id == req.params.addressId);
+      let addressFound = false
+      const indexAddress = user.addresses.findIndex(addr => addr._id == req.params.addressId)
 
       if (indexAddress !== -1) {
-        addressFound = true;
-        const address = user.addresses[indexAddress];
-        address.city = req.body.city || address.city;
-        address.country = req.body.country || address.country;
-        address.postalCode = req.body.postalCode || address.postalCode;
-        address.street = req.body.street || address.street;
+        addressFound = true
+        const address = user.addresses[indexAddress]
+        address.city = req.body.city || address.city
+        address.country = req.body.country || address.country
+        address.postalCode = req.body.postalCode || address.postalCode
+        address.street = req.body.street || address.street
       }
 
       if (!addressFound) {
-        return sendErrorResponse(res, 400, "Adresse non trouvée");
+        return sendErrorResponse(res, 400, "Adresse non trouvée")
       }
 
-      const updatedUser = await user.save();
-      // Check again to ensure addresses is not undefined after saving
+      const updatedUser = await user.save()
       if (updatedUser.addresses && updatedUser.addresses.length > indexAddress) {
-        res.json({ updatedAddress: updatedUser.addresses[indexAddress] });
+        res.json({ updatedAddress: updatedUser.addresses[indexAddress] })
       } else {
-        sendErrorResponse(res, 500, "Erreur lors de la mise à jour de l'adresse");
+        sendErrorResponse(res, 500, "Erreur lors de la mise à jour de l'adresse")
       }
     } else {
-      sendErrorResponse(res, 400, "Utilisateur non trouvé");
+      sendErrorResponse(res, 400, "Utilisateur non trouvé")
     }
   })
-);
+)
 
-// add payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id)
     if (user) {
-      // Ensure paymentCards array is initialized
       if (!user.paymentCards) {
-        user.paymentCards = [];
+        user.paymentCards = []
       }
 
       const newCard = new PaymentCardModel({
@@ -225,40 +208,37 @@ userRouter.post(
         monthExpiration: req.body.monthExpiration,
         yearExpiration: req.body.yearExpiration,
         isDefault: false
-      });
+      })
 
-      user.paymentCards.push(newCard);
-      await user.save();
-      res.send({ newCard: newCard });
+      user.paymentCards.push(newCard)
+      await user.save()
+      res.send({ newCard: newCard })
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' });
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
     }
   })
-);
+)
 
-// payment card default
 userRouter.put(
   '/:id/payment/card/:idCard/default',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
-    const user = await UserModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id)
     if (user && user.paymentCards) {
       user.paymentCards.forEach(card => {
-        card.isDefault = (card._id == req.params.idCard);
-      });
+        card.isDefault = (card._id == req.params.idCard)
+      })
 
-      await user.save();
-      res.json({ message: 'Default card updated' });
+      await user.save()
+      res.json({ message: 'Default card updated' })
     } else {
-      res.status(404).send({ message: 'Utilisateur non trouvé' });
+      res.status(404).send({ message: 'Utilisateur non trouvé' })
     }
   })
-);
+)
 
-// delete user
 userRouter.delete(
   '/:id',
   isAuth,
-  // isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)
@@ -271,7 +251,7 @@ userRouter.delete(
     }
   })
 )
-// signin
+
 userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
@@ -290,60 +270,41 @@ userRouter.post(
     }
   })
 )
-// sign up
+
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const { name, email, password } = req.body;
-      console.log('Received signup request with data:', { name, email });
-
-      // Check if the email already exists
-      console.log('Checking if email already exists...');
-      const existingUser = await UserModel.findOne({ email });
+      const { name, email, password } = req.body
+      const existingUser = await UserModel.findOne({ email })
       if (existingUser) {
-        console.log('Email already exists:', email);
-        return sendErrorResponse(res, 400, 'Email already exists');
+        return sendErrorResponse(res, 400, 'Email already exists')
       }
-      console.log('Email is unique, proceeding with user creation...');
 
-      console.log('Generating salt for password hashing...');
-      const salt = await bcrypt.genSalt(10);
-      console.log('Salt generated:', salt);
+      const salt = await bcrypt.genSalt(10)
       const user = new UserModel({
         _id: new ObjectId(),
         name,
         email,
         password: bcrypt.hashSync(password, salt),
         isAdmin: false
-      });
-      console.log('User object created:', user);
+      })
 
-      console.log('Saving user to the database...');
-      const newUser = await user.save();
-      console.log('User saved successfully:', newUser);
+      const newUser = await user.save()
       res.json({
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         isAdmin: newUser.isAdmin,
         token: generateToken(newUser),
-      });
-      console.log('Signup response sent:', {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        isAdmin: newUser.isAdmin,
-      });
-    } catch (error: any) {
-      console.error('Error during user creation:', error);
-      console.error('Error details:', error.stack);
-      sendErrorResponse(res, 500, 'Erreur lors de la création de l\'utilisateur');
-      console.log('Error response sent:', 'Erreur lors de la création de l\'utilisateur');
+      })
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Erreur lors de la création de l\'utilisateur'
+      sendErrorResponse(res, 500, errorMessage)
     }
   })
 )
-// password request
+
 userRouter.post(
   '/password-reset-request',
   passwordResetRequestLimiter,
@@ -363,7 +324,7 @@ userRouter.post(
     }
   })
 )
-// password reset
+
 userRouter.post(
   '/password-reset',
   asyncHandler(async (req: Request, res: Response) => {
@@ -374,12 +335,12 @@ userRouter.post(
       }
       if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not defined')
       interface DecodedToken {
-        _id: string;
-        email: string;
-        jti?: string;
+        _id: string
+        email: string
+        jti?: string
       }
 
-      const decoded: DecodedToken = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken;
+      const decoded: DecodedToken = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken
       const user = await UserModel.findOne({
         _id: decoded._id,
         email: decoded.email,
@@ -397,4 +358,3 @@ userRouter.post(
     }
   })
 )
-

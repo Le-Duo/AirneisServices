@@ -1,9 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express, dotenv, mongoose et cors pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'index.ts', est le point d'entrée de l'application. Il configure l'application Express, se connecte à la base de données MongoDB et définit les routes pour les différents endpoints de l'API.
- * Les routes sont définies pour les produits, les utilisateurs, les commandes et les données d'initialisation.
- * L'application écoute sur le port 4000 et se connecte à la base de données MongoDB à l'aide de l'URI fournie par la variable d'environnement MONGODB_URI.
- */
 
 import cors from 'cors'
 import dotenv from 'dotenv'
@@ -28,12 +22,10 @@ dotenv.config()
 const MONGODB_URI = process.env.MONGODB_URI || ''
 const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI || 'mongodb://localhost:27017'
 
-// Force connection on "Airneis" database; by default, mongoose create "Test" database
 const connectionOptions = {
   dbName: `Airneis`,
 }
 
-// Function to connect to MongoDB
 const connectToMongoDB = async (uri: string) => {
   try {
     await mongoose.connect(uri, connectionOptions)
@@ -44,7 +36,6 @@ const connectToMongoDB = async (uri: string) => {
   }
 }
 
-// Attempt to connect to MONGODB_URI or fallback to LOCAL_MONGODB_URI
 console.log('Attempting to connect to MONGODB_URI...')
 connectToMongoDB(MONGODB_URI).catch(() => {
   console.log('Attempting to connect to LOCAL_MONGODB_URI...')

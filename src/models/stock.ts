@@ -1,21 +1,15 @@
-import {
-  modelOptions,
-  prop,
-  getModelForClass,
-  DocumentType,
-} from '@typegoose/typegoose'
-import { Product } from './product'
+import { modelOptions, prop, getModelForClass, DocumentType } from "@typegoose/typegoose";
+import { Product } from "./product";
 
-@modelOptions({ schemaOptions: { collection: 'stock', timestamps: true } })
+@modelOptions({ schemaOptions: { collection: "stock", timestamps: true } })
 export class Stock {
-
-  public _id?: string
+  public _id?: string;
 
   @prop({ required: true, type: () => Product })
-  public product!: DocumentType<Product> //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons le Product entier
+  public product!: DocumentType<Product>;
 
   @prop({ required: true, default: 0 })
-  public quantity!: number
+  public quantity!: number;
 }
 
-export const StockModel = getModelForClass(Stock)
+export const StockModel = getModelForClass(Stock);

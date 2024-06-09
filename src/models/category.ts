@@ -1,25 +1,25 @@
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import { modelOptions, prop, getModelForClass } from "@typegoose/typegoose";
 
 @modelOptions({
   schemaOptions: {
-    collection: 'categories',
+    collection: "categories",
     timestamps: true,
   },
 })
 export class Category {
-  public _id?: string
+  public _id?: string;
 
   @prop({ required: true })
-  public name!: string
+  public name!: string;
 
   @prop({ required: true })
-  public slug!: string
+  public slug!: string;
 
   @prop({ required: false })
-  public urlImage?: string
+  public urlImage?: string;
 
   @prop({ required: false })
-  public description?: string
+  public description?: string;
 }
 
-export const CategoryModel = getModelForClass(Category)
+export const CategoryModel = getModelForClass(Category);
