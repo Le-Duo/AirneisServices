@@ -281,6 +281,7 @@ productRouter.get(
           quantity: { $arrayElemAt: ["$stockInfo.quantity", 0] },
           inStock: 1,
           priority: 1,
+          category: 1,
         },
       },
     ];

@@ -1,12 +1,7 @@
-import {
-  modelOptions,
-  prop,
-  getModelForClass,
-  Ref,
-} from '@typegoose/typegoose'
-import { Product } from './product'
-import { User } from './user'
-
+import { modelOptions, prop, getModelForClass, Ref } from "@typegoose/typegoose";
+import { Product } from "./product";
+import { User } from "./user";
+import { Category } from "./category";
 
 export enum OrderStatus {
   Initiated = 'initiated',
@@ -50,6 +45,10 @@ export class Item {
   public quantity!: number;
   @prop({ required: false })
   public image?: string;
+
+  @prop({ required: false })
+  public category?: Category;
+
   @prop({ required: true })
   public price!: number;
   @prop({ ref: () => Product })
