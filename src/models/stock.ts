@@ -12,7 +12,7 @@ export class Stock {
   public _id?: string
 
   @prop({ required: true, type: () => Product })
-  public product!: DocumentType<Product> //Ne pas utiliser Ref<> : Ref<> ne garde que l'ID mongo, nous voulons le Product entier
+  public product!: DocumentType<Product>
 
   @prop({ required: true, default: 0 })
   public quantity!: number

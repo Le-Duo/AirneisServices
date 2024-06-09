@@ -20,7 +20,6 @@ describe('Category Model Test', () => {
     const validCategory = new CategoryModel(categoryData);
     const savedCategory = await validCategory.save();
 
-    // Assertions
     expect(savedCategory._id).toBeDefined();
     expect(savedCategory.name).toBe(categoryData.name);
     expect(savedCategory.slug).toBe(categoryData.slug);

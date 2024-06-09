@@ -1,9 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express, Typegoose et bcryptjs pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'userRouter.ts', gère les routes pour les utilisateurs. Il contient deux routes principales : une pour la connexion des utilisateurs et une autre pour l'inscription des utilisateurs.
- * La route 'POST /signin' permet aux utilisateurs de se connecter en utilisant leur email et leur mot de passe. Si les informations sont correctes, un token est généré et renvoyé avec les informations de l'utilisateur.
- * La route 'POST /signup' permet aux nouveaux utilisateurs de s'inscrire en fournissant leur nom, email et mot de passe. Un nouveau utilisateur est créé dans la base de données et un token est généré et renvoyé avec les informations de l'utilisateur.
- */
 import express, { Request, Response } from 'express'
 import { UserModel, UserAddress, UserAddressModel } from '../models/user'
 import asyncHandler from 'express-async-handler'
@@ -41,7 +35,7 @@ interface UserRequestBody {
 interface AddressRequestBody {
   street: string
   city: string
-  postalCode: string // Assuming postalCode is preferred over zipCode for consistency with develop branch
+  postalCode: string
   country: string
 }
 
@@ -56,7 +50,7 @@ interface PaymentCardRequestBody {
 const sendErrorResponse = (res: Response, statusCode: number, message: string) => {
   res.status(statusCode).send({ message })
 }
-// Get all users
+
 userRouter.get(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
@@ -64,11 +58,10 @@ userRouter.get(
     res.json(users)
   })
 )
-// Get user by id
+
 userRouter.get(
   '/:id',
   isAuth,
-  // isAdmin, // si isAdmin = un utilisateur ne peut pas voir son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
@@ -78,11 +71,10 @@ userRouter.get(
     }
   })
 )
-// Update user
+
 userRouter.put(
   '/:id',
   isAuth,
-  // isAdmin, // si isAdmin = un utilisateur ne peut pas modifier son propre profil
   asyncHandler(async (req: Request<ParamsDictionary, UserRequestBody>, res: Response) => {
     try {
       const user = await UserModel.findById(req.params.id)
@@ -120,13 +112,11 @@ userRouter.put(
   })
 )
 
-// new address
 userRouter.post(
   '/:id/address/add',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id)
     if (user) {
-      // Ensure addresses array is initialized
       if (!user.addresses) {
         user.addresses = [];
       }
@@ -148,7 +138,6 @@ userRouter.post(
   })
 );
 
-// address default
 userRouter.put(
   '/:id/address/:idAddress/default',
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
@@ -166,14 +155,12 @@ userRouter.put(
   })
 );
 
-// update address
 userRouter.put(
   '/:id/address/:addressId',
   isAuth,
   asyncHandler(async (req: Request<ParamsDictionary, AddressRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id);
     if (user) {
-      // Ensure addresses array is initialized
       if (!user.addresses) {
         user.addresses = [];
       }
@@ -195,7 +182,6 @@ userRouter.put(
       }
 
       const updatedUser = await user.save();
-      // Check again to ensure addresses is not undefined after saving
       if (updatedUser.addresses && updatedUser.addresses.length > indexAddress) {
         res.json({ updatedAddress: updatedUser.addresses[indexAddress] });
       } else {
@@ -207,13 +193,11 @@ userRouter.put(
   })
 );
 
-// add payment card
 userRouter.post(
   '/:id/payment/card/add',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
     const user = await UserModel.findById(req.params.id);
     if (user) {
-      // Ensure paymentCards array is initialized
       if (!user.paymentCards) {
         user.paymentCards = [];
       }
@@ -236,7 +220,6 @@ userRouter.post(
   })
 );
 
-// payment card default
 userRouter.put(
   '/:id/payment/card/:idCard/default',
   asyncHandler(async (req: Request<ParamsDictionary, PaymentCardRequestBody>, res: Response) => {
@@ -254,11 +237,9 @@ userRouter.put(
   })
 );
 
-// delete user
 userRouter.delete(
   '/:id',
   isAuth,
-  // isAdmin,
   asyncHandler(async (req: Request<ParamsDictionary>, res: Response) => {
     try {
       const user = await UserModel.findByIdAndDelete(req.params.id)
@@ -271,7 +252,7 @@ userRouter.delete(
     }
   })
 )
-// signin
+
 userRouter.post(
   '/signin',
   asyncHandler(async (req: Request, res: Response) => {
@@ -290,7 +271,7 @@ userRouter.post(
     }
   })
 )
-// sign up
+
 userRouter.post(
   '/signup',
   asyncHandler(async (req: Request, res: Response) => {
@@ -298,8 +279,6 @@ userRouter.post(
       const { name, email, password } = req.body;
       console.log('Received signup request with data:', { name, email });
 
-      // Check if the email already exists
-      console.log('Checking if email already exists...');
       const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
         console.log('Email already exists:', email);
@@ -343,7 +322,7 @@ userRouter.post(
     }
   })
 )
-// password request
+
 userRouter.post(
   '/password-reset-request',
   passwordResetRequestLimiter,
@@ -363,7 +342,7 @@ userRouter.post(
     }
   })
 )
-// password reset
+
 userRouter.post(
   '/password-reset',
   asyncHandler(async (req: Request, res: Response) => {
@@ -397,4 +376,3 @@ userRouter.post(
     }
   })
 )
-

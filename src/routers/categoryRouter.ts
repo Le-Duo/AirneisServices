@@ -49,7 +49,6 @@ categoryRouter.post(
     try {
       const { _id, name, slug, urlImage, description } = req.body;
 
-      // Création du model pour la catégorie
       const newCategory = new CategoryModel({
         _id,
         name,
@@ -58,7 +57,6 @@ categoryRouter.post(
         description,
       });
 
-      // Enregistre le produit dans la base de données
       const savedCategory = await newCategory.save();
 
       res.status(201).json(savedCategory);
@@ -75,7 +73,7 @@ categoryRouter.put(
   isAdmin,
   asyncHandler(async (req, res) => {
     const id = req.params.id;
-    const nouvellesDonnees = req.body; // récupère les informations du body
+    const nouvellesDonnees = req.body;
 
     try {
       const resultat = await CategoryModel.updateOne(
@@ -100,9 +98,9 @@ categoryRouter.delete(
   isAuth,
   isAdmin,
   asyncHandler(async (req, res) => {
-    const id = req.params.id; // récupère l'id dans les paramètres de l'url
+    const id = req.params.id;
 
-    const filtreSuppression = { _id: new Types.ObjectId(id) }; // filtre sur l'id pour la suppression
+    const filtreSuppression = { _id: new Types.ObjectId(id) };
 
     try {
       const resultat = await CategoryModel.deleteOne(filtreSuppression);

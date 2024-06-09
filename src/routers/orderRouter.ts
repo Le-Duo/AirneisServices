@@ -1,10 +1,3 @@
-/**
- * J'ai choisi d'utiliser Express et Typegoose pour construire cette API REST car ils offrent une excellente compatibilité avec TypeScript.
- * Ce fichier, 'orderRouter.ts', gère les routes pour les commandes. Il contient deux routes principales : une pour obtenir une commande spécifique par son ID et une autre pour créer une nouvelle commande.
- * La route 'GET /:id' renvoie les détails d'une commande spécifique. Elle nécessite une authentification.
- * La route 'POST /' crée une nouvelle commande avec les détails fournis dans le corps de la requête. Elle nécessite également une authentification.
- */
-
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { isAuth } from '../utils'
@@ -15,7 +8,6 @@ export const orderRouter = express.Router()
 
 orderRouter.get(
   "/",
-  // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     const orders = await OrderModel.find({}).populate("user", "name");
     res.json(orders);
@@ -74,7 +66,6 @@ orderRouter.get(
 
 orderRouter.get(
   "/:id",
-  // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     console.log("Get order by id called");
     const order = await OrderModel.findById(req.params.id);
@@ -88,7 +79,6 @@ orderRouter.get(
 
 orderRouter.get(
   "/order/:orderNumber",
-  // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     console.log("Get order by orderNumb er called");
     const order = await OrderModel.findOne({
@@ -175,7 +165,6 @@ orderRouter.post(
         status: "initiated",
       });
 
-      // Deduct stock
       for (const item of orderItems) {
         await StockModel.findOneAndUpdate(
           { "product._id": item.product },
@@ -194,14 +183,6 @@ orderRouter.post(
   })
 );
 
-/*
-  Pour le update, une fois l'ordre créer en initiated, on s'attend
-  à un paiement valide.
-  Quand le paiement est fait, l'ordre sera mis à jour avec la référence de paiement
-  et son status changera en "pending".
-  Si le paiement est refusé, l'ordre sera mis à jour avec le status
-  "cancelled" et la référence du paiement échouée
-*/
 orderRouter.put(
   "/:ordernumber",
   asyncHandler(async (req, res) => {
@@ -232,7 +213,6 @@ orderRouter.put(
 
 orderRouter.delete(
   "/:id",
-  // isAuth,
   asyncHandler(async (req: Request, res: Response) => {
     const orderId = req.params.id;
     const deletedOrder = await OrderModel.findByIdAndDelete(orderId);

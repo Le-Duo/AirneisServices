@@ -23,11 +23,11 @@ describe('POST /', () => {
       },
       paymentMethod: 'Credit Card',
       orderItems: [{
-        product: '65b2de45860c1db56605433c', // Remplacer par un ObjectId valide
+        product: '65b2de45860c1db56605433c',
         quantity: 2,
         price: 100,
-        image: 'path/to/image.jpg', // Ajouter le chemin de l'image
-        name: 'Nom du produit' // Ajouter le nom du produit
+        image: 'path/to/image.jpg',
+        name: 'Nom du produit'
       }],
       isPaid: false,
       isDelivered: false,
