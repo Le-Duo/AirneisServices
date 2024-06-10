@@ -16,7 +16,7 @@ describe('Category Model Test', () => {
   });
 
   it('Create & save category successfully', async () => {
-    const categoryData: Category = { name: 'sofas', slug: 'sofas', urlImage: 'http://example.com/sofas.png' };
+    const categoryData: Category = { name: 'sofas', slug: 'sofas', urlImage: 'http://example.com/sofas.png', order: 0 };
     const validCategory = new CategoryModel(categoryData);
     const savedCategory = await validCategory.save();
 

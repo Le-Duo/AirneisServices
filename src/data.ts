@@ -16,6 +16,7 @@ export const sampleCategories: Category[] = [
     slug: "sofas",
     description:
       "Discover the ultimate comfort with our luxurious sofa collection, perfect for elevating your living space.",
+    order: 0,
   },
   {
     _id: "60d0fe4f5311236168a109cb",
@@ -24,6 +25,7 @@ export const sampleCategories: Category[] = [
     slug: "tables",
     description:
       "Elevate your dining experience with our stylish and functional tables, designed to fit any space.",
+    order: 1,
   },
   {
     _id: "60d0fe4f5311236168a109cc",
@@ -32,6 +34,7 @@ export const sampleCategories: Category[] = [
     slug: "bookcases",
     description:
       "Organize your favorite reads and accentuate your space with our elegant and versatile bookcases.",
+    order: 2,
   },
   {
     _id: "60d0fe4f5311236168a109cd",
@@ -40,6 +43,7 @@ export const sampleCategories: Category[] = [
     slug: "rugs",
     description:
       "Add a touch of warmth and style to any room with our exquisite collection of rugs.",
+    order: 3,
   },
   {
     _id: "60d0fe4f5311236168a109ce",
@@ -48,6 +52,7 @@ export const sampleCategories: Category[] = [
     slug: "lamps",
     description:
       "Illuminate your home with our range of beautiful and functional lamps, perfect for setting the mood.",
+    order: 4,
   },
   {
     _id: "60d0fe4f5311236168a109cf",
@@ -56,6 +61,7 @@ export const sampleCategories: Category[] = [
     slug: "wardrobes",
     description:
       "Keep your clothes organized and your bedroom tidy with our stylish and spacious wardrobes.",
+    order: 5,
   },
 ];
 

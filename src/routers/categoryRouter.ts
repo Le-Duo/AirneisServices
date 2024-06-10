@@ -10,7 +10,7 @@ export const categoryRouter = express.Router();
 categoryRouter.get(
   "/",
   asyncHandler(async (req, res) => {
-    const categories = await CategoryModel.find();
+    const categories = await CategoryModel.find().sort({ order: 1 });
     res.json(categories);
   })
 );
@@ -47,7 +47,7 @@ categoryRouter.post(
   isAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const { _id, name, slug, urlImage, description } = req.body;
+      const { _id, name, slug, urlImage, description, order } = req.body;
 
       const newCategory = new CategoryModel({
         _id,
@@ -55,6 +55,7 @@ categoryRouter.post(
         slug,
         urlImage,
         description,
+        order,
       });
 
       const savedCategory = await newCategory.save();
@@ -116,4 +117,3 @@ categoryRouter.delete(
     }
   })
 );
-
