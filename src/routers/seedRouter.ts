@@ -1,9 +1,8 @@
-
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import { ProductModel, Product } from '../models/product'
 import { UserModel } from '../models/user'
-import { CategoryModel } from '../models/category'
+import { CategoryModel, Category } from '../models/category'
 import { CarouselItemModel } from '../models/carouselItem'
 import { StockModel } from '../models/stock'
 import { OrderModel } from '../models/order'
@@ -60,7 +59,18 @@ seedRouter.get(
       if (!userDoc) {
         throw new Error('User not found');
       }
-      return { ...order, user: userDoc._id };
+      const orderItemsUpdated = order.orderItems.map(item => {
+        const productDoc = createdProducts.find(p => p.slug === (item.product as Product).slug);
+        if (!productDoc) {
+          throw new Error(`Product ${(item.product as Product).slug} not found`);
+        }
+        const categoryDoc = createdCategories.find(c => c.slug === (item.category as Category).slug);
+        if (!categoryDoc) {
+          throw new Error(`Category ${(item.category as Category).slug} not found`);
+        }
+        return { ...item, product: productDoc._id, category: categoryDoc._id };
+      });
+      return { ...order, user: userDoc._id, orderItems: orderItemsUpdated };
     });
 
     const createdOrders = await OrderModel.insertMany(updatedSampleOrders);

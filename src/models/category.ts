@@ -20,6 +20,9 @@ export class Category {
 
   @prop({ required: false })
   public description?: string
+
+  @prop({ required: true, default: 0 })
+  public order!: number
 }
 
 export const CategoryModel = getModelForClass(Category)
