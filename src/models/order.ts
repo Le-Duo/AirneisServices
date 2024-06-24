@@ -39,6 +39,8 @@ export class ShippingAddress {
 export const ShippingAddressModel = getModelForClass(ShippingAddress);
 
 export class Item {
+  @prop({ required: false })
+  public _id?: string;
   @prop({ required: true })
   public name!: string;
   @prop({ required: true })
@@ -107,6 +109,9 @@ export class Order {
 
   @prop({ required: true, default: OrderStatus.Initiated })
   public status!: OrderStatus;
+
+  @prop()
+  public paymentIntentId?: string;
 }
 
 export const OrderModel = getModelForClass(Order)

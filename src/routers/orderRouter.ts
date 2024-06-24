@@ -4,6 +4,8 @@ import { isAuth } from '../utils'
 import { OrderModel, ShippingAddress, Item } from '../models/order'
 import { StockModel } from '../models/stock'
 import { v4 as uuidv4 } from 'uuid'
+import Stripe from 'stripe';
+
 export const orderRouter = express.Router()
 
 orderRouter.get(
@@ -126,6 +128,11 @@ orderRouter.post(
         orderNumber?: string
       } = req.body;
 
+      if (typeof isPaid !== 'boolean' || typeof isDelivered !== 'boolean') {
+        res.status(400).json({ error: "Invalid isPaid or isDelivered format" });
+        return;
+      }
+
       if (
         !Array.isArray(orderItems) ||
         !orderItems.every(
@@ -165,20 +172,67 @@ orderRouter.post(
         status: "initiated",
       });
 
+      if (!process.env.STRIPE_SECRET_KEY) {
+        res.status(500).json({ error: "Stripe secret key is not defined" });
+        return;
+      }
+
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2024-04-10',
+      });
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(totalPrice * 100),
+        currency: 'gbp',
+        metadata: { orderId: newOrder._id.toString() },
+      });
+
+      newOrder.paymentIntentId = paymentIntent.id;
+
+      const savedOrder = await newOrder.save();
+
+      // Update stock levels
+      const stockUpdates = [];
+      const originalStockLevels = [];
+
       for (const item of orderItems) {
-        await StockModel.findOneAndUpdate(
-          { "product._id": item.product },
-          {
-            $inc: { quantity: -item.quantity },
-          }
+        console.log("Processing item:", item);
+        const stock = await StockModel.findOne({ "product._id": item._id });
+        
+        if (!stock) {
+          throw new Error(`Stock not found for product: ${item._id}`);
+        }
+
+        if (stock.quantity < item.quantity) {
+          throw new Error(`Insufficient stock for product: ${item._id}`);
+        }
+
+        originalStockLevels.push({ productId: item._id, quantity: stock.quantity });
+        stockUpdates.push(
+          StockModel.updateOne(
+            { "product._id": item._id },
+            { $inc: { quantity: -item.quantity } }
+          )
         );
       }
 
-      const savedOrder = await newOrder.save();
-      res.status(201).json(savedOrder);
+      try {
+        await Promise.all(stockUpdates);
+      } catch (error) {
+        // Rollback stock updates if an error occurs
+        for (const original of originalStockLevels) {
+          await StockModel.updateOne(
+            { "product._id": original.productId },
+            { $set: { quantity: original.quantity } }
+          );
+        }
+        throw new Error("Failed to update stock levels");
+      }
+
+      res.status(201).json({ ...savedOrder.toObject(), clientSecret: paymentIntent.client_secret });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error on order creation" });
+      console.error("Order creation error:", error);
+      res.status(500).json({ error: (error as Error).message || "Error on order creation" });
     }
   })
 );

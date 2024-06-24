@@ -4,3 +4,5 @@
 .cursorignore
 .DS_Store
 Thumb.db
+combined.log
+error.log

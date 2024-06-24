@@ -1,9 +1,9 @@
-
 import { Request, Response, NextFunction } from 'express'
 import { User } from './models/user'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
+import { createLogger, format, transports } from 'winston';
 dotenv.config()
 
 export const generateToken = (user: User) => {
@@ -26,22 +26,26 @@ export const generateToken = (user: User) => {
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
-  if (authorization && authorization.startsWith('Bearer ')) {
-    const token = authorization.slice(7, authorization.length);
-    if (token) {
-      try {
-        if (!process.env.JWT_SECRET) {
-          throw new Error('JWT_SECRET is not set');
+  if (authorization) {
+    if (authorization.startsWith('Bearer ')) {
+      const token = authorization.slice(7, authorization.length);
+      if (token) {
+        try {
+          if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not set');
+          }
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          req.user = decoded as User;
+          next();
+        } catch (error) {
+          console.error(error);
+          res.status(401).send({ message: 'Invalid Token' });
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded as User;
-        next();
-      } catch (error) {
-        console.error(error);
-        res.status(401).send({ message: 'Invalid Token' });
+      } else {
+        res.status(401).send({ message: 'Token not found' });
       }
     } else {
-      res.status(401).send({ message: 'Token not found' });
+      res.status(401).send({ message: 'Authorization header must start with Bearer ' });
     }
   } else {
     res.status(401).send({ message: 'No Token or Bearer prefix missing' });
@@ -76,6 +80,10 @@ export const generatePasswordResetToken = (user: User) => {
 }
 
 export const sendPasswordResetEmail = async (user: User, token: string) => {
+  if (!process.env.MAILTRAP_USER || !process.env.MAILTRAP_PASS) {
+    throw new Error('MAILTRAP_USER or MAILTRAP_PASS is not set');
+  }
+
   const transporter = nodemailer.createTransport({
     host: 'sandbox.smtp.mailtrap.io',
     port: 2525,
@@ -83,7 +91,7 @@ export const sendPasswordResetEmail = async (user: User, token: string) => {
       user: process.env.MAILTRAP_USER,
       pass: process.env.MAILTRAP_PASS,
     },
-    secure: false,
+    secure: true,
   });
 
   const appDeepLink = `airneisapp://reset-password/${token}`;
@@ -101,4 +109,23 @@ export const sendPasswordResetEmail = async (user: User, token: string) => {
   } catch (error) {
     console.error(error);
   }
+}
+
+export const logger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.timestamp(),
+    format.json()
+  ),
+  defaultMeta: { service: 'payment-service' },
+  transports: [
+    new transports.File({ filename: 'error.log', level: 'error' }),
+    new transports.File({ filename: 'combined.log' }),
+  ],
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new transports.Console({
+    format: format.simple(),
+  }));
 }

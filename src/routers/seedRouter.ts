@@ -68,7 +68,15 @@ seedRouter.get(
         if (!categoryDoc) {
           throw new Error(`Category ${(item.category as Category).slug} not found`);
         }
-        return { ...item, product: productDoc._id, category: categoryDoc._id };
+        return { 
+          ...item, 
+          product: productDoc._id, 
+          category: { 
+            _id: categoryDoc._id, 
+            slug: categoryDoc.slug, 
+            name: categoryDoc.name 
+          } 
+        };
       });
       return { ...order, user: userDoc._id, orderItems: orderItemsUpdated };
     });

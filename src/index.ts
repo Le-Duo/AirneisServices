@@ -15,10 +15,11 @@ import { carouselRouter } from './routers/carouselRouter'
 import { shippingAddressRouter } from './routers/shippingAddressRouter'
 import { statusRouter } from './routers/statusRouter'
 import { featuredProductRouter } from './routers/featuredProductRouter'
+import { paymentRouter } from './routers/paymentRouter'
 
 dotenv.config()
 
-const MONGODB_URI = process.env.MONGODB_URI || ''
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017'
 const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI || 'mongodb://localhost:27017'
 
 const connectionOptions = {
@@ -48,6 +49,8 @@ mongoose.set('strictQuery', true)
 
 const app = express()
 
+app.use('/api/payments/webhook', express.raw({type: 'application/json'}));
+
 app.use(helmet())
 app.use(cookieParser())
 app.use(
@@ -71,6 +74,7 @@ app.use('/api/carousel', carouselRouter)
 app.use('/api/shippingaddresses', shippingAddressRouter)
 app.use('/api/status', statusRouter)
 app.use('/api/featuredProducts', featuredProductRouter)
+app.use('/api/payments', paymentRouter)
 
 const PORT: number = parseInt((process.env.PORT || '4000') as string, 10)
 
