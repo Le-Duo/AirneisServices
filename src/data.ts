@@ -442,6 +442,9 @@ export const sampleOrders: Order[] = [
         product: sampleProducts.find(
           (product) => product.slug === "macleod"
         ) as DocumentType<Product>,
+        category: sampleCategories.find(
+          (cat) => cat.slug === "sofas"  
+        ) as DocumentType<Category>,
       },
     ],
     shippingAddress: {
